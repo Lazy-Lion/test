@@ -13,7 +13,10 @@
 
 
 ----
-分割线
+```
+ 分割线
+ ---
+```
 <br />
 *斜体* (\*后不跟空格)
 <br />
@@ -36,7 +39,7 @@
 - 方式1：
 <br /> 
 ```
-插入换行符\<br />
+插入换行符*<br / >*
 ```
 <br /> 
 ![vbs处理.PNG](https://upload-images.jianshu.io/upload_images/14080660-bde490ea14204563.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
