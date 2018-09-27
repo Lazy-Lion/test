@@ -39,9 +39,8 @@
 - 方式1：
 <br /> 
 ```
-插入换行符*<br / >*
+换行符需要手写插入
 ```
-<br /> 
 ![vbs处理.PNG](https://upload-images.jianshu.io/upload_images/14080660-bde490ea14204563.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 -方式2：
