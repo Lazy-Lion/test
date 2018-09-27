@@ -1,4 +1,4 @@
-## 分级标题
+## 分级标题 (** \# 号后需要空格，否则无效**)
 # 一级标题
 ## 二级标题
 ### 三级标题
@@ -31,9 +31,15 @@
 
 ## 插入图片
 - 方式1：
+<br /> 
+```
+插入换行符<br />
+```
+<br /> 
 ![vbs处理.PNG](https://upload-images.jianshu.io/upload_images/14080660-bde490ea14204563.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 -方式2：
+<br />
 ![vbs处理.png][2]
 
 [2]:https://upload-images.jianshu.io/upload_images/14080660-bde490ea14204563.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240
@@ -46,7 +52,7 @@
 [分页查询](https://my.oschina.net/vbird/blog/1504259)
 [MySql分页查询](https://segmentfault.com/a/1190000008859706)
 
-- [分级标题](#分级标题)  
+- [分级标题](#分级标题) *页内锚点连接，需要对应标题*  
  **简书上无法使用这种锚点方式,github可以使用**
 
 ~~删除线~~
@@ -78,6 +84,10 @@ $$ s ^ 4 $$
 ## 代办事项(*简书中不支持*)
 * [ ] 早起跑步
 * [x] 看书
+
+*[ ] 早起跑步
+*[x] 看书
+<br />
 
 [ ] 早起跑步
 [x] 看书
