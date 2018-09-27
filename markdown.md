@@ -1,4 +1,4 @@
-## 分级标题 (**\# 号后需要空格，否则无效**)
+## 分级标题 (*\# 号后需要空格，否则无效*)
 # 一级标题
 ## 二级标题
 ### 三级标题
@@ -14,8 +14,11 @@
 
 ----
 分割线
-*斜体*
+<br />
+*斜体* (\*后不跟空格)
+<br />
 **粗体**
+<br />
 [Markdown syntax](https://github.com/cdoco/markdown-syntax "Markdown syntax")
 
 <https://www.baidu.com>
@@ -33,7 +36,7 @@
 - 方式1：
 <br /> 
 ```
-插入换行符`<br />`
+插入换行符\<br />
 ```
 <br /> 
 ![vbs处理.PNG](https://upload-images.jianshu.io/upload_images/14080660-bde490ea14204563.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
