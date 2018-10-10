@@ -24,6 +24,7 @@
  后来升级到32位，现在使用x86表示32位指令集，为了区分使用x86_64表示64位指令集
  
 <br />
+
 **各个组件和装置在Linux下都是一个文件**
 
  ## linux命令行格式 *command [-Option] parameter1 parameter2 ...*
@@ -44,10 +45,10 @@
     *例 cal [month] [year] ：若没有参数，则显示当前月份的日历*
 - cp : 复制命令
     *cp 来源文件 目的文件* 
-- shutdown :关机指令，
-    *例 shutdown -h now **立刻关机***
-    *shutdown -h 20:25  **20:25关机***
-    *shutdown -h +10  **10分钟后关机***
+- shutdown :关机指令，<br />
+    *例 shutdown -h now **立刻关机***<br />
+    *shutdown -h 20:25  **20:25关机***<br />
+    *shutdown -h +10  **10分钟后关机***<br />
     *shutdown -h +10 "system will be shutdown" **10分钟后关机,并发出警告信息***
 - poweroff : 关机指令
 - reboot : 重启命令
@@ -91,13 +92,14 @@
   剩下的九个字符分三组，分别是拥有者权限，群组权限，其他人权限，rwx三种，如果有则用符号表示，否则使用 - 表示
  - 使用 ls -al 显示文档详细信息
     *例 -rw-r--r--. 1 root test 1864 May 4 18:01 initial-setup-ks.cfg*
-    -rw-r--r--： 权限信息
-    1 : 链接数
-    root : 拥有者
-    test : 所属群组
-    1864 : 档案容量
-    May 4 18:01 : 最后修改时间
-    initial-setup-ks.cfg : 文档名
+    <br />
+    -rw-r--r--： 权限信息<br />
+    1 : 链接数<br />
+    root : 拥有者<br />
+    test : 所属群组<br />
+    1864 : 档案容量<br />
+    May 4 18:01 : 最后修改时间<br />
+    initial-setup-ks.cfg : 文档名<br />
 
 ### 权限相关命令
   - chgrp : 改变文件所属群组 
