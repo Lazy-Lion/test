@@ -32,7 +32,7 @@
 | git push -u origin master | 第一次推送master分支上所有内容到远程仓库 | |
 | git push origin branchname | 后续从本地推送修改到远程仓库 | 如果推送失败，先用git pull抓取远程新的提交,若有冲突处理冲突 |
 | git fetch origin | 从远程获取最新版本到本地，不会自动合并 | |
-| git pull | 从远程获取最新版本到本地，自动合并| tit pull origin master 相当于 git fetch origin master + git merge origin/master |
+| git pull | 从远程获取最新版本到本地，自动合并| git pull origin master 相当于 git fetch origin master + git merge origin/master |
 | git checkout -b branchname origin/branchname | 在本地创建和远程分支对应的分支 | 本地和远程分支名最好一致 |
 | git branch --set-upstream branchname origin/branchname | 建立本地分支和远程分支的关联 | | 
 | git clone git@github.com:Lazy-Lion/test.git | 远程仓库克隆到本地 | 该命令为克隆我的test仓库；git 支持多种协议(ssh,https等)，通过ssh支持的原生git协议最快 |
