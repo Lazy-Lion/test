@@ -4,9 +4,11 @@
 ## Fast Forward
  [merge](https://backlog.com/git-tutorial/cn/stepup/stepup1_4.html)
 
-## .gitignore文件
- 忽略某些文件
+## .gitignore 文件
+ 让版本控制系统忽略某些文件
 
+## .gitkeep 文件
+ Git does not track empty directories, if you wish to track or push an empty directory to your upstream, just create one .gitkeep file. It is important to check that you never add ".gitkeep" into the .gitignore. Then the whole purpose of the tracking the empty directories would vanish.
 
 ## 简单命令
 
