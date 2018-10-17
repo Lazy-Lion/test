@@ -11,6 +11,7 @@
  - CV7T2-6WY5Q-48EWP-ZXY7X-QGUWD
 
 # linux 
+ linux 是多用户多任务的环境
  ## centos 安装图形界面
    1. yum groupinstall "X Window System"
    2. yum groupinstall "GNOME Desktop"
