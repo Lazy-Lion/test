@@ -144,7 +144,7 @@ volatile关键字保证可见性和有序性，但不保证原子性。
 | ArrayBlockingQueue | FIFO |
 | LinkedBlockingQueue | FIFO |
 | PriorityBlockingQueue | 按优先级排序，自然序:Comparable 或 比较器：Comparator |
-| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间 |
+| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间;它维护一组线程，这些线程在等待把元素加入或移出队列 |
 
 队列可以是有界的，也可以是无界的，无界队列永远不会充满，因此无界队列上的 put 永远不会阻塞(通常这种无界不是真的无界，而是容量是Integer.MAX_VALUE)。
 <br />
@@ -152,3 +152,23 @@ volatile关键字保证可见性和有序性，但不保证原子性。
 
 **在构建高可用的应用程序时，有界队列是一种强大的资源管理工具，它们能抑制并防止产生过多的工作项，使应用程序在负荷过载的情况下变得更加健壮。**
 
+
+> java 6 新增两个容器类型 ： Deque (发音"deck") 和 BlockingDeque, 分别对Queue和BlockingQueue进行扩展。实现类包括 ArrayDeque 和 LinkedBlockingDeque。 Deque 是一个双端队列，实现了在队列头和队列尾高效插入和移除。<br /> 双端队列适用的模式是**工作密取(Work Stealing)**:在生产者-消费者模式中，所有消费者有一个共享的工作队列，在工作密取中，每个消费者都有各自的双端队列。如果一个消费者完成自己双端队列中的全部工作，那么它可以从其他消费者双端队列末尾秘密地获取工作。
+
+------
+线程状态转换：
+![](https://github.com/CyC2018/CS-Notes/blob/master/pics/ace830df-9919-48ca-91b5-60b193f593d2.png)
+
+> 阻塞方法和中断方法： 
+
+线程阻塞(BLOCKED、WAITING、TIMED_WAITING)的一些原因： 
+  - 等待I/O 操作结束
+  - 等待获得锁
+  - 等待从Thread.sleep方法中醒来
+  - 等待另一个线程的计算结果
+
+**阻塞操作与执行时间很长的普通操作的差别在于，被阻塞的线程必须等待某个不受它控制的事件发生后才能继续执行。当某个外部事件发生时，线程被置回RUNNABLE状态，并可以再次被调度执行。**
+
+> 当某个方法抛出InterruptedException时，表示该方法是一个阻塞方法，如果这个方法被中断，那么它将努力提前结束阻塞状态。Thread提供interrupt方法，用于中断线程或者查询线程是否已经被中断。
+
+> 中断是一种协作机制。一个线程不能强制其他线程停止正在执行的操作而去执行其他的操作。当线程A中断B时，A仅仅是要求B在执行到某个可以暂停的地方停止正在执行的操作，前提是线程B愿意停止下来。
