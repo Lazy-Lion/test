@@ -42,6 +42,9 @@ volatile变量的正确使用方式： 确保它们自身状态的可见性，�
  - 该变量不会与其他状态变量一起纳入不变性条件中；
  - 在访问变量时不需要加锁；
 
+<br />
+volatile关键字保证可见性和有序性，但不保证原子性。
+
 > 发布(publish)与逸出(escape)： 发布一个对象是指使对象能在当前作用域之外的代码中使用。当某个不应该发布的对象被发布时，这种情况被称为逸出。
 ``` java
 	public static Set<Secret> knownSecrets;
@@ -111,12 +114,41 @@ volatile变量的正确使用方式： 确保它们自身状态的可见性，�
 
 容器的某些方法会间接地执行迭代操作，如hashCode(),equals()等，这些同样可能会抛出ConcurrentModificationException;
 
+-------
 > 并发容器： ConcurrentHashMap (替代同步且基于散列的Map), ConcurrentSkipListMap (替代同步的SortedMap), ConcurrentSkipListSet (替代同步的SortedSet), CopyOnWriteArrayList (在遍历操作为主要操作的情况下代替同步的List), ConcurrentLinkedQueue (FIFO队列),BlockingQueue (阻塞队列，"生产-消费者"模式)<PriorityQueue，优先队列，不是并发的>
 
-- ConcurrentHashMap : jdk 7 : 分段锁实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值； <br />jdk 8 : CAS，synchronized实现
+- ConcurrentHashMap : jdk 7 : segment 实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值；<br /> jdk 8 : CAS，synchronized 实现
+
+
+ [为并发而生的 ConcurrentHashMap（Java 8）](https://www.jianshu.com/p/e99e3fcface4)
+  <br />
+ [为什么ConcurrentHashMap的读操作不需要加锁？](https://juejin.im/entry/5b98b89bf265da0abd35034c)
  
- 并发容器提供的迭代器不会抛出 ConcurrentModificationException ,因此不需要在迭代过程中对容器加锁。ConcurrentHashMap 返回的迭代器具有弱一致性 (Weaklly Consistent)，而并非"fail-fast"。弱一致性的迭代器可以容忍并发的修改，当创建迭代器时会遍历已有的元素，并可以(但不保证)在迭代器被构造后将修改操作反映给容器。
+ 并发容器提供的迭代器不会抛出 ConcurrentModificationException ,因此不需要在迭代过程中对容器加锁。ConcurrentHashMap 返回的迭代器具有**弱一致性** (Weaklly Consistent)，而并非"fail-fast"。弱一致性的迭代器可以容忍并发的修改，当创建迭代器时会遍历已有的元素，并可以(但不保证)在迭代器被构造后将修改操作反映给容器。
+ <br />
 
+- CopyOnWriteArrayList : 每次修改容器都会复制底层数组(并且使用 ReentrantLock )，所以仅当迭代操作远远多于修改操作时才应该使用。容器的迭代器保留一个指向底层数组的引用，由于底层数组不会被改变，所以对其进行同步只需确保数组内容的可见性。该容器的迭代器不会抛出 ConcurrentModificationException 。
 
+- BlockingQueue 和 producer-consumer模式
 
+```java
+/* Inserts the specified element into this queue, waiting if necessary for space to become available. */
+    void put(E e) throws InterruptedException;
+    
+/* Retrieves and removes the head of this queue, waiting if necessary until an element becomes available. */    
+    E take() throws InterruptedException;
+```
+
+| Implements | |
+| - | - |
+| ArrayBlockingQueue | FIFO |
+| LinkedBlockingQueue | FIFO |
+| PriorityBlockingQueue | 按优先级排序，自然序:Comparable 或 比较器：Comparator |
+| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间 |
+
+队列可以是有界的，也可以是无界的，无界队列永远不会充满，因此无界队列上的 put 永远不会阻塞(通常这种无界不是真的无界，而是容量是Integer.MAX_VALUE)。
+<br />
+[解读 Java 并发队列 BlockingQueue](https://javadoop.com/2017/08/22/java-concurrent-queue/?)
+
+**在构建高可用的应用程序时，有界队列是一种强大的资源管理工具，它们能抑制并防止产生过多的工作项，使应用程序在负荷过载的情况下变得更加健壮。**
 
