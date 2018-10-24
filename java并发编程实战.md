@@ -87,7 +87,35 @@ volatile变量的正确使用方式： 确保它们自身状态的可见性，�
 
 **"除非需要更高的可见性，否则应将所有的域都声明为私有域"是一个良好的编程习惯；"除非需要某个域是可变的,否则应将其声明为final域"也是一个良好的编程习惯。**
 
+> 在并发程序中使用和共享对象时，实用的一些策略：
+ - 线程封闭： 线程封闭的对象只能由一个线程拥有，对象被封闭在该线程中，并且只能由该线程修改；
+ - 只读共享： 在没有额外的同步情况下，共享的只读对象可以由多个线程并发访问，但任何线程都不能修改它。共享的只读对象包括不可变对象和事实不可变对象(Effectively Immutable Object, 对象从技术上来看是可变的，但其状态在发布后不会再改变)。
+ - 线程安全共享： 线程安全的对象在其内部实现同步，因此多个线程可以通过对象的公有接口来进行访问而不需要进一步的同步；
+ - 保护对象： 被保护的对象只能通过持有特定的锁访问。保护对象包括封装在其他线程安全对象中的对象，以及已发布的并且由某个特定锁保护的对象。
 
+------
+> 同步容器类：Vector 、Hashtable 、 Collections.synchronizedXxx() ， 实现线程安全的方式是将状态封装起来，并对每个公有方法都进行同步，使得每次只有一个线程能访问容器的状态。同步容器将所有对容器状态的访问都串行化，以实现它们的线程安全性。这种方法的代价是严重降低并发性，当多个线程竞争容器的锁时，吞吐量将严重降低。
+
+同步容器类都是线程安全的，但是在某些情况下可能需要额外的客户端加锁来保护符合操作。常见的符合操作：
+- 迭代
+- 跳转(根据指定顺序找到当前元素的下一个元素)
+- 条件运算
+
+在同步容器类中，这些复合操作在没有客户端加锁的情况下仍然是线程安全的，但当其他线程并发地修改容器时，它们可能会表现出意料之外的行为。
+
+> 迭代器(Iterator) 和 ConcurrentModificationException: 当发现容器在迭代过程中被修改，就会抛出一个ConcurrentModificationException (fail-fast机制)；实现上是将计数器的变化和容器关联，如果迭代期间计数器被修改，则抛出异常。(**在单线程代码中也可能抛出ConcurrentModificationException异常，当对象直接从容器中删除而不是通过Iterator.remove()来删除时就会抛出该异常。<remove()方法会修改exceptedModCount的值>**)
+
+迭代过程中避免出现ConcurrentModificationException:
+- 对容器加锁
+- 克隆容器，在副本上进行迭代
+
+容器的某些方法会间接地执行迭代操作，如hashCode(),equals()等，这些同样可能会抛出ConcurrentModificationException;
+
+> 并发容器： ConcurrentHashMap (替代同步且基于散列的Map), ConcurrentSkipListMap (替代同步的SortedMap), ConcurrentSkipListSet (替代同步的SortedSet), CopyOnWriteArrayList (在遍历操作为主要操作的情况下代替同步的List), ConcurrentLinkedQueue (FIFO队列),BlockingQueue (阻塞队列，"生产-消费者"模式)<PriorityQueue，优先队列，不是并发的>
+
+- ConcurrentHashMap : jdk 7 : 分段锁实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值； <br />jdk 8 : CAS，synchronized实现
+ 
+ 并发容器提供的迭代器不会抛出 ConcurrentModificationException ,因此不需要在迭代过程中对容器加锁。ConcurrentHashMap 返回的迭代器具有弱一致性 (Weaklly Consistent)，而并非"fail-fast"。弱一致性的迭代器可以容忍并发的修改，当创建迭代器时会遍历已有的元素，并可以(但不保证)在迭代器被构造后将修改操作反映给容器。
 
 
 
