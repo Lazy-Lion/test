@@ -172,3 +172,151 @@ volatile关键字保证可见性和有序性，但不保证原子性。
 > 当某个方法抛出InterruptedException时，表示该方法是一个阻塞方法，如果这个方法被中断，那么它将努力提前结束阻塞状态。Thread提供interrupt方法，用于中断线程或者查询线程是否已经被中断。
 
 > 中断是一种协作机制。一个线程不能强制其他线程停止正在执行的操作而去执行其他的操作。当线程A中断B时，A仅仅是要求B在执行到某个可以暂停的地方停止正在执行的操作，前提是线程B愿意停止下来。
+
+> 同步工具类： 可以是任何一个对象，只要它根据自身的状态来协调线程的控制流。
+
+- 闭锁：延迟线程的进度直到其到达终止状态，**到达结束状态后将不会再改变状态**。CountDownLatch：维护一个计数器(实际是AbstractQueuedSynchronizer的状态)，countDown()递减计数器，await()方法等待计数器达到0。
+
+- FutureTask: 实现Future语义，表示一种抽象的可生产结果的计算。
+
+Treiber stack : FutureTask中使用到了这种无锁并发栈,用来保存等待的线程，其实现方式是 CAS + 重试<br />
+[FutureTask源码解读](http://www.cnblogs.com/micrari/p/7374513.html)
+
+- Semaphore: 用来控制同时访问某个特定资源的操作数量，或同时执行某个指定操作的数量。
+
+- 栅栏(Barrier): 阻塞一组线程直到某个事件发生。栅栏与闭锁的关键区别在于，所有线程必须到达了栅栏位置，才能继续执行。闭锁用于等待事件(事件完成，线程允许执行)，而栅栏用于等待其他线程(所有线程到达栅栏，允许继续执行后面的操作)。
+
+ CyclicBarrier: 栅栏可以重置，多次使用。
+ ```java
+  public CyclicBarrier(int parties);
+  public CyclicBarrier(int parties, Runnable barrierAction);
+  
+  /* Waits until all parties have invoked await on this barrier.*/
+  public int await() throws InterruptedException, BrokenBarrierException；
+ ```
+<br />
+Exchanger: 两方(Two-Party)栅栏
+
+```java
+//实现一个缓存器
+public interface Computable<A, V> {
+	V compute(A args) throws InterruptedException;
+}
+
+public class Memoizer<A,V> implements Computable<A,V>{
+	private final ConcurrentHashMap<A,FutureTask<V>> cache = 
+			new ConcurrentHashMap<>();
+	
+	private final Computable<A,V> comp;
+	
+	public Memoizer(Computable<A,V> comp) {
+		this.comp = comp;
+	}
+	
+	public V compute(A args) throws InterruptedException {
+		
+		while(true) {
+			FutureTask<V> f = cache.get(args);
+			
+			if(f == null) {
+				Callable<V> callable = new Callable<V>() {
+					@Override
+					public V call() throws InterruptedException {
+						return comp.compute(args);
+					}
+				};
+				
+				FutureTask<V> ft = new FutureTask<>(callable);
+				
+				f = cache.putIfAbsent(args, ft);
+				
+				if(f == null) {
+					f = ft;
+					ft.run();
+				}
+			}
+			
+			try {
+				return f.get();
+			} catch(CancellationException e) {
+				cache.remove(args, f);  // Cache Pollution, removed
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
+```
+
+-------
+> 无限制地创建线程的问题：
+ - 线程生命周期的开销非常高；
+ - 资源消耗；如果可运行的线程数量多于可用的处理器数量，那么有些线程将闲置。大量空闲的线程会占用许多内存，给垃圾回收器带来压力，而且大量线程在竞争CPU资源时还将产生其他性能开销。如果已经有足够多的线程使所有CPU保持忙碌状态，那么再创建更多线程反而会降低性能。
+ - 稳定性；在可创建线程的数量上存在一个限制，如果破坏这些限制，可能会抛出OutOfMemoryError。
+
+> Executor框架：任务是一组逻辑工作单元，而线程则是使任务异步执行的机制。在Java类库中，任务执行主要抽象不是Thread，而是Executor。**Executor基于生产者-消费者模式，提交任务的操作相当于生产者，执行任务的线程则相当于消费者。任务的提交和执行解耦。**
+```java
+public interface Executor {
+    void execute(Runnable command);
+}
+```
+
+> 线程池：通过调用Executors中的静态方法创建线程池
+
+- newFixedThreadPool
+- newCachedThreadPool
+- newSingleThreadExecutor
+- newScheduledThreadPool
+
+> Executor生命周期： 
+ 
+为了解决执行服务的生命周期问题，Executor扩展了ExecutorService接口,Executor生命周期有3中状态：运行、关闭、已终止。
+```java
+public interface ExecutorService extends Executor {
+    void shutdown();
+    List<Runnable> shutdownNow();
+    boolean isShutdown();
+    boolean isTerminated();
+    Future<?> submit(Runnable task);
+    <T> Future<T> submit(Runnable task, T result);
+    <T> Future<T> submit(Callable<T> task);
+    boolean awaitTermination(long timeout, TimeUnit unit)
+        throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+        throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
+                                  long timeout, TimeUnit unit)
+        throws InterruptedException;
+}
+```
+
+------
+> Runnable 、 Callable
+```java
+public interface Runnable {
+// 不能返回值，不能抛出异常
+    public abstract void run();  
+}
+
+public interface Callable<V> {
+    V call() throws Exception;
+}
+
+```
+
+> CompletionService : 将 Executor 和 BlockingQueue 功能融合。ExecutorCompletionService 是其实现类。
+
+------
+> 任务取消：java中没有一种安全的抢占式方法来停止线程，因此也没有安全的抢占式方法来停止任务。只有一些协作式的机制，使请求取消的任务和代码都遵循一种协商好的协议。
+
+> Thread中的中断方法：
+ 
+```java
+    public void interrupt(); // 中断目标线程
+    public boolean isInterrupted(); // 返回目标线程的中断状态
+    public static boolean interrupted(); // 清除当前线程的中断状态，并返回它之前的值
+    
+```
+中断操作并不会真正地中断一个正在运行的线程，而只是发出中断请求，然后由线程在下一个合适的时刻中断自己。
+
+
