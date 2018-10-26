@@ -141,10 +141,10 @@ volatile关键字保证可见性和有序性，但不保证原子性。
 
 | Implements | |
 | - | - |
-| ArrayBlockingQueue | FIFO |
-| LinkedBlockingQueue | FIFO |
-| PriorityBlockingQueue | 按优先级排序，自然序:Comparable 或 比较器：Comparator |
-| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间;它维护一组线程，这些线程在等待把元素加入或移出队列 |
+| ArrayBlockingQueue | FIFO，有界 |
+| LinkedBlockingQueue | FIFO，有界或无界 |
+| PriorityBlockingQueue | 有界，按优先级排序，自然序:Comparable 或 比较器：Comparator |
+| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间;它维护一组线程，这些线程在等待把元素加入或移出队列; 不是一个真正的队列，而是一种在线程之间进行移交的机制，Executors.newCachedThreadPool()使用了这种队列 |
 
 队列可以是有界的，也可以是无界的，无界队列永远不会充满，因此无界队列上的 put 永远不会阻塞(通常这种无界不是真的无界，而是容量是Integer.MAX_VALUE)。
 <br />
@@ -304,19 +304,88 @@ public interface Callable<V> {
 
 ```
 
+
+```java
+
+public interface Future<V> {
+	boolean cancel(boolean mayInterruptIfRunning);
+	boolean isCancelled();
+	boolean isDone();
+	V get() throws InterruptedException, ExecutionException;
+	V get(long timeout, TimeUnit unit)
+       	 throws InterruptedException, ExecutionException, TimeoutException;
+}
+
+```
+
 > CompletionService : 将 Executor 和 BlockingQueue 功能融合。ExecutorCompletionService 是其实现类。
 
 ------
 > 任务取消：java中没有一种安全的抢占式方法来停止线程，因此也没有安全的抢占式方法来停止任务。只有一些协作式的机制，使请求取消的任务和代码都遵循一种协商好的协议。
+
+**通常，中断是实现取消的最合理方式。**
 
 > Thread中的中断方法：
  
 ```java
     public void interrupt(); // 中断目标线程
     public boolean isInterrupted(); // 返回目标线程的中断状态
-    public static boolean interrupted(); // 清除当前线程的中断状态，并返回它之前的值
+    public static boolean interrupted(); // 清除当前线程的中断状态，并返回清除之前的值
     
 ```
 中断操作并不会真正地中断一个正在运行的线程，而只是发出中断请求，然后由线程在下一个合适的时刻中断自己。
 
+> JVM 关闭：JVM 既可以正常关闭，也可以强行关闭。
 
+正常关闭的触发方式包括：
+- 最后一个"正常(非守护)"线程结束
+- 调用System.exit()
+- 通过其他特定于平台的方法关闭(如发送SIGINT信号或键入 Ctrl-C)
+
+强行关闭：调用 Runtime,halt 或者在操作系统中"kill" JVM 进程(如发送SIGKILL)。
+
+> 关闭钩子: 
+
+```java
+Runtime.getRuntime().addShutdownHook(Thread hook);
+```
+
+> 守护线程(Daemon Thread)：线程分为两种：普通线程和守护线程。在 JVM 启动时创建的所有线程中，除了主线程以外，其他的线程都是守护线程(如垃圾回收器以及其他执行辅助工作的线程)。当创建一个新线程时，新线程将继承创建它的线程的守护状态，因此在默认情况下，主线程创建的所有线程都是普通线程。
+
+普通线程和守护线程的差异仅在于当线程退出时发生的操作。当一个线程退出时，JVM会检查其他正在运行的线程，如果这些线程都是守护线程，那么JVM 会正常退出。当JVM 停止时，所有仍然存在的守护线程都将被抛弃(既不会执行finally代码块，也不会执行回卷栈，JVM只是直接退出)。
+
+> finalize() ： **避免使用**
+
+------
+
+## 线程池： 
+> 线程饥饿死锁(Thread Starvation Deadlock)：线程池中的任务需要无限期地等待一些必须由池中其他任务才能提供的资源或条件，除非线程池足够大，否则将发生线程饥饿死锁。
+
+> 获取CPU数目：
+
+```java
+Runtime.getRuntime().availableProcessors();
+```
+
+> ThreadPoolExecutor:
+ Executors中 newCachedThreadPool 和 newFixedThreadPool 返回的线程池都是 ThreadPoolExecutor 类型。
+ 
+ **只有当任务相互独立时，为线程池或工作队列设置界限才是合理的。如果任务之间存在依赖性，那么有界的线程池或队列可能导致线程"饥饿"死锁问题。此时，应该使用无界的线程池，如 Executors.newCachedThreadPool()。**
+ 
+> 饱和策略：当有界队列被填满后，饱和策略开始发挥作用(如果某个任务被提交到一个已被关闭的Executor,也会用到饱和策略)。
+
+JDk提供的饱和策略(均实现了 RejectedExecutionHandler 接口)：
+- AbortPolicy ： 默认策略，抛出 RejectedExecutionException
+- CallerRunsPolicy ：Executes task in the caller's thread, unless the executor has been shut down, in which case the task is discarded.
+- DiscardPolicy ：新提交的任务无法保存到队列中等待执行时，悄悄抛弃该任务，do nothing
+- DiscardOldestPolicy ： 抛弃下一个将被执行的任务，然后尝试重新提交新任务
+
+```java
+//ThreadPoolExecutor通过调用该方法修改饱和策略
+public void setRejectedExecutionHandler(RejectedExecutionHandler handler);
+
+// RejectedExecutionHandler 接口定义
+public interface RejectedExecutionHandler {
+	void rejectedExecution(Runnable r, ThreadPoolExecutor executor);
+}
+```
