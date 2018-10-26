@@ -389,3 +389,11 @@ public interface RejectedExecutionHandler {
 	void rejectedExecution(Runnable r, ThreadPoolExecutor executor);
 }
 ```
+
+> 线程工厂：线程池需要创建一个新线程时，调用ThreadFactory.newThread();默认的线程工厂方法创建一个新的、非守护的线程，并且不包含特殊的配置信息。
+
+```java 
+public interface ThreadFactory {
+	Thread newThread(Runnable r);
+}
+```
