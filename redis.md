@@ -29,9 +29,11 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
 | Hash | A Redis hash is a collection of key value pairs. Redis Hashes are maps between string fields and string values, so they are the perfect data type to represent objects. Every hash can store up to 2^32 - 1 field-value pairs (more than 4 billion). | HMSET, HGETALL, HSET, HGET, HDEL, HEXISTS | 
 | List | Redis Lists are simply lists of strings, sorted by insertion order. **They are basically linked lists.** You can add elements to a Redis List on the head or on the tail. The max length of a list is 2^32 - 1 elements. | LPUSH, RPUSH, LRANGE, LINDEX, BLPOP, LPOP | 
 | Set | Redis Sets are an unordered collection of Strings. Redis Sets have the desirable property of not allowing repeated members. The max number of members in a set is 2^32 - 1. | SADD, SCARD, SREM, SMOVE |
-| Sorted Set | Redis Sorted Sets are, similarly to Redis Sets, non repeating collections of Strings. The difference is that every member of a Sorted Set is associated with score, that is used in order to take the sorted set ordered, from the smallest to the greatest score. While members are unique, scores may be repeated. | ZADD, ZCARD, ZCOUNT, ZRANK |
+| Sorted Set | Redis Sorted Sets are, similarly to Redis Sets, non repeating collections of Strings. The difference is that every member of a Sorted Set is associated with **score(64 bits double)**, that is used in order to take the sorted set ordered, from the smallest to the greatest score. While members are unique, scores may be repeated. If A and B have exactly the same score, then A > B if the A string is lexicographically greater than the B string. | ZADD, ZCARD, ZCOUNT, ZRANK |
 | HyperLogLog |  | PFADD, PFCOUNT, PFMERGE |
 | BitMap | | |
+
+#### -inf , +inf
 
 ## 命令
  | Command | Info |
@@ -73,7 +75,9 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
  | SDIFFSTORE | |
  | SCARD | Returns the set cardinality (number of elements) of the set stored at key. | 
  | SRANDMEMBER | **SRANDMEMBER key \[count\]** <br /> 1) count is positive : return an array of count **distinct elements**. <br /> 2) count is nagative : return an array of -count elements, is allowed to return **the same element multiple times**. <br /> 3) no count argument : return a random element | 
- 
+ | ZADD | **ZADD key \[NX\|XX\] \[CH\] \[INCR\] score member \[score member ...\]** . <br /> 1)XX: Only update elements that already exist. Never add elements.<br /> 2)NX: Don't update already existing elements. Always add new elements.<br /> 3)CH: Modify the return value from the number of new elements added, to the total number of elements changed (CH is an abbreviation of changed). Changed elements are new elements added and elements already existing for which the score was updated. So elements specified in the command line having the same score as they had in the past are not counted. Note: normally the return value of ZADD only counts the number of new elements added.<br /> 4)INCR: When this option is specified ZADD acts like ZINCRBY. Only one score-element pair can be specified in this mode. |
+ | ZINCRBY | **ZINCRBY key increment member** .Increments the score of member in the sorted set stored at key by increment. |
+ | ZSCORE | Returns the score of member in the sorted set at key. If member does not exist in the sorted set, or key does not exist, nil is returned. |
  
  
  
@@ -87,3 +91,5 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
 \[1\]:[An Introduction to Redis Types and Abstractions](https://redis.io/topics/data-types-intro)<br />
 \[2\]:[Redis Commands](https://redis.io/commands) <br />
 \[3\]:[Memcached vs Redis](https://www.linkedin.com/pulse/memcached-vs-redis-which-one-pick-ranjeet-vimal)<br />
+\[4\]:[Redis命令参考](http://doc.redisfans.com/)<br />
+\[5\]:[Try Redis](http://try.redis.io/)
