@@ -84,6 +84,6 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
 - Calling a read-only command such as LLEN (which returns the length of the list), or a write command removing elements, with an empty key, always produces the same result as if the key is holding an empty aggregate type of the type the command expects to find. 
 
 ## References
-\[1\]:[An Introduction to Redis Types and Abstractions](https://redis.io/topics/data-types-intro)
+\[1\]:[An Introduction to Redis Types and Abstractions](https://redis.io/topics/data-types-intro)<br />
 \[2\]:[Redis Commands](https://redis.io/commands) <br />
-\[3\]:[Memcached vs Redis](https://www.linkedin.com/pulse/memcached-vs-redis-which-one-pick-ranjeet-vimal)
+\[3\]:[Memcached vs Redis](https://www.linkedin.com/pulse/memcached-vs-redis-which-one-pick-ranjeet-vimal)<br />
