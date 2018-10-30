@@ -25,7 +25,7 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
 #### 数据类型
 | Type | Info | Command |
 | - | - | - |
-| String | Strings are the most basic kind of Redis value. Redis Strings are binary safe, this means that a Redis string can contain any kind of data, for instance a JPEG image or a serialized Ruby object.A String value can be at max 512 Megabytes in length. | GET, SET, MSET, MGET, APPEND, STRLEN, INCR, DECR, INCRBY, DECRBY, GETSET (sets a key to a new value, returning the old value as the result) | 
+| String | Strings are the most basic kind of Redis value. Redis Strings are binary safe, this means that a Redis string can contain any kind of data, for instance a JPEG image or a serialized Ruby object.A String value can be at max 512 Megabytes in length. | GET, SET, MSET, MGET, APPEND, STRLEN, INCR, DECR, INCRBY, DECRBY, GETSET| 
 | Hash | A Redis hash is a collection of key value pairs. Redis Hashes are maps between string fields and string values, so they are the perfect data type to represent objects. Every hash can store up to 2^32 - 1 field-value pairs (more than 4 billion). | HMSET, HGETALL, HSET, HGET, HDEL, HEXISTS | 
 | List | Redis Lists are simply lists of strings, sorted by insertion order. **They are basically linked lists.** You can add elements to a Redis List on the head or on the tail. The max length of a list is 2^32 - 1 elements. | LPUSH, RPUSH, LRANGE, LINDEX, BLPOP, LPOP | 
 | Set | Redis Sets are an unordered collection of Strings. Redis Sets have the desirable property of not allowing repeated members. The max number of members in a set is 2^32 - 1. | SADD, SCARD, SREM, SMOVE |
@@ -40,6 +40,10 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
  | - | - |
  | MULTI/EXEC | MULTI marks the start of transaction block, EXEC executes all previously queued commands in a transaction and restores the connection state to normal. |
  | EXISTS | Returns if key exists |
+ | GETSET | Sets a key to a new value, returning the old value as the result |
+ | SETNX | set if not exists |
+ | INCR | Increments the number stored at key by one (**atomic operation**). This operation is limited to **64 bit signed integers(actually a String operation,  Redis does not have a dedicated Integer type)**. |
+ | DECR | Decrements the number stored at key by one (**atomic operation**). |
  | DEL | Removes the specified keys. A key is ignored if it does not exist. |
  | TYPE | Returns the string representation of the type of the value stored at key. The different types that can be returned are: string, list, set, zset and hash. |
  | LLEN | Returns the length of the list stored at key. If key does not exist, it is interpreted as an empty list and 0 is returned. An error is returned when the value stored at key is not a list. |
