@@ -45,6 +45,8 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
  | | INCR | Increments the number stored at key by one (**atomic operation**). This operation is limited to **64 bit signed integers(actually a String operation,  Redis does not have a dedicated Integer type)**. |
  | | DECR | Decrements the number stored at key by one (**atomic operation**). |
  | | DEL | Removes the specified keys. A key is ignored if it does not exist. |
+ | | [SCAN](https://redis.io/commands/scan) | **SCAN cursor \[MATCH pattern\] \[COUNT count\]** |  
+ | | KEYS | **KEYS pattern**. Returns all keys matching pattern. Pattern : h?llo, h\*llo, h\[ae\]llo, h\[^e\]llo, h\[a-b\]llo | 
  | | TYPE | Returns the string representation of the type of the value stored at key. The different types that can be returned are: string, list, set, zset and hash. |
  | | EXPIRE | Set a timeout on key. Another way to set expire : set key 100 ex 10 (have an expire of ten seconds) |
  | | PEXPIRE | Work exactly like EXPIRE but the time to live of the key is specified in milliseconds instead of seconds. |
@@ -67,9 +69,11 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
  | | HGET | Returns the value associated with field in the hash stored at key. |
  | | HMGET | **HMGET key field \[field ...\]** |
  | | HGETALL | Returns all fields and values of the hash stored at key. |
+ | | HSCAN | |
  | Set | SADD | Add the specified members to the set stored at key. Specified members that are already a member of this set are ignored. |
  | | SPOP | **SPOP key \[count\]** . Removes and returns one or more random elements from the set value store at key. |
  | | SMEMBERS | Returns all the members of the set value stored at key. | 
+ | | SSCAN | | 
  | | SISMEMBER | Returns if member is a member of the set stored at key. | 
  | | SINTER | Returns the members of the set resulting from the intersection of all the given sets. | 
  | | SINTERSTORE | **SINTERSTORE destination key \[key ...\]** . This command is equal to SINTER, but instead of returning the resulting set, it is stored in destination. **If destination already exists, it is overwritten.** |
@@ -80,18 +84,21 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
  | | SCARD | Returns the set cardinality (number of elements) of the set stored at key. | 
  | | SRANDMEMBER | **SRANDMEMBER key \[count\]** <br /> 1) count is positive : return an array of count **distinct elements**. <br /> 2) count is nagative : return an array of -count elements, is allowed to return **the same element multiple times**. <br /> 3) no count argument : return a random element | 
  | Sorted Set | ZADD | **ZADD key \[NX\|XX\] \[CH\] \[INCR\] score member \[score member ...\]** . <br /> 1)XX: Only update elements that already exist. Never add elements.<br /> 2)NX: Don't update already existing elements. Always add new elements.<br /> 3)CH: Modify the return value from the number of new elements added, to the total number of elements changed (CH is an abbreviation of changed). Changed elements are new elements added and elements already existing for which the score was updated. So elements specified in the command line having the same score as they had in the past are not counted. Note: normally the return value of ZADD only counts the number of new elements added.<br /> 4)INCR: When this option is specified ZADD acts like ZINCRBY. Only one score-element pair can be specified in this mode. |
+ | | ZCARD | **ZCARD key**. Returns the sorted set cardinality (number of elements) of the sorted set stored at key. | 
+ | | ZCOUNT | **ZCOUNT key min max**. Returns the number of elements in the sorted set at key with a score between min and max. | 
  | | ZINCRBY | **ZINCRBY key increment member** .Increments the score of member in the sorted set stored at key by increment. |
  | | ZSCORE | Returns the score of member in the sorted set at key. If member does not exist in the sorted set, or key does not exist, nil is returned. |
  | | ZRANGE | **ZRANGE key start stop \[WITHSCORES\]** .Returns the specified range (ascending) of elements in the sorted set stored at key.  |
  | | ZREVRANGE | Returns the specified range (descending) of elements in the sorted set stored at key. |
  | | ZRANGEBYSCORE | **ZRANGEBYSCORE key min max \[WITHSCORES\] \[LIMIT offset count\]** . By default, the interval specified by min and max is closed (inclusive). It is possible to specify an open interval (exclusive) by prefixing the score with the character ( . For example : **zrangebyscore zset (1 (5**. |
  | | ZREMRANGEBYSCORE | **ZREMRANGEBYSCORE key min max**. Removes all elements in the sorted set stored at key with a score between min and max (inclusive). |
- | | ZRANK | |
- | | ZREVRANK | |
- | | ZRANGEBYLEX | |
- | | ZREVRANGEBYLEX | |
- | | ZREMRANGEBYLEX | |
- | | ZLEXCOUNT | |
+ | | ZRANK | Determine the index of a member in a sorted set. |
+ | | ZREVRANK | Determine the index of a member in a sorted set, with scores ordered from high to low. |
+ | | ZRANGEBYLEX | **ZRANGEBYLEX key min max \[LIMIT offset count\]**. Return a range of members in a sorted set, by lexicographical range. If the elements in the sorted set have different scores, the returned elements are unspecified. **Valid start and stop must start with ( or \[**, in order to specify if the range item is respectively exclusive or inclusive. The special values of + or - for start and stop have the special meaning or positively infinite and negatively infinite strings. |
+ | | ZREVRANGEBYLEX | **ZREVRANGEBYLEX key max min \[LIMIT offset count\]**. Return a range of members in a sorted set, by lexicographical range, ordered from higher to lower strings. |
+ | | ZREMRANGEBYLEX | **ZREMRANGEBYLEX key min max**. Remove all members in a sorted set between the given lexicographical range. The meaning of min and max are the same of the ZRANGEBYLEX command. |
+ | | ZLEXCOUNT | **ZLEXCOUNT key min max**. Count the number of members in a sorted set between the given lexicographical range. The min and max arguments have the same meaning as described for ZRANGEBYLEX. |
+ | | ZSCAN | **ZSCAN key cursor \[MATCH pattern\] \[COUNT count\]** |
  
  
  
