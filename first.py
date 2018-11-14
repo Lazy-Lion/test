@@ -1,7 +1,40 @@
 #!/usr/bin/env python3
 ## -*- coding: utf-8 -*-
 
-## 基础
+# 第一行表示Mac,Linux下可直接执行
+# 第二行表示采用utf-8编码
+
+# sublime Text 3 默认不支持input(), 需要安装SublimeREPL插件
+# ctrl + shift + p ：选择 Install Package 安装，如果无法安装参照 https://packagecontrol.io/installation
+# ctrl + shift + p ：选择 sublimeREPL 安装，安装完成后Tools菜单下会出现sublimeREPL
+# 设置快捷键： preferences -> key bindings : 添加如下代码
+#{
+#    "keys": ["f5"],
+#    "caption": "SublimeREPL: Python - RUN current file",
+#   "command": "run_existing_window_command",
+#    "args": {
+#        "id": "repl_python_run",
+#        "file": "config/Python/Main.sublime-menu"
+#    }
+#}
+# Preferences->Browse Packages 进入文件SublimeREPL->config->Python-> Main.sublime-menu 可以修改python版本
+#
+#
+
+
+# 查看python路径
+import sys
+print(sys.path)
+
+# 查看python版本
+import sys
+print(sys.version)
+
+# 从cmd进入python交互：输入python
+# 从python交互退回cmd：输入exit()
+# windows下执行py文件，在cmd中输入 python filename.py
+
+## 一、基础
 # 编码问题： 在计算机内存中，统一使用Unicode编码，当需要保存到硬盘或者需要传输的时候，就转换为UTF-8编码。
 # Python 是大小写敏感的
 # 整数：十六进制使用 0x 前缀
@@ -32,6 +65,8 @@
 # decode()：bytes->str,例： b'ABC'.decode('ascii') ==> 'ABC'
 # encode(),decode() 方法对于无法正确编码或解码的会报错；对于decode(),如果bytes中只有一小部分无效的字节，可以传入errors='ignore'忽略错误的字节：b'\xe4\xb8\xad\xff'.decode('utf-8', errors='ignore')
 # len() : 计算str包含多少字符: len('中文A') ==> 3；对于len(b'ABC') ==> 3,计算的就是字节数 
+# 
+# str：字符串
 # 输出格式化字符串： % 实现： 1. %d :整数；2. %s :字符串； 3.%f :浮点数； 4.%x ：16进制整数
 #     print('hi, %s,you hava $%d' % ('Michael', 10000)) 
 #     格式化整数和浮点数还可以指定是否补0和整数与小数的位数 : %02d,%.2f
@@ -90,19 +125,19 @@
 # 循环： 语句块的编写需要缩进， 循环中的break,continue和java用法一致
 #     Ctrl + C ： 强制退出程序
 #     1. for ... in ...
-#     sum = 0
-      for x in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
-          sum = sum + x
-      2. while
-      sum = 0
-      n = 99
-      while n > 0:
-          sum = sum + n
-          n = n - 2
+sum = 0
+for x in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+  sum = sum + x
+#      2. while
+sum = 0
+n = 99
+while n > 0:
+  sum = sum + n
+  n = n - 2
 
 
 
-## 函数
+## 二、函数
 # 内置函数 https://docs.python.org/3/library/functions.html
 # max(),abs(),int(),hex()
 # 函数名其实就是指向一个函数对象的引用，完全可以把函数名赋给一个变量，相当于给这个函数起了一个“别名”:
@@ -128,70 +163,171 @@
 #         else:
 #             return -x
 # 返回多个值：
-#      import math
-#      
-#      def move(x, y, step, angle=0):
-#          nx = x + step * math.cos(angle)
-#          ny = y - step * math.sin(angle)
-#          return nx, ny 
-#      
+import math
+      
+def move(x, y, step, angle=0):
+  nx = x + step * math.cos(angle)
+  ny = y - step * math.sin(angle)
+  return nx, ny 
+      
 #      调用: x, y = move(100,100,60,math.pi/6)
 #      事实上返回的是一个tuple,多个变量同时接收一个tuple，按位置赋给对应的值
-#           
+#    
+# 参数： 位置参数，默认参数，可变参数，关键字参数，命名关键字参数
+def enroll(name, gender, age = 6, city = 'Beijing'):
+  print(name)
+  print(gender)
+  print(age)
+  print(city)
+#     age,city是默认参数，调用时可以按顺序提供参数enroll('Bob','M',7);或不按顺序指定参数名enroll('Adam','M',city='Tianjin')
+#     ** 默认参数必须指向不可变对象(如None,str)
+def add_end(L = None):
+  if L is None:
+    L = []
+    L.append('end')
+    return L
+#     如果参数直接使用 L = [],多次调用add_end()会产生错误
 
-print('中文输出正常')
-print('hello word')
-print(100+200)
-print('the quick brown fox','jumps over','the lazy dog.')
-print('100+200')
-print('1024 * 768 = ',1024 * 768)
+def calc(*numbers):
+  sum = 0
+  for n in numbers:
+    sum = sum + n
+  return sum
+#     *numbers表示可变参数(0个或多个)，函数内部numbers是自动组装成的tuple(note:tuple指向不可变)
+#     Python允许在list或tuple前面加一个*号，把list或tuple的元素变成可变参数传进去
+#     调用：
+calc()
+calc(1,2)
+nums = [1,2,3]  
+calc(*nums)
+#################################    
+def person(name,age,**kw):
+  print('name:',name,'age:',age,'other:',kw)
 
-name = input()
-print('hello', name)
+#     **kw表示关键字参数(0个或多个含参数名的参数)，关键字参数在函数内部自动组装成一个dict
+#     **extra表示把extra这个dict的所有key-value用关键字参数传入到函数的**kw参数，kw将获得一个dict，注意kw获得的dict是extra的一份拷贝，对kw的改动不会影响到函数外的extra
+#     调用：
+person('Michael',30) # 输出：name: Michael age: 30 other: {}
+person('Adam',45,gender='M',job='Engineer') # 输出： name: Adam age: 45 other: {'gender': 'M', 'job': 'Engineer'}
+#####
+def person(name,age,*,city,job):
+  print(name,age,city,job)
+#     命名关键字参数，上述定义表示只接收city,job作为关键字参数，*表示的是分割符，如果函数定义已经有一个可变参数，后面跟着的命名关键字参数就不需要*分割符
+#     命名关键字参数必须传入参数名，有默认值的命名关键字参数可以不传值
+def person(name,age,*args,city,job):
+  print(name,age,args,city,job)
+  
+def person(name,age,*args,city='shanghai',job):
+  print(name,age,args,city,job)
 
-name = input('please enter you name: ')
-print('hello', name)
+# 递归函数:使用递归函数需要注意防止栈溢出。在计算机中，函数调用是通过栈（stack）实现的，每当进入一个函数调用，栈就会加一层栈帧，每当函数返回，栈就会减一层栈帧
+# 尾递归：在函数返回的时候，调用函数自身，并且return语句不能包含表达式
+# python 解释器对尾递归没有优化，尾递归依然会导致栈溢出
+
+def fact(n):
+  if n == 1: 
+    return 1
+  return n * fact(n - 1)
+
+print(fact(5))
+
+def fact_iter(n, result):
+  if n == 1:
+    return result
+  return fact_iter(n - 1, n * result)
+
+print(fact_iter(5, 1))
+
+# 汉罗塔：n表示3个柱子中第1个柱子的盘子数量，然后打印出把所有盘子从a借助b移动到c的方法
+def move(n,a,b,c):
+  if n == 1: 
+    print(a, '-->', c)
+  else:
+    move(n-1,a,c,b)
+    print(a, '-->', c)
+    move(n-1,b,a,c)
+
+move(3,'A','B','C')
+
+## 高级特性
+# 切片： 取list、tuple的部分元素；str也可以进行切片，返回str
+L = list(range(0,11))
+print(L)
+print(L[0:3])  # 取前3个，索引 [0,3) ,左闭右开
+print(L[:3])   # 第一个索引是0，可以省略
+print(L[1:3])  # [1,3)
+print(L[-2:])  # 后两个
+print(L[1:])
+print(L[:])    # 原样复制
+print(L[::2])  # 对整个list，每2个取一个，第一个L[0]取
+print(L[1:7:2])
+
+# 去除字符串首尾空格
+def trim(s):
+  while s and s[0] == ' ':
+    s = s[1:]
+  while s and s[-1] == ' ':
+    s = s[:-1]
+  return s
 
 
-a = -100
-if a >= 0:
-	print(a)
-else:
-	print(-a)
 
-# 多行内容表示
-print('''line1
-line2
-line3''')
+# print('中文输出正常')  # 文件开始指定utf-8编码
+# print('hello word')
+# print(100+200)
+# print('the quick brown fox','jumps over','the lazy dog.')
+# print('100+200')
+# print('1024 * 768 = ',1024 * 768)
 
-# 在python 交互环境下，第一行后每行会自动生成... ,文本编辑下不用加
+# name = input()
+# print('hello', name)
+
+# name = input('please enter you name: ')
+# print('hello', name)
+
+
+# a = -100
+# if a >= 0:
+# 	print(a)
+# else:
+# 	print(-a)
+
+# # 多行内容表示
 # print('''line1
-# ... line2
-# ... line3''')
+# line2
+# line3''')
 
-print(r'''hello, \n
-world''')
+# # 在python 交互环境下，第一行后每行会自动生成... ,文本编辑下不用加
+# # print('''line1
+# # ... line2
+# # ... line3''')
 
-print('True and False:',True and False,'\n','True or False:',True or False,'\n','not True:',not True)
+# print(r'''hello, \n
+# world''')
 
-n = 123
-f = 456.789
-s1 = 'Hello, world'
-s2 = 'Hello, \'Adam\''
-s3 = r'Hello, "Bart"'
-s4 = r'''Hello,
-Lisa!'''
-print(n)
-print(f)
-print(s1)
-print(s2)
-print(s3)
-print(s4)
+# print('''hello, \n
+# world''')
 
-# print('A'), 0041是A的unicode编码
-print('\u0041')
+# print('True and False:',True and False,'\n','True or False:',True or False,'\n','not True:',not True)
 
-# 格式化输出字符串, %
-print('hi, %s,you hava $%d' % ('Michael', 10000)) 
-# 单个，可以省略()
-print('hi, %s' % 'Michael')
+# n = 123
+# f = 456.789
+# s1 = 'Hello, world'
+# s2 = 'Hello, \'Adam\''
+# s3 = r'Hello, "Bart"'
+# s4 = r'''Hello,
+# Lisa!'''
+# print(n)
+# print(f)
+# print(s1)
+# print(s2)
+# print(s3)
+# print(s4)
+
+# # print('A'), 0041是A的unicode编码
+# print('\u0041')
+
+# # 格式化输出字符串, %
+# print('hi, %s,you hava $%d' % ('Michael', 10000)) 
+# # 单个，可以省略()
+# print('hi, %s' % 'Michael')
