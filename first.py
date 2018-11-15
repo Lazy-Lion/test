@@ -48,11 +48,36 @@ print(sys.version)
 #        a = 'abc'
 #        a.replace('a','A') ==> 'Abc',此时print(a) 依然是'abc', str是不可变对象
 # find()
+# str(object=b'',encoding='utf-8',errors='strict'):将对象转换成其字符串表现形式
 s = 'abcdef'
 print(s.find('e')) # 能找到，返回index
 print(s.find('m')) # 找不到，返回-1
 # 布尔值： True, False ： 布尔值可以使用的运算： and, or, not
-# 
+# Python中除了False,''、""、0(值为0的数都是False,如0.0)、()、[]、{}、None为False之外，其他的都是True
+
+if not 0 : 
+	print('0 is False')
+if not 0.0 : 
+	print('0.0 is False')
+if not '' :
+	print('\'\' is False')
+if not "":
+	print('\"\" is False')
+if not ():
+	print('() is False')
+if not []:
+	print('[] is False')
+if not {}:
+	print('{} is False')
+if not None:
+	print('None is False')
+if 1:
+	print('1 is True')
+
+print('{} == False :', {} == False) # 直接比较返回False，不相等
+print('0.0 == False:', 0.0 == False) # 直接比较返回True，相等
+
+
 # input() 输入： 返回的数据类型是str, int()函数将str转换成整数
 #     s = input()
 #     s = int(s)    
@@ -83,6 +108,24 @@ print(s.upper()) # 大写
 print(s.lower()) # 小写
 print(s.capitalize()) # 字符串首字母大写，其余小写
 print(s.title())  # 字符串标题化，所有单词首字母大写，其余小写
+
+# strip(): 删除字符串首尾指定的字符序列，返回新字符串 
+#    strip([chars]),chars(Optional):Character or a set of characters, that needs to be removed from the string.
+#                                           If no parameter is passed then only the leading and trailing spaces are removed.
+#                                           空白字符除了空格还有\n等
+s = '\n  abc def fed cba '
+print(s)
+print(s.strip())
+print(s.strip('abc'))
+
+s = 'abc def fed cba'
+print(s.strip('abc')) # 返回'def fed ',删除的是参数包含的字符，不是以字符串计算的
+
+# lstrip()
+# rstrip()
+
+
+#
 
 # list : 内置的数据类型，有序集合，可以随时添加和删除其中的元素，list里元素的数据类型可以不同
 #     classmates = ['Michael', 'Bob', 'Tracy']
@@ -269,13 +312,20 @@ move(3,'A','B','C')
 L = list(range(0,11))
 print(L)
 print(L[0:3])  # 取前3个，索引 [0,3) ,左闭右开
-print(L[:3])   # 第一个索引是0，可以省略
+print(L[:3])   # 缺省值为0
 print(L[1:3])  # [1,3)
-print(L[-2:])  # 后两个
+print(L[-2:])  # 后两个，缺省值为len(L)
 print(L[1:])
 print(L[:])    # 原样复制
 print(L[::2])  # 对整个list，每2个取一个，第一个L[0]取
 print(L[1:7:2])
+
+# L[i:j:s]: s 缺省是1，表示步进；
+#           s < 0 时，i缺省时默认为-1，j缺省时默认为-len(L)-1
+print(L[::-1]) # 同L[-1:-len(L)-1:-1],列表倒序
+print(L[-1:-len(L)-1:-1])
+
+
 
 # 去除字符串首尾空格
 def trim(s):
@@ -515,7 +565,51 @@ else:
 print(str2float('23213'))
 
 
-# filter()
+# filter():接收一个函数和一个序列，把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。
+#          返回的是Iterator
+def not_empty(s):
+	return s and s.strip()
+
+print(list(filter(not_empty,['a','b','c','',' ',None])))
+
+
+# 求素数:
+# 素数： 在大于1的自然数中，除了1和它本身以外不再有其他因数。
+# 解法：埃氏筛法
+def odd_iter():  # 大于1的奇数序列
+	n = 1
+	while 1:
+		n = n + 2 
+		yield n 
+
+def not_divisible(n): 
+	return lambda x : x % n > 0 
+
+def primes():
+	yield 2 
+	it = odd_iter()
+	while 1 : 
+		n = next(it)
+		yield n 
+		it = filter(not_divisible(n),it)
+
+#      打印100以内的素数:
+for n in primes():
+    if n < 100:
+        print(n)
+    else:
+        break
+
+# 判断回数
+def is_palindrome(n):
+	return str(n) == str(n)[::-1]
+
+output = filter(is_palindrome, range(1, 1000))
+print('1~1000:', list(output))
+if list(filter(is_palindrome, range(1, 200))) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33, 44, 55, 66, 77, 88, 99, 101, 111, 121, 131, 141, 151, 161, 171, 181, 191]:
+    print('测试成功!')
+else:
+    print('测试失败!')
 
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
