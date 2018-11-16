@@ -612,6 +612,42 @@ else:
     print('测试失败!')
 
 
+# sorted():高阶函数，对list进行排序
+print(sorted([1,3,2,7,5,6]))
+print(sorted([1,3,-2,-7,5,6],key = abs))  # 自定义排序方式，按绝对值大小排序,key函数作用于每个元素
+print(sorted(['bob','about','Zoo','Credit']))
+print(sorted(['bob','about','Zoo','Credit'],key = str.lower))
+print(sorted(['bob','about','Zoo','Credit'],key = str.lower,reverse = True)) # 反向排序
+
+
+L = [('Bob',75), ('Adam',92), ('Bart',66), ('Lisa',88)]
+def by_name(t):  #按名字排序
+	name,score = t 
+	return name
+
+def by_score(t):  #按成绩从高到低排序
+	name,score = t 
+	return score 
+
+print(sorted(L,key = by_name))
+print(sorted(L,key = by_score, reverse = True))
+
+# 返回函数：内部函数可以引用外部函数的参数和局部变量，当外部函数返回内部函数时，相关参数和变量都保存在返回的函数中，即"闭包"
+#         lazy_sum每次调用返回的都是新的函数，即使传入相同的参数
+def lazy_sum(*args):
+	def csum():
+		ax = 0
+		for n in args:
+			ax = ax + n 
+		return ax 
+	return csum
+f = lazy_sum(*list(range(1,11)))
+print(f)
+print(f())
+
+
+#
+
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
 # print(100+200)
