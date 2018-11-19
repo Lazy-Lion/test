@@ -193,6 +193,7 @@ while n > 0:
 
 
 ## 二、函数
+# Python的函数是对象，函数可以在另一个函数内部被定义，函数可以赋值给一个变量，函数可以返回另一个函数，可以传入一个函数作为参数
 # 内置函数 https://docs.python.org/3/library/functions.html
 # max(),hex()
 # abs():定义在builtins模块中
@@ -633,7 +634,11 @@ print(sorted(L,key = by_name))
 print(sorted(L,key = by_score, reverse = True))
 
 # 返回函数：内部函数可以引用外部函数的参数和局部变量，当外部函数返回内部函数时，相关参数和变量都保存在返回的函数中，即"闭包"
-#         lazy_sum每次调用返回的都是新的函数，即使传入相同的参数
+#         lazy_sum每次调用返回的都是新的函数，即使传入相同的参数；返回的函数并没有立刻执行，而是直到调用了f()才执行
+#   (闭包(Closure)：在计算机科学中，闭包（英语：Closure），又称词法闭包（Lexical Closure）或函数闭包（function closures），
+#                   是引用了自由变量的函数。这个被引用的自由变量将和这个函数一同存在，即使已经离开了创造它的环境也不例外。 )
+#   内部函数只能引用而不能修改外部函数中定义的自由变量
+#   <https://stackoverflow.com/questions/111102/how-do-javascript-closures-work>
 def lazy_sum(*args):
 	def csum():
 		ax = 0
@@ -646,7 +651,162 @@ print(f)
 print(f())
 
 
-#
+def count():
+	fs = []
+	for i in range(1,4):
+		def f():
+			return i * i
+		fs.append(f)
+	return fs
+
+f1,f2,f3 = count()
+print(f1(), f2(), f3())  # 返回值都是9，即返回的函数直到调用时才执行
+
+# 返回闭包时牢记一点：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+
+# 如果一定要引用循环变量：再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变
+def count():
+	def f(j):
+		def g():
+			return j * j
+		return g
+	fs = []
+	for i in range(1,4):
+		fs.append(f(i))
+	return fs 
+
+def count():  # 使用lambda简化上述代码
+	fs = []
+	for i in range(1,4):
+		fs.append((lambda j : lambda : j * j)(i))
+	return fs
+
+f1,f2,f3 = count()
+print(f1(),f2(),f3())
+
+f1,f2,f3 = [(lambda j : lambda : j * j)(i) for i in range(1,4)] # 使用列表生成式简化上述代码
+print(f1(),f2(),f3())
+
+
+# 计数器函数，递增整数 （生成器方式）
+def createCounter():
+	def g():
+		v = 1
+		while 1 :
+			yield v 
+			v = v + 1 
+
+	count = g()
+	def counter():
+#		count = count + 1  # 不能直接修改外部变量的值
+		return next(count) 
+	return counter
+
+# 计数器函数，递增函数 (全局变量方式)
+def createCounter():
+	global count 
+	count = 0 
+	def counter():
+		global count
+		count += 1
+		return count
+	return counter  
+
+
+# 测试:
+counterA = createCounter()
+print(counterA(), counterA(), counterA(), counterA(), counterA()) # 1 2 3 4 5
+counterB = createCounter()
+if [counterB(), counterB(), counterB(), counterB()] == [1, 2, 3, 4]:
+    print('测试通过!')
+else:
+    print('测试失败!')
+
+
+# 匿名函数：lambda表达式
+#   限制：只能有一个表达式，不用写return，返回值就是该表达式的结果,冒号前面表示函数的参数
+print(list(map(lambda x : x*x, range(1,11))))
+print(list(filter(lambda n : n % 2 == 1, range(1,20))))
+
+# 装饰器(Decorator)：在代码运行期间动态增加功能的方式；允许在被装饰函数前后执行代码，而不对函数本身做任何修改
+#          本质上，decorator就是一个返回函数的高阶函数
+def now():
+	print('2018-11-19')
+f = now
+f()
+print(f.__name__)  # 函数对象有一个__name__属性
+
+
+def log(func):
+	def wrapper(*args, **kw):  
+		print('call %s():'% func.__name__)
+		return func(*args, **kw) # 调用原始函数
+	return wrapper
+
+@log  # Python的@语法，将decorator置于函数的定义处,相当于log(now)，一个函数可以使用多个装饰器，按照书写顺序执行
+def now():
+	print('2018-11-19')
+
+now()
+print(now.__name__) # 函数名变成了wrapper
+
+# 如果装饰器本身需要传入参数
+def log(text):
+	def decorator(func):
+		def wrapper(*args, **kw):
+			print('%s %s():' % (text,func.__name__))
+			return func(*args, **kw)
+		return wrapper
+	return decorator
+
+@log('execute') # 效果相当于log('execute')(now)
+def now():
+	print('2018-11-19')
+
+now()
+print(now.__name__) # 函数名变成了wrapper
+
+
+# 装饰器返回的函数名变更，需要把原始函数的__name__等属性复制到wrapper()函数中，否则有些依赖函数签名的代码执行就会出错
+import functools
+
+def log(func):
+	@functools.wraps(func)  # 用于将原始函数的一些属性复制到wrapper()函数中
+	def wrapper(*args, **kw):
+		print('call %s()' % func.__name__)
+		return func(*args, **kw)
+	return wrapper
+
+@log
+def now():
+	print('2018-11-19')
+
+print(now.__name__)
+
+
+# 装饰器模式：打印函数执行时间
+import time,functools
+
+def metric(func):
+	@functools.wraps(func)
+	def wrapper(*args, **kw):
+		start = time.perf_counter()
+		func(*args, **kw)
+		end = time.perf_counter()
+		print('%s excuted in %s ms ' % (func.__name__, end - start))
+		return func(*args, **kw)
+	return wrapper
+
+@metric 
+def func():
+	for x in range(1,100):
+		pass
+func()
+
+
+
+
+
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
