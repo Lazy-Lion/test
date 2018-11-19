@@ -29,11 +29,11 @@
 | git rm filename | 删除文件 | 执行过后需要commit | 
 | git checkout -- filename | 丢弃未到暂存区的工作区的修改 | 撤回到最近一次git add 或 git commit 时的状态; 对于手动误删或使用rm误删但未提交的文件，可以使用该命令恢复，但是使用git rm命令删除的即使没有commit 也不能恢复|
 | git reset HEAD filename | 将暂存区的修改退回到工作区 | 可以与上条命令配合使用，撤销已提交到暂存区的修改 |
-| git remote add origin git@servername:path/reponame.git | 关联远程仓库 | 关联github时需要ssh才能推送| 
+| git remote add origin git@servername:path/reponame.git | 关联远程仓库,如 git remote add origin git@github.com:Lazy-Lion/test.git | 关联github时需要ssh才能推送| 
 | git remote remove origin | 取消本地目录下关联的远程库 | |
 | git push -u origin master | 第一次推送master分支上所有内容到远程仓库 | |
 | git push origin branchname | 后续从本地推送修改到远程仓库 | 如果推送失败，先用git pull抓取远程新的提交,若有冲突处理冲突 |
-| git fetch origin | 从远程获取最新版本到本地，不会自动合并 | |
+| git fetch origin | 从远程获取最新版本到本地，不会自动合并，如 git fetch origin master | |
 | git pull | 从远程获取最新版本到本地，自动合并| git pull origin master 相当于 git fetch origin master + git merge origin/master |
 | git checkout -b branchname origin/branchname | 在本地创建和远程分支对应的分支 | 本地和远程分支名最好一致 |
 | git branch --set-upstream branchname origin/branchname | 建立本地分支和远程分支的关联 | | 
