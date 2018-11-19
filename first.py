@@ -804,9 +804,57 @@ def func():
 		pass
 func()
 
+# 装饰器既支持@log，也支持@log('execute')的写法
+def log(func):
+	if callable(func):
+		@functools.wraps(func)
+		def wrapper(*args, **kw):
+			print('call %s:' % func.__name__)
+			return func(*args, **kw)
+		return wrapper
+	else: 
+		def decorator(fn):
+			@functools.wraps(fn)
+			def wrapper(*args, **kw):
+				print('%s %s' % (func, fn.__name__))
+				return fn(*args, **kw)
+			return wrapper
+		return decorator
 
+@log
+def now():
+	print('2018-11-19')
+now()
+print(now.__name__)
 
+@log('execute')
+def now():
+	print('2018-11-19')
+now()
+print(now.__name__)
+print('------')
+origin_now = now.__wrapped__  # python 3 中使用该属性可以调用去decorator的函数
+origin_now()
 
+# 偏函数(Partial function): functools.partial() 创建一个偏函数,参数为：函数对象,*args,**kw
+print(int('12345'))
+print(int('1001101',base = 2))
+
+def int2(x,base = 2):
+	return int(x,base)
+
+print(int2('1001101'))
+
+import functools
+int2 = functools.partial(int, base = 2)  # functools.partial创建一个偏函数，也就是对函数的某些参数设置默认值，返回新的函数; 相当于functools.partial(int, **{'base':2})
+print(int2('1001101'))
+print(int2('123',base = 10))  # 有默认值的参数同样可以传入新值
+
+int2 = functools.partial(int, **{'base':2})
+print(int2('1001101'))
+
+max2 = functools.partial(max, 10) 
+print(max2(5,6,7)) # 相当于max(*(10,5,6,7)),即当成*args的一部分自动加到左边
 
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
