@@ -10,6 +10,8 @@
 ## .gitkeep 文件
  Git does not track empty directories, if you wish to track or push an empty directory to your upstream, just create one .gitkeep file. It is important to check that you never add ".gitkeep" into the .gitignore. Then the whole purpose of the tracking the empty directories would vanish.
 
+## [github设置添加ssh](https://www.cnblogs.com/chuyanfenfei/p/8035067.html)
+
 ## 简单命令
 
 | Command | Purpose | Info |
