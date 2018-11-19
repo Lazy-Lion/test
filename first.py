@@ -730,6 +730,7 @@ print(list(filter(lambda n : n % 2 == 1, range(1,20))))
 
 # 装饰器(Decorator)：在代码运行期间动态增加功能的方式；允许在被装饰函数前后执行代码，而不对函数本身做任何修改
 #          本质上，decorator就是一个返回函数的高阶函数
+# <http://kissg.me/2016/07/16/translation-about-python-decorator/>
 def now():
 	print('2018-11-19')
 f = now
