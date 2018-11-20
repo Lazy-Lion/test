@@ -857,6 +857,28 @@ max2 = functools.partial(max, 10)
 print(max2(5,6,7)) # 相当于max(*(10,5,6,7)),即当成*args的一部分自动加到左边
 
 
+## 模块：在Python中一个.py文件就称为一个模块(Module). 相同名字的函数和变量完全可以分别存在于不同的模块中.但尽量不要与内置函数名冲突.
+#自己创建模块时要注意命名，不能和Python自带的模块名称冲突。例如，系统自带了sys模块，自己的模块就不可命名为sys.py，否则将无法导入系统自带的sys模块.
+#  可以在命名前检查系统是否已存在该模块，在交互环境下执行import modulename ，若成功则表明已存在。
+
+# 为了避免模块名冲突，Python引入按目录来组织模块的方法，称为包(Package). 每一个包目录下都会有一个__init__.py文件，必须存在。
+#  mycompany
+#  ├─ __init__.py
+#  ├─ abc.py
+#  └─ xyz.py
+# 上述示例： mycompany是包名，__init__.py对应的模块名就是mycompany，abc.py对应的模块名是mycompany.abc
+
+# 如下多级目录结构：www.py的模块名是mycompany.web.www
+#  mycompany
+#   ├─ web
+#   │  ├─ __init__.py
+#   │  ├─ utils.py
+#   │  └─ www.py
+#   ├─ __init__.py
+#   ├─ abc.py
+#   └─ xyz.py
+
+
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
 # print(100+200)
