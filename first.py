@@ -878,6 +878,47 @@ print(max2(5,6,7)) # 相当于max(*(10,5,6,7)),即当成*args的一部分自动�
 #   ├─ abc.py
 #   └─ xyz.py
 
+# 模块代码示例:hello.py
+
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+' a test module '
+
+__author__ = 'Michael Liao'
+
+import sys
+
+def test():
+    args = sys.argv
+    if len(args)==1:
+        print('Hello, world!')
+    elif len(args)==2:
+        print('Hello, %s!' % args[1])
+    else:
+        print('Too many arguments!')
+
+if __name__=='__main__':
+    test()
+
+# 上述代码：第1、2行是标准注释；第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；
+# 		   第6行使用__author__变量把作者写进去； 后面是正式代码
+#     sys.argv变量用list存储命令行的所有参数,argv至少有一个元素，第一个参数永远是运行的.py文件名称：
+#			python hello.py  的sys.argv为['hello.py']
+# 			python hello.py Michael  的sys.argv为['hello.py','Michael']
+#     命令行执行hello.py时，python解释器将特殊变量 __name__ 置为 __main__ ，而当导入时则不会设置，因此导入时不会自动运行test()，需手动调用hello.test()，因此可以用于运行测试。
+
+
+# 作用域：
+#        1.public：正常的函数和变量名是公开的，可以被外部直接引用，如 a,b1
+#		 2.特殊变量：__xxx__ ,可以被外部直接引用，但是有特殊用途，如 __name__ ,我们自己的变量一般不要用这种变量名
+#        3.private：_xxx, 不应该被外部直接引用(Python并没有一种方法可以可以完全限制访问private函数或变量，但是从编程习惯上不应该引用private函数或变量)
+
+
+# 安装第三方模块：通过包管理工具pip完成
+# 一般来说，第三方库都会在Python官方的 https://pypi.org/ 网站注册
+
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
