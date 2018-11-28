@@ -1261,6 +1261,48 @@ class Fib(object):
 			return L
 print(Fib()[:10])
 
+
+# __getattr__:正常情况下，当我们调用类的方法或属性时，如果不存在就会报错AttributeError;
+#             __getattr__()可以动态的返回一个属性，比如不存在score属性时，python解释器会试图调用__getattr__(self,'score')来获取属性
+class Student(object):
+	pass
+
+s = Student()
+# s.score  ==> 报错
+
+class Student(object):
+	def __init__(self, name):
+		self._name = name
+
+	def __getattr__(self, attr):
+		if attr == 'score':
+			return 90   
+		if attr == 'age':
+			return lambda : 25
+
+s = Student('Lisa')
+print(s._name)
+print(s.score)
+print(s.age())
+print(s.gender)  # __getattr__()默认返回值是None
+
+class Student(object):
+	def __init__(self, name):
+		self._name = name
+
+	def __getattr__(self, attr):
+		if attr == 'score':
+			return 90   
+		raise AttributeError('\'Student\' object has no attribute %s' % attr)
+
+s = Student('Lisa')
+print(s._name)
+print(s.score)
+print(s.gender) # raise AttributeError
+
+
+
+
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
 # print(100+200)
