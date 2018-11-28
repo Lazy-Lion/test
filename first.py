@@ -475,7 +475,7 @@ print(isinstance(triangles(),Iterator)) # True
 print(isinstance(iter('abc'),Iterator)) # True
 
 
-## 函数式编程 Functional Programming
+## 四、函数式编程 Functional Programming
 # 1.变量可以指向函数
 # 2.函数名也是变量,abs=10 就会把abs指向整数10，而不指向求绝对值函数，也就无法调用abs(-10)
 # 3.高阶函数：接收另一个函数作为参数
@@ -857,7 +857,7 @@ max2 = functools.partial(max, 10)
 print(max2(5,6,7)) # 相当于max(*(10,5,6,7)),即当成*args的一部分自动加到左边
 
 
-## 模块：在Python中一个.py文件就称为一个模块(Module). 相同名字的函数和变量完全可以分别存在于不同的模块中.但尽量不要与内置函数名冲突.
+## 五、模块：在Python中一个.py文件就称为一个模块(Module). 相同名字的函数和变量完全可以分别存在于不同的模块中.但尽量不要与内置函数名冲突.
 #自己创建模块时要注意命名，不能和Python自带的模块名称冲突。例如，系统自带了sys模块，自己的模块就不可命名为sys.py，否则将无法导入系统自带的sys模块.
 #  可以在命名前检查系统是否已存在该模块，在交互环境下执行import modulename ，若成功则表明已存在。
 
@@ -918,7 +918,348 @@ if __name__=='__main__':
 
 # 安装第三方模块：通过包管理工具pip完成
 # 一般来说，第三方库都会在Python官方的 https://pypi.org/ 网站注册
+# 例： pip install Pillow     # 命令行模式下输入，安装Pillow库
+# Anaconda: https://www.anaconda.com/  
 
+# 模块搜索路径：当我们试图加载一个模块时，Python会在指定路径下搜索对应的.py文件，如果找不到则报错；
+#              默认情况下Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在sys模块的path变量中;
+#			   如果要添加自己的搜索目录： 1.修改sys.path：sys.path.append('E:\\my_py_scripts'),运行时修改，运行结束后失效；   2.设置环境变量PYTHONPATH,该环境变量内容自动加到模块搜索路径中
+
+import sys
+print(sys.path)
+
+
+## 六、面向对象编程 Object Oriented Programming：封装、继承、多态
+# 在Python中所有数据类型都可以视为对象
+
+class Student(object):  #类定义，类名为Student，(object)表示该类继承自object类(所有的类最终都会继承的类，没有合适的继承类时就用object类)
+
+	def __init__(self, name, score):  #__init__方法(类似于构造方法)的第一个参数永远是self，表示创建的实例本身
+		self.name = name
+		self.score = score
+
+	def print_score(self):            # 类中定义的函数第一个参数永远是实例变量self，调用时不用传递该参数，其他与普通函数相同
+		print('%s: %s' % (self.name,self.score))
+
+print(Student)
+lisa = Student('Lisa Simpson', 87)  # 实例对象
+print(lisa)
+lisa.print_score()
+lisa.score = 95     # 可以外部访问属性
+lisa.print_score()
+
+lisa.age = 10     # Python允许对实例变量任意绑定属性，也就是说对于两个实例变量，即使是同一个类的不同实例，拥有的变量名称都可能不同
+print(lisa.age)
+
+class Student(object):
+
+	def __init__(self, name, score):
+		self.__name = name
+		self.__score = score
+
+	def get_name(self):
+		return self.__name
+
+	def get_score(self):
+		return self.__score
+
+	def set_name(self, name):
+		self.__name = name
+
+	def set_score(self, score):
+		if 0 <= score <= 100:
+			self.__score = score
+		else :
+			raise ValueError('bad score')
+
+	def print_score(self):
+		print('%s: %s' % (self.name,self.score))
+
+lisa = Student('Lisa Simpson', 87)
+# print(lisa.__score)  # 在Python中，实例的变量名以两个下划线__开头，就变成一个私有变量(private)，只能内部访问，外部无法访问(以双下划线开头并且以双下划线结尾的是特殊变量，可以直接访问，不是private)
+				       #            以一个下划线开头的实例变量名，外部是可以访问的，但是按照约定俗成的规定，"虽然我可以被访问，但是，请把我视为私有变量，不要随意访问"
+				       #			双下划线的实例变量不能直接访问是因为Python解释器对外把__score变量改为_Student__score，所以仍然可以通过_Student__score来访问(不同版本解释器可能会改成不同的变量名)
+
+print(lisa._Student__score)
+print(lisa.get_score())
+
+lisa.__name = 'new name'   # 实际上是新增了一个__name变量，而不是修改实例内部的__name变量
+print(lisa.get_name())
+
+
+# 继承 :
+class Animal(object):
+	def run(self):
+		print('Animal is running...')
+
+class Dog(Animal):
+	def run(self):  # 重写
+		print('Dog is running')
+
+dog = Dog()
+dog.run()
+
+def run_func(animal):
+	animal.run()    # 实际上，对于动态语言来说，传入的对象有run()方法即可，不一定要是Animal或其子类型 ("鸭子类型")
+
+run_func(Dog())
+run_func(Animal())
+
+
+# type():判断对象类型
+print(type(123)) 
+print(type(None))
+print(type(str))
+print(type('str'))
+print(type(abs))
+print(type(dog))
+
+# 判断基本数据类型
+print('test primary type:')
+print(type(123) == int)
+print(type('123') == str)
+print(type([1]) == list)
+
+# 判断对象是否为函数，types模块
+print('test types module:')
+import types
+
+def fn():
+	pass
+
+print(type(fn) == types.FunctionType)
+print(type(lambda x : x * x) == types.LambdaType)
+print(type(abs) == types.BuiltinFunctionType)
+print(type((x for x in range(100))) == types.GeneratorType)
+
+# 判断class的类型, 使用isinstance()
+print('test isinstance():')
+print(isinstance(dog, Animal))
+print(isinstance(Animal(), Animal))
+print(isinstance('str', str))  # 能用type判断的，也能使用isinstance()判断，优先使用isinstance()判断
+print(isinstance(b'123', bytes))
+
+# dir() :获得一个对象的所有属性和方法
+print(dir('str'))
+print(dir(dog))
+
+# len('ABC') <=> 'ABC'.__len__()
+
+print(len('ABC'))  # len()函数实际上自动调用对象的__len__()方法
+print('ABC'.__len__())
+
+
+class MyDog(object):
+	def __init__(self, x, y):
+		self.__x = x
+		self.y = y
+
+	def __len__(self):
+		return 100
+
+dog = MyDog('x','y')
+print(len(dog))
+
+print(dir(dog))
+
+# getattr()、setattr()、hasattr() 可用于对象的属性或方法 
+print(hasattr(dog, '__x')) #  无法访问private属性,返回False
+print(hasattr(dog,'y'))
+print(setattr(dog, 'y', 'name'))
+print(getattr(dog, 'y'))
+print(getattr(dog, 'z', 404)) # 可以传入一个默认参数，如果属性不存在，就返回默认值
+
+# 类属性: 实例属性属于各个实例所有，互不干扰；类属性属于类所有，所有实例共享一个属性
+class Student(object):
+	name = 'class value'
+
+
+s = Student()
+print(s.name)
+print(Student.name)
+s.name = 'instance value'
+print(s.name)  # 实例属性优先级比类属性高，返回 instance value
+print(Student.name) # 类属性并未消失，返回 class value
+
+
+## 七、面向对象高级编程：多重继承、定制类、元类
+
+# 给实例绑定属性和方法
+class Student(object):
+	pass
+
+s = Student()
+s.name = 'Michael' # 给实例绑定属性
+print(s.name)
+
+def set_age(self, age):
+	self.age = age
+
+from types import MethodType
+s.set_age = MethodType(set_age, s) # 给实例绑定方法，对其他实例不起作用
+s.set_age(5)
+print(s.age)
+
+def set_score(self, score):
+	self.score = score
+
+Student.set_score = set_score # 给类绑定方法，对所有实例有效
+s.set_score(90)
+print(s.score)
+
+Student.gender = 'male' # 给类绑定属性
+
+class Student(object):
+	__slots__ = ('name', 'age') #限制实例能添加的属性，仅对当前类实例有效，对子类实例无效，对类也无效
+
+s = Student()
+s.name = 'lisa'
+s.age = 10
+# s.score = 90  实例无法绑定score , AttributeError
+Student.score = 90  # 类依然可以绑定
+
+class HighStudent(Student):
+	pass
+
+s = HighStudent()
+s.score = 90 # 子类可以绑定
+
+
+# @property: 内置装饰器负责把一个方法变成属性调用
+class Student(object):
+
+	@property       # getter方法变为属性，同时创建了另一个装饰器@score.setter
+	def score(self):
+		return self._score
+	
+	@score.setter  # setter方法变为属性赋值，如果只设置@property表示该属性只读
+	def score(self, score):
+		if not isinstance(score, int):
+			raise ValueError('score must be an integer')
+		if score < 0 or score > 100:
+			raise ValueError('score must between 0 ~ 100')
+		self._score = score
+
+print('test @property:')
+s = Student()
+s.score = 100
+print(s.score)
+# s.score = 120  # 根据数据验证，ValueError
+
+
+class Screen(object):
+
+	@property
+	def width(self):
+		return self._width
+	
+	@width.setter
+	def width(self, width):
+		self._width = width
+
+	@property
+	def height(self):
+		return self._height
+	
+	@height.setter
+	def height(self, height):
+		self._height = height
+
+	@property
+	def resolution(self):
+		return 786432
+
+s = Screen()
+s.width = 1024
+s.height = 768
+
+# 多重继承: MixIn的设计
+#        关于多重继承方法的调用顺序(MRO)：https://kevinguo.me/2018/01/19/python-topological-sorting/
+class Animal(object):
+	pass
+
+class Runnable(object):
+	def run(self):
+		print('running...')
+
+class Dog(Animal, Runnable):
+	pass
+
+
+# 定制类： 
+# __str__(), __repr__()  ---> toString()
+print('定制类：')
+
+class Student(object):
+	def __init__(self, name):
+		self.name = name
+print(Student('Michael'))
+
+class Student(object):
+	def __init__(self, name):
+		self.name = name
+	def __str__(self):
+		return 'Student object (name: %s)' % self.name
+print(Student('Michael'))
+
+class Student(object):
+	def __init__(self, name):
+		self.name = name
+	def __str__(self):
+		return 'Student object (name: %s)' % self.name
+
+	__repr__ = __str__   # 为开发者调试服务的，在python交互界面，不用print，直接敲变量时会执行
+
+
+
+#  __iter__(), __next__()  ---> 迭代对象
+class Fib(object):
+	def __init__(self):
+		self.a, self.b = 0, 1
+	def __iter__(self):
+		return self
+	def __next__(self):
+		self.a, self.b = self.b, self.a + self.b 
+		if self.a > 10000:
+			raise StopIteration()
+		return self.a
+
+for v in Fib():
+	print(v)
+print('##########')
+
+# __getitem__()  ---> 下标获取， 对应的还有__setitem__(),__delitem__()，使得自定义的类表现的和list、tuple、dic等一致
+class Fib(object):
+	def __getitem__(self, n):
+		a,b = 1,1
+		for x in range(n):
+			a,b = b,a+b
+		return a
+print(Fib()[10])
+
+#  实现slice的部分功能
+class Fib(object):
+	def __getitem__(self, n):
+		if isinstance(n, int):
+			a,b = 1,1
+			for x in range(n):
+				a,b = b, a+b
+			return a
+		if isinstance(n, slice):
+			start = n.start
+			stop = n.stop
+
+			if start is None:
+				start = 0
+			a,b = 1,1
+
+			L = []
+			for x in range(stop):
+				if x >= start:
+					L.append(a)
+				a,b = b, a+b 
+			return L
+print(Fib()[:10])
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
