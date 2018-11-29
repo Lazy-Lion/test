@@ -1263,7 +1263,8 @@ print(Fib()[:10])
 
 
 # __getattr__:正常情况下，当我们调用类的方法或属性时，如果不存在就会报错AttributeError;
-#             __getattr__()可以动态的返回一个属性，比如不存在score属性时，python解释器会试图调用__getattr__(self,'score')来获取属性
+#             __getattr__()可以动态的返回一个属性，比如不存在score属性时，python解释器会试图调用__getattr__(self,'score')来获取属性，如果存在则不会调用__getattr__()
+#             __setattr___(self, name, value): 类似__getattr__()，是尝试设置一个不存在属性时调用的函数
 class Student(object):
 	pass
 
@@ -1298,10 +1299,436 @@ class Student(object):
 s = Student('Lisa')
 print(s._name)
 print(s.score)
-print(s.gender) # raise AttributeError
+# print(s.gender) # raise AttributeError
 
 
+# 完全动态调用特性示例：REST API
+class Chain(object):
 
+	def __init__(self, path = ''):
+		self._path = path
+
+	def __getattr__(self, path):
+		return Chain('%s/%s' % (self._path, path))
+
+	def __str__(self):
+		return self._path
+
+print(Chain().status.user.timeline.list)  #/status/user/timeline/list
+
+# __call__():直接对实例进行调用
+class Student(object):
+	def __init__(self, name):
+		self._name = name
+	def __call__(self):
+		print('My name is : %s' % self._name)
+
+s = Student('Michael')
+print(s())
+
+# 能被调用的对象就是一个Callable对象,callable()判断是否是Callable对象
+print('test Callable object:')
+print(callable(Student('')))
+print(callable([1,2,3]))
+print(callable(max))
+
+# /users/:user/repos ==> REST API url 调用时:user用实际用户名替换
+
+class Chain(object):
+	def __init__(self, path = ''):
+		self._path = path
+	def __getattr__(self, path):
+		return Chain('%s/%s' % (self._path, path))
+	def __call__(self, path):
+		return Chain('%s/%s' % (self._path, path))
+	def __str__(self):
+		return self._path
+
+print(Chain().users('michael').repos)
+
+
+# 枚举：Enum
+from enum import Enum
+
+Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+
+print(Month.Jan)
+print(Month.Jan.value)  # 1,自动赋值给成员的int常量，默认从1开始计数
+
+for name,member in Month.__members__.items():
+	print(name, '==>', member, ',', member.value)
+
+
+# 更精确地控制枚举类型
+from enum import Enum, unique
+
+@unique   # @unique装饰器帮助检查保证没有重复值
+class Weekday(Enum):
+	Sun = 0
+	Mon = 1
+	Tue = 2
+	Wed = 3 
+	Thu = 4 
+	Fri = 5 
+	Sat = 6
+
+print(Weekday.Mon)
+print(Weekday['Mon'])
+print(Weekday.Mon.value)
+print(Weekday(1))
+# print(Weekday[1])  # Error
+# print(Weekday(7))  # ValueError
+
+for name,member in Weekday.__members__.items():
+	print(name, '==>', member, ',', member.value)
+
+# type() 查看一个类型或变量的类型，也可以创建新的类型(正常情况下使用class定义时，python解释器也是通过调用type()函数创建class)
+
+fn = lambda slef,name = 'World' : print('Hello %s ' % name)
+
+H = type('Hello', (object,), dict(hello = fn)) # 创建Hello class，而不需要class定义
+# type新建类型传入的3个参数：
+#		1.class的名称
+#  		2.继承的父类集合，Python支出多继承，如果只有一个父类，别忘了tuple的单元素写法
+#		3.class的方法名称与函数绑定，这里把函数fn绑定到方法名hello上
+
+h = H()
+print(H.__name__)
+print(type(H))
+print(type(h))
+h.hello('Michael')
+
+
+# metaclass :元类，控制类的创建行为；根据metaclass创建类，先定义metaclass，然后创建类
+#       实例创建过程：定义metaclass --> 创建类 --> 创建实例
+
+class ListMetaclass(type): # metaclass是类的模板，必须从 type 类型派生
+	def __new__(cls, name, bases, attrs):  # 参数： 1.cls:当前准备创建的类的对象; 2.创建类的名字； 3.创建类继承的父类集合； 4.创建类的方法和属性集合(dict)
+		attrs['add'] = lambda self, value : self.append(value)
+		return type.__new__(cls, name, bases, attrs)
+
+class MyList(list, metaclass = ListMetaclass): # 定义类时，指定使用的metaclass,Python解释器在创建MyList时，通过ListMetaclass.__new__()来创建,因此，可以修改类的定义
+	pass
+
+L = MyList()
+print(L)
+L.add(1)
+print(L)
+
+
+# metaclass示例： ORM (Object Relational Mapping)
+class Field(object):
+	def __init__(self, name, column_type):
+		self.name = name
+		self.column_type = column_type
+	def __str__(self):
+		return '<%s,%s>' % (self.name, self.column_type)
+
+class StringField(Field):
+	def __init__(self, name):
+		super(StringField, self).__init__(name, 'varchar(100)')
+
+class IntegerField(Field):
+	def __init__(self, name):
+		super(IntegerField, self).__init__(name, 'bigint')
+
+class ModelMetaclass(type):
+	def __new__(cls, name, bases, attrs):
+		if name == 'Model':
+			return type.__new__(cls, name, bases, attrs)
+		print('Found Model: %s' % name)
+		mappings = dict()
+		for k,v in attrs.items():
+			if isinstance(v, Field):
+				print('Found mapping: %s ==> %s' % (k,v) )
+				mappings[k] = v
+		for k in mappings.keys():
+			attrs.pop(k)                  # 删除类属性
+		attrs['__mappings__'] = mappings  # 属性名和列的映射
+		attrs['__table___'] = name        # 假设表名和类名一致
+		return type.__new__(cls, name, bases, attrs)
+
+class Model(dict, metaclass = ModelMetaclass):
+
+	def __init__(self, **kw):
+		super(Model,self).__init__(**kw)
+
+	def __getattr__(self, key):
+		try:
+			return self[key]
+		except KeyError:
+			raise AttributeError(r"'Model' object has no attribute '%s'" % key)
+
+	def __setattr__(self, key, value):
+		self[key] = value
+
+	def save(self):
+		fields = []
+		params = []
+		args = []
+
+		for k, v in self.__mappings__.items():
+			fields.append(v.name)
+			params.append('?')
+			args.append(getattr(self, k ,None))
+		sql = 'insert into %s (%s) value (%s)' % (self.__table___,','.join(fields), ','.join(params))
+		print('SQL: %s' % sql)
+		print('ARGS: %s' % str(args))
+
+
+#调用Orm
+class User(Model):
+	id = IntegerField('id')
+	name = StringField('name')
+	email = StringField('email')
+	password = StringField('password')
+
+u = User(id = 123, name = 'Lisa', email = 'test@git', password = 'pwd')
+u.save()
+
+
+## 八、 错误、调试和测试
+
+# 所有错误类型都继承自 BaseException
+#       常见的错误类型和继承关系： https://docs.python.org/3/library/exceptions.html#exception-hierarchy
+
+# try...except...finally...类似java中的try...catch...finally；python中如果没有错误发生，可以在except语句块后面加一个else，当没有错误发生时，会自动执行else语句
+try:
+	print('try ...')
+	r = 10/ int('2')
+	print('resutl: ', r)
+except ValueError as e:
+	print('except: ', e)
+except ZeroDivisionError as e:
+	print('except: ', e)
+else:
+	print('no error.')
+finally:
+	print('finally...')
+print('End')
+
+
+# try...except 可以跨越层级调用，比如函数main()调用foo()，foo()调用bar()，结果bar()出错了，这时，只要main()捕获到了，就可以处理
+# 调用栈：如果错误没有被捕获，就会一直往上抛，最后被Python解释器捕获，打印错误信息，然后程序退出
+
+# logging模块：记录错误信息
+import logging
+
+def foo(s):
+	return 10 / int(s)
+def bar(s):
+	return foo(s) * 2
+
+def main():
+	try:
+		bar('0')
+	except Exception as e:
+		pass
+#		logging.exception(e)  # 打印异常信息，程序继续执行
+
+main()
+print('End')
+
+# 抛出异常 raise
+def foo(s):
+	n = int(s)
+	if n == 0:
+		raise ValueError('invalid value %s' % s)
+	return 10 / n 
+
+def bar():
+	try:
+		foo('0')
+	except ValueError as e:
+		print('ValueError')
+		raise  # raise语句不带参数，表示把当前错误原样抛出
+
+# 调试：
+# 1. print() 打印
+# 2. assert断言： assert n != 0, 'n is zero' ;上述断言表示，n!=0 应该是True, 断言失败会抛出AssertionError: n is zero; 启动时可以通过-O 关闭断言，当做pass来看 :python -O first.py
+# 3. logging：输出文本  
+#    import logging
+#    logging.basicConfig(level = logging.INFO) # 设置日志的输出等级, 表示logging.info('error')也会输出到文本，级别从低到高依次：debug,info,warning,error
+# 4. pdb调试器，命令行启动 python -m pdb first.py; Sublime Text3 的SublimeREPL插件可以启用pdb调试：b row ==> 在row行添加断点; r ==> 运行到断点处
+# 5. IDE:vs code, pycharm等
+
+# 单元测试：unittest模块
+class Student(object):
+	def __init__(self, name, score):
+		self._name = name
+
+		if not isinstance(score, int):
+			raise ValueError('not a int value')
+		self._score = score
+
+import unittest
+
+class TestDict(unittest.TestCase): # 编写单元测试，需要编写一个测试类，继承自unittest.TestCase
+	def setUp(self):  # 每次调用一个test方法前执行
+		print('setUp ...')
+
+	def tearDown(self): # 每次调用一个test方法后执行
+		print('tearDown ...') 
+
+
+	def test_init(self):  # 测试方法需要以test开头，不以test开头的不被认为是测试方法，测试的时候不会执行
+		s = Student('Lisa', 90)
+		self.assertEqual(s._score, 90) # 判断相等
+		self.assertTrue(isinstance(s, Student))  
+
+		with self.assertRaises(ValueError):  # 期待抛出异常
+			s = Student('Michael', '1')
+
+	def test_fn(self):
+		pass
+
+# 运行单元测试： 
+#    方式一：推荐，命令行输入 python -m unittest first  ==> first是测试类所在文件名
+#    方式二：单元测试类所在文件添加如下代码
+#if __name__ == '__main__':
+#	unittest.main()
+
+# 文档测试：
+class Dict(dict):
+    '''
+    Simple dict but also support access as x.y style.
+
+    >>> d1 = Dict()
+    >>> d1['x'] = 100
+    >>> d1.x
+    100
+    >>> d1.y = 200
+    >>> d1['y']
+    200
+    >>> d2 = Dict(a=1, b=2, c='3')
+    >>> d2.c
+    '3'
+    >>> d2['empty']
+    Traceback (most recent call last):
+        ...
+    KeyError: 'empty'
+    >>> d2.empty
+    Traceback (most recent call last):
+        ...
+    AttributeError: 'Dict' object has no attribute 'empty'
+    '''
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r"'Dict' object has no attribute '%s'" % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+if __name__=='__main__':
+    import doctest    # python内置的文档注释模块，严格按照命令行的输入输出来判断测试结果是否正确，如果没有输出表示运行正确，否则会输出错误信息
+    doctest.testmod()
+
+
+## 九、同步IO编程    
+#    Stream(流)：单向
+#    同步IO, 异步IO(回调模式，轮询模式)
+
+# 在磁盘上读写文件的功能都是由操作系统提供的，现代操作系统不允许普通的程序直接操作磁盘，所以读写文件就是请求操作系统打开一个文件对象(文件描述符)，然后通过操作系统提供的接口从这个文件对象中
+#   读取数据，或把数据写入这个文件对象
+
+# 读文件
+
+try:
+	f = open(r'E:\python\test.txt','r')  # 如果文件不存在，抛出IOError
+	print(f.read()) # 一次读取文件的全部内容，python把内容读到内存，用一个str对象表示
+finally:
+	if f:
+		f.close() # 关闭文件
+
+#上述代码可以简化,使用with语句自动调用close()
+with open(r'E:\python\test.txt','r') as f:
+	print(f.read())
+
+# read(size):每次最多读取size个字节内容
+# readline()：每次读取一行内容
+# readlines()：一次读取所有内容并按行返回list
+with open(r'E:\python\test.txt','r') as f:
+	for line in f.readlines():
+		print(line.strip()) 
+
+# file-like Object: 有read()方法的对象
+
+# 二进制文件
+#with open(r'E:\python\test.ico','rb') as f:
+#	print(f.read())  # 输出16进制表示的字节
+
+# 其他参数：
+# f = open(r'E:\python\test.txt', 'r', encoding = 'gbk', errors='ignore) ; encoding指定读取文件的字符编码； 文本文件可能夹杂一些非法编码字符，UnicodeDecodeError, errors='ignore' 表示遇到错误编码时直接忽略
+
+# 写文件：也是使用open(), 'w'表示写文本文件(如果文件已存在，直接覆盖，相当于删除后新写入一个文件),'wb'表示写二进制文件，'a'表示追加内容到文件末尾
+#with open(r'E:\python\testwrite.txt','w', encoding = 'gbk') as f:
+#	f.write('test 写入')
+
+
+# 参照https://docs.python.org/3/library/functions.html#open
+#Character	Meaning
+#'r'		open for reading (default)
+#'w'		open for writing, truncating the file first
+#'x'		open for exclusive creation, failing if the file already exists
+#'a'		open for writing, appending to the end of the file if it exists
+#'b'		binary mode
+#'t'		text mode (default)
+#'+'		open a disk file for updating (reading and writing)
+#'U'		universal newlines mode (deprecated)
+
+# StringIO (内存中读写str,只能操作str)、BytesIO (内存读写bytes):使得内存中str、bytes的操作和读写文件有一致的接口 
+
+print('test StringIO:')
+
+from io import StringIO
+f = StringIO()
+print(f.write('hello'))
+print(f.write(' '))
+print(f.write('world !'))
+print(f.getvalue())
+print(f.tell())  # 获取stream position,可以通过f.seek(offset, whence = 0)调整position: offset表示偏移量(如果文件没有以'b'打开，无法使用负值)，whence 默认值0表示文件开头，1表示当前位置，2表示文件末尾
+
+
+f = StringIO('Hello!\nHi!\nGoodbye!')
+while True:
+	s = f.readline()
+	if s == '':
+		break
+	print(s.strip())
+
+
+print('test BytesIO:')
+from io import BytesIO
+f = BytesIO()
+print(f.write('中文'.encode('utf-8')))
+print(f.getvalue())
+
+f = BytesIO(b'\xe4\xb8\xad\xe6\x96\x87')
+print(f.read())
+
+
+# 操作文件和目录：os模块可以直接调用操作系统提供的接口函数
+import os
+print(os.name)  # nt 是Windows系统; posix 是Linux、Unix或Mac OS X
+# print(os.uname()) # 获取详细的系统信息，windows上不支持
+# print(os.environ) # 系统的环境变量
+print(os.environ.get('Maven')) # 获取指定环境变量的值
+print(os.environ.get('Maven','default'))
+
+
+# 操作文件好目录的函数一部分放在os模块中，一部分放在os.path模块中
+print(os.path.abspath('.')) # 查看当前目录的绝对路径
+print(os.path.join(r'E:\python','testDir')) # 显示某个目录下的指定目录的完整路径,这种拼接方式可以正确处理不同操作系统的路径分割符
+os.mkdir(r'E:\python\testDir')  # 创建一个新目录，如果存在报错FileExistsError
+os.rmdir(r'E:\python\testDir') # 删除一个目录
+print(os.path.split(r'E:\python\test.txt'))  # 把路径拆分成两部分，后一个部分总是最后级别的目录或文件名，可以正确处理不同操作系统的路径分割符
+print(os.path.splitext(r'E:\python\test.txt')) # 获取文件的扩展名
+# 以上合并、拆分操作并不需要目录和文件真实存在，只是对字符串进行操作
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
