@@ -1666,8 +1666,8 @@ with open(r'E:\python\test.txt','r') as f:
 # f = open(r'E:\python\test.txt', 'r', encoding = 'gbk', errors='ignore) ; encoding指定读取文件的字符编码； 文本文件可能夹杂一些非法编码字符，UnicodeDecodeError, errors='ignore' 表示遇到错误编码时直接忽略
 
 # 写文件：也是使用open(), 'w'表示写文本文件(如果文件已存在，直接覆盖，相当于删除后新写入一个文件),'wb'表示写二进制文件，'a'表示追加内容到文件末尾
-#with open(r'E:\python\testwrite.txt','w', encoding = 'gbk') as f:
-#	f.write('test 写入')
+with open(r'E:\python\testwrite.txt','w', encoding = 'gbk') as f:
+	f.write('test 写入')
 
 
 # 参照https://docs.python.org/3/library/functions.html#open
@@ -1729,6 +1729,273 @@ os.rmdir(r'E:\python\testDir') # 删除一个目录
 print(os.path.split(r'E:\python\test.txt'))  # 把路径拆分成两部分，后一个部分总是最后级别的目录或文件名，可以正确处理不同操作系统的路径分割符
 print(os.path.splitext(r'E:\python\test.txt')) # 获取文件的扩展名
 # 以上合并、拆分操作并不需要目录和文件真实存在，只是对字符串进行操作
+os.rename(r'E:\python\testwrite.txt',r'E:\python\testwrite.py')  # 文件重命名，如果没有完整路径，表示当前文件夹下，文件不存在时FileNotFoundError
+os.remove(r'E:\python\testwrite.py') # 删除文件
+
+# 复制文件的函数在os模块中不存在！原因是复制文件并非操作系统提供的系统调用。可以使用IO,或者shutil模块
+import shutil
+shutil.copyfile(r'E:\python\test.txt', r'E:\python\test_copy.txt')
+os.remove(r'E:\python\test_copy.txt')
+
+print([x for x in os.listdir('.') if os.path.isdir(x)]) # 列出当前目录下的所有目录, 注意：os.path.isdir()的参数应该是路径，而os.listdir('.')得到的结果是名称集合,此处可以这么写因为是判断当前文件夹下
+print([x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1] == '.py']) # 列出当前目录下的py文件
+print([x for x in os.listdir('.')])  # 列出当前目录下的所有文件和目录，不显示次级目录内容
+print([x for x in os.listdir('./image')]) # 列出当前目录下的image目录下的文件和目录名
+print('------')
+print('ab' in 'abc') # 判断字符串包含另一个字符串, 返回True,False
+print('abc'.find('ab')) # 判断字符串包含另一个字符串, 返回index,如果不包含则返回-1
+print('abc'.find('ac'))
+
+
+# 输出文件名包含s的所有文件的相对路径
+def dirfile(s, path = '.',):
+	global R
+	files = [os.path.join(path, x) for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x)) and (s.lower() in os.path.splitext(x.lower())[0]) ]
+	dirs = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
+
+	R = R + files
+
+	for d in dirs:
+		dirfile(s, os.path.join(path, d))
+
+
+#R = []
+#dirfile('a')
+#print(R)
+
+# 序列化,python中叫pickling,java中叫serialization
+# 反序列化, unpickling
+import pickle  # 实现序列化的模块
+# python的pickle模块序列化和反序列化只能用于python，并且可能不同版本的python彼此都不兼容，因此，只能用pickle保存不重要的数据，不能成功反序列化也没有关系
+d = dict(name='Bob', age=20, score=88)
+print(pickle.dumps(d))  #dumps()把任意对象序列化成一个bytes,然后就可以手动把这个bytes写入文件
+
+with open(r'E:\python\pickle.txt','wb') as f:
+	pickle.dump(d, f)   #dump() 直接把对象序列化后写入一个file-like object
+
+# 反序列化方式： 1.把内容读到一个bytes,然后用pickle.loads()方式反序列化出对象
+#				2.直接用pickle.load()方法从一个file-like object 中反序列化出对象
+with open(r'E:\python\pickle.txt','rb') as f:
+	di = pickle.load(f)
+print(di)
+
+# JSON：在不同的编程语言之间传递对象，是一种序列化的标准格式，JSON和Python数据类型对应如下：
+# JSON类型	    Python类型
+#  {}	          dict
+#  []	          list
+# "string"	      str
+# 1234.56	    int或float
+# true/false	True/False
+# null            None
+
+import json # python内置的python对象和json格式转换的模块
+
+d = dict(name='Bob', age=20, score=88)
+print(json.dumps(d)) # dumps()方法返回一个str,表示标准的JSON (JSON标准规定JSON编码时UTF-8); dump()方法可以直接把json写入一个file-like object
+
+with open(r'E:\python\json.txt','w') as f:
+	json.dump(d, f)
+
+json_str = '{"name": "Bob", "age": 20, "score": 88}'
+d = json.loads(json_str) # loads()方法把json字符串反序列化成对象；load()方法从file-like object 中读取字符串并反序列化
+print(d)
+
+
+# 序列化类实例：
+import json
+
+class Student(object):
+	def __init__(self, name, age, score):
+		self.name = name
+		self.age = age
+		self.score = score
+
+s = Student('Bob', 20, 90)
+#print(json.dumps(s))  # 直接序列化抛出TypeError
+
+# https://docs.python.org/3/library/json.html#json.dumps 参看文档
+
+def student2dict(std):
+	return {
+		'name': std.name,
+		'age' : std.age,
+		'score': std.score
+	}
+
+print(json.dumps(s, default = student2dict)) # student实例首先被student2dict()函数转换成dict,然后再序列化成JSON
+
+print(s.__dict__) # 实例的__dict__属性
+
+def dict2student(d):
+	return Student(d['name'], d['age'], d['score'])
+
+print(json.loads('{"name": "Bob", "age": 20, "score": 88}', object_hook = dict2student)) # 同理，反序列化先将str转换成dict，再通过 object_hook的函数将dict转换成Student对象
+
+obj = dict(name='小小', age = 22)
+print(json.dumps(obj, ensure_ascii = True)) # ensure_ascii默认是True
+print(json.dumps(obj, ensure_ascii = False))
+
+
+## 十、进程(Process)和线程(Thread)
+# 多任务处理： 1.多进程； 2. 单进程多线程； 3. 多进程多线程
+
+# Unix/Linux 操作系统提供一个fork()系统调用，普通函数调用，调用一次，返回一次，fork()调用一次，返回两次，因为操作系统自动把当前进程(父进程)复制了一份(子进程)，然后分别在父进程和子进程内返回。
+#            子进程永远返回0，父进程返回子进程的ID。一个父进程可以fork出很多子进程，所以父进程要记下每个子进程的ID，而子进程只需要调用getppid()就可以拿到父进程的ID。
+
+#import os 
+#print('Process (%s) start...' % os.getpid())
+
+#pid = os.fork()  # only work on Linux/Unix/Mac， 通过fork调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务
+#if pid == 0 : 
+#	print('i am child process (%s) and my parent process is (%s)' % (os.getpid(), os.getppid()))
+#else : 
+#	print('i (%s) just created a child process (%s)' % (os.getpid(), pid))
+
+
+# multiprocessing模块：跨平台的多进程模块
+
+# 在Unix/Linux下，multiprocessing模块封装了fork()调用，使我们不需要关注fork()的细节。
+# 由于Windows没有fork调用，因此，multiprocessing需要“模拟”出fork的效果，父进程所有Python对象都必须通过pickle序列化再传到子进程去，
+#    所以，如果multiprocessing在Windows下调用失败了，要先考虑是不是pickle失败了
+
+from multiprocessing import Process
+import os
+
+def run_proc(name):
+	print('Run child process %s (%s)...' % (name, os.getpid()))
+
+#if __name__ == '__main__':   # Make a script both importable and executable, 直接执行时为True，import导入该文件时为False, 即导入时不会执行
+                                                                                       #   上面所写的测试代码，import 导入时依然会执行
+#	print('Parent process %s.' % os.getpid())
+#	p = Process(target = run_proc, args = ('test',))
+#	print('child process will start...')
+#	p.start()   # 开始一个子进程，会将上面的测试代码重新又运行一遍
+#	p.join()  # 等待p进程结束
+#	print('child procss end.')
+
+
+# Pool：进程池，可以批量创建子进程
+
+
+# 以下代码应单独提出到一个独立的py文件中执行，当前py中有过多测试代码，每个新进程都会执行一遍
+# from multiprocessing import Pool
+# import os, time, random
+
+# def long_time_task(name):
+# 	print('Run task %s (%s)...' % (name, os.getpid()))
+# 	start = time.time()
+# 	time.sleep(random.random() * 3)
+# 	end = time.time()
+# 	print('Task %s runs %0.2f seconds.' % (name, (end - start)))
+
+# if __name__ == '__main__':
+# 	print('Parent process %s.' % os.getpid())
+# 	p = Pool(4)  # Pool 默认大小是CPU核心数
+# 	for i in range(5):
+# 		p.apply_async(long_time_task, args=(i,))
+# 	print('Waiting for all subprocesses done...')
+# 	p.close()   # join()方法等待所有子进程执行完毕，join()调用之前需先调用close()，调用close()之后就不能继续添加新的Process
+# 	p.join()
+# 	print('All subprocesses done.')
+
+# 执行结果(命令行运行)： Pool池只有4，所以同时只能运行4个进程；
+#          但是在Sublime Text中执行时，进程按照顺序执行，一个进程执行完再执行下一个进程 (不清楚原因)
+# Parent process 21168.
+# Waiting for all subprocesses done...
+# Run task 0 (4748)...
+# Run task 1 (22740)...
+# Run task 2 (23780)...
+# Run task 3 (16532)...
+# Task 3 runs 0.92 seconds.
+# Run task 4 (16532)...
+# Task 2 runs 1.92 seconds.
+# Task 1 runs 1.98 seconds.
+# Task 0 runs 2.99 seconds.
+# Task 4 runs 2.92 seconds.
+# All subprocesses done.
+
+
+# 子进程: subprocess模块：启动一个子进程，然后控制其输入输出
+#       关于子进程更多内容参考文档
+import subprocess
+
+print('$ nslookup www.python.org')
+r = subprocess.call(['nslookup','www.python.org']) # python代码中运行命令 nslookup www.python.org ;该命令用于查询DNS记录，查看域名解析是否正常，命令行中可直接运行
+print('Exit Code:', r) 
+print('-------')
+
+# 相当于在命令行输入：
+#   nsloookup
+#   set q=mx
+#   python.org
+#   exit
+import subprocess
+print('$ nslookup')
+p = subprocess.Popen(['nslookup'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+output,err = p.communicate(b'set q=mx\npython.org\nexit\n')
+print(output.decode('gbk'))
+print('Exit Code:', p.returncode)
+
+
+# 进程间通信：multiprocessing模块中Queue、Pipes等，代码示例如下：
+
+# from multiprocessing import Process, Queue
+# import os, time, random
+
+# 写数据进程执行的代码:
+# def write(q):
+#     print('Process to write: %s' % os.getpid())
+#     for value in ['A', 'B', 'C']:
+#         print('Put %s to queue...' % value)
+#         q.put(value)
+#         time.sleep(random.random())
+
+# # 读数据进程执行的代码:
+# def read(q):
+#     print('Process to read: %s' % os.getpid())
+#     while True:
+#         value = q.get(True)
+#         print('Get %s from queue.' % value)
+
+# if __name__=='__main__':
+#     # 父进程创建Queue，并传给各个子进程：
+#     q = Queue()
+#     pw = Process(target=write, args=(q,))
+#     pr = Process(target=read, args=(q,))
+#     # 启动子进程pw，写入:
+#     pw.start()
+#     # 启动子进程pr，读取:
+#     pr.start()
+#     # 等待pw结束:
+#     pw.join()
+#     # pr进程里是死循环，无法等待其结束，只能强行终止:
+#     pr.terminate()
+
+
+
+#  多线程：Python的线程是真正的Posix Thread，而不是模拟出来的线程。
+#         Pythont标准库提供了两个模块: _thread和threading, _thread是低级模块，threading是高级模块，对_thread进行了封装。
+
+import time,threading
+
+def loop():
+	print('thread %s is running...' % threading.current_thread().name)
+	n = 0
+
+	while n < 5:
+		n = n + 1
+		print('thread %s >>> %s' % (threading.current_thread().name, n))
+		time.sleep(1)
+	print('thread %s end' % threading.current_thread().name)
+
+print('thread %s is running...' % threading.current_thread().name)
+t = threading.Thread(target=loop, name='LoopThread')
+t.start()
+t.join()
+print('thread %s end' % threading.current_thread().name)
+
+
+
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
