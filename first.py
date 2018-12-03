@@ -96,7 +96,31 @@ print('0.0 == False:', 0.0 == False) # 直接比较返回True，相等
 # decode()：bytes->str,例： b'ABC'.decode('ascii') ==> 'ABC'
 # encode(),decode() 方法对于无法正确编码或解码的会报错；对于decode(),如果bytes中只有一小部分无效的字节，可以传入errors='ignore'忽略错误的字节：b'\xe4\xb8\xad\xff'.decode('utf-8', errors='ignore')
 # len() : 计算str包含多少字符: len('中文A') ==> 3；对于len(b'ABC') ==> 3,计算的就是字节数 
-# 
+
+
+# 全局变量(global variable)和局部变量(local variable):
+
+# 1. Python makes educated guesses on whether variables are local or global. It assumes that any variable assigned a value in a function is local.
+#    如果只是使用变量，变量在全局域中有定义，局部域中没有定义，则使用全局变量。
+#    全局变量和局部变量同名，函数中默认使用局部变量。
+num = 100   # 全局变量
+def func():
+	print(num)
+	# num = num + 100   # local variable 'num' referenced before assignment, 如果不注释该行会报错，否则print(num) 会打印全局变量100
+ 
+func()
+
+# 2. 函数中如果要给全局变量赋值，使用关键字global
+
+num = 100
+def func():
+	global num 
+	num = num + 100 
+	print(num)
+func()
+print(num)
+
+ 
 # str：字符串
 # 输出格式化字符串： % 实现： 1. %d :整数；2. %s :字符串； 3.%f :浮点数； 4.%x ：16进制整数
 #     print('hi, %s,you hava $%d' % ('Michael', 10000)) 
@@ -1979,7 +2003,7 @@ print('Exit Code:', p.returncode)
 import time,threading
 
 def loop():
-	print('thread %s is running...' % threading.current_thread().name)
+	print('thread %s is running...' % threading.current_thread().name) # current_thread()返回当前线程的实例，主线程实例的名字叫MainThread,子线程默认名为Thread-1,Thread-2,...
 	n = 0
 
 	while n < 5:
@@ -1994,8 +2018,398 @@ t.start()
 t.join()
 print('thread %s end' % threading.current_thread().name)
 
+# Lock: 确保某段关键代码只能由一个线程从头到尾完整执行(存在死锁)
+#  多进程中同一个变量各自有一份拷贝存在于每个进程中，互不影响，而多线程中，所有变量都由所有线程共享。所以，任何一个变量都可以被任何一个线程修改。
+
+import time,threading
+
+balance = 0
+lock = threading.Lock() # 创建锁
+
+def change_it(n):
+	global balance
+	balance = balance + n 
+	balance = balance - n 
+
+def run_thread(n):
+	for i in range(100000):
+		lock.acquire() # 获取锁
+		try:
+			change_it(n)
+		finally:
+			lock.release() # 释放锁
+
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print(balance) 
 
 
+# Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦。
+
+# ThreadLocal:
+class Student(object):
+	def __init__(self, name):
+		self.name = name
+
+import threading 
+
+local_school = threading.local() # 创建ThreadLocal对象
+
+def process_student():
+	std = local_school.student 
+	print('hello, %s (in %s)' % (std, threading.current_thread().name))
+
+def process_thread(name):
+	local_school.student = name  # 绑定ThreadLocal的student
+	process_student() 
+
+t1 = threading.Thread(target=process_thread,args=('Alice',),name='Thread-A')
+t2 = threading.Thread(target=process_thread,args=('Bob',),name='Thread-B')
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+
+# 计算密集型 vs IO密集型
+#  python脚本语言运行效率低，不适合计算密集型任务
+
+# 分布式进程：multiprocessing的子模块manager支持把多进程分布到多台机器上
+
+# # task_master.py
+
+# # windows 查看端口占用进程： 
+# # netstat -ano
+# # netstat -ano|findstr "PID number"
+# # tasklist|findstr "PID number"
+
+# import random,time,queue
+# from multiprocessing.managers import BaseManager
+
+# task_queue = queue.Queue()  # 发送任务的队列
+# result_queue = queue.Queue() # 接收结果的队列
+
+# class QueueManager(BaseManager): # 继承BaseManager
+# 	pass
+
+# def return_task_queue():
+# 	return task_queue
+
+# def return_result_queue():
+# 	return result_queue
+
+
+# if __name__ == '__main__':
+# 	# 把两个队列注册到网络上
+# #	QueueManager.register('get_task_queue', callable=lambda : task_queue)  # pickle序列化不支持匿名函数
+# #	QueueManager.register('get_result_queue', callable=lambda : result_queue)
+# 	QueueManager.register('get_task_queue', callable=return_task_queue)  # pickle序列化不支持匿名函数
+# 	QueueManager.register('get_result_queue', callable=return_result_queue)
+
+
+# 	manager = QueueManager(address=('127.0.0.1',5000),authkey=b'abc') # 绑定端口5000,设置验证码abc
+
+# 	manager.start() # 启动Queue
+
+# 	#通过网络访问的Queue对象
+# 	task = manager.get_task_queue()  
+# 	result = manager.get_result_queue()
+
+# 	# 添加几个任务
+# 	for i in range(10):
+# 		n = random.randint(0, 10000)
+# 		print('put task %d...' % n)
+# 		task.put(n)
+
+# 	# 从result队列读取结果
+# 	print('Try get Results...')
+# 	for i in range(10):
+# 		r = result.get()
+# 		#r = result.get(timeout=10)
+# 		print('result: %s' % r)
+
+# 	# 关闭
+# 	manager.shutdown()
+# 	print('master exit')
+
+
+# # task_worker.py
+
+# import time,sys,queue
+# from multiprocessing.managers import BaseManager
+
+# class QueueManager(BaseManager):
+# 	pass
+
+# # 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
+# QueueManager.register('get_task_queue')
+# QueueManager.register('get_result_queue')
+
+# # 连接到运行task_master.py的机器
+# server_addr = '127.0.0.1'
+# print('Connect to server %s ' % server_addr)
+
+# m = QueueManager(address=(server_addr,5000),authkey=b'abc')
+
+# m.connect()
+
+# # 获取Queue对象
+# task = m.get_task_queue()
+# result = m.get_result_queue()
+
+# # 获取任务，并把结果放入result
+# for i in range(10):
+# 	try:
+# 		n = task.get(timeout=1)
+# 		print('run task %d * %d' % (n,n))
+# 		r = '%d * %d = %d' % (n,n,n*n)
+# 		time.sleep(1)
+# 		result.put(r)
+# 	except Queue.Empty:
+# 		print('task queue is empyt')
+
+# # 结束
+# print('worker exit')
+
+
+## 十一、正则表达式： 默认是贪婪匹配
+
+# re模块
+import re
+
+print(re.match(r'^\d{3}\-\d{3,8}$','010-12345')) # match匹配成功返回一个Match对象，否则返回None
+print(re.match(r'^\d{3}\-\d{3,8}$','0101-12345'))
+
+# 上述匹配过程： 1. 编译正则表达式； 2.用编译后的正则表达式去匹配字符串
+
+# 对于需要多次重复使用的正则表达式，可以使用预编译：
+re_telephone = re.compile(r'^\d{3}\-\d{3,8}$')
+print(re_telephone.match('010-12345'))
+
+
+# 切分字符串
+print(re.split(r'\s+','a b   c')) 
+print(re.split(r'[\s,;]+','a,b;; c   d'))
+
+# 分组
+m = re.match(r'^(\d{3})\-(\d{3,8})$','010-12345')
+print(m.group(0)) # group(0)是原始字符串
+print(m.group(1))
+print(m.group(2))
+print(m.groups()) # 获取除了原始字符串的所有分组子串
+
+
+regular = r'((\w+[\.]\w+)|(\w+))@\w+[\.]?\w+'
+email1 = r'someone@gmail.com'
+email2 = r'bill.gates@microsoft.com'
+email3 = r'b@microsoft.com'
+email4 = r'a.a@microsoft.com'
+print(re.match(regular,email1))
+print(re.match(regular,email2))
+print(re.match(regular,email3))
+print(re.match(regular,email4).groups())
+
+
+regular = r'((<([\w\s]+)>\s+\w+)|(\w+))@\w+[\.]\w+'
+email1 = r'<Tom Paris> tom@voyager.org'
+email2 = r'bob@example.com'
+
+m = re.match(regular, email1)
+print(m)
+print(m.group(3))
+m = re.match(regular, email2)
+print(m)
+print(m.group(1))
+
+
+
+## 十二、常用内建模块
+
+# datetime: 处理日期和时间, https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
+from datetime import datetime # datetime模块中还包含一个datetime类，需要导入datetime类
+now = datetime.now() # 获取当前datetime
+print(now)
+print(type(now))
+
+dt = datetime(2018,10,20,12,59)
+print(dt)
+
+print(dt.timestamp()) # 将datetime转换成timestamp(1970-1-1 00:00:00 UTC+0:00为0)，返回浮点数，小数位表示毫秒数
+
+print(datetime.fromtimestamp(1429417200.0)) # timestamp转换成datetime,转换的datetime是当前操作系统设置的时区
+print(datetime.utcfromtimestamp(1429417200.0)) # datetime是UTC标准时区的时间
+
+print(datetime.strptime('2018-10-20 17:59:59','%Y-%m-%d %H:%M:%S')) # str转datetime：结果没有时区信息
+print(datetime.now().strftime('%a, %b %d %H:%M')) # datetime转str
+
+
+from datetime import datetime,timedelta
+now = datetime.now()
+print(now)
+print(now + timedelta(hours=10))
+print(now - timedelta(days=1))
+print(now + timedelta(days=2,hours=12))
+
+
+from datetime import datetime,timedelta,timezone
+
+tz_utc_8 = timezone(timedelta(hours=8)) #创建时区UTC+8：00
+now = datetime.now()
+dt = now.replace(tzinfo=tz_utc_8) # tzinfo是datetime的时区属性，默认是None，replace强制设置为UTC+8:00
+dt = now.replace(tzinfo=timezone(timedelta(hours=1)))
+print(dt)
+
+utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc) #获取utc时间(带时区的datetime)并强制设置时区为UTC+0:00
+print(utc_dt)
+bj_dt = utc_dt.astimezone(timezone(timedelta(hours=8))) #将时区转换成UTC+8:00(北京时间)
+print(bj_dt)
+tokyo_dt = utc_dt.astimezone(timezone(timedelta(hours=9))) # 东京时间(UTC+9:00)
+print(tokyo_dt)
+tokyo_dt = bj_dt.astimezone(timezone(timedelta(hours=9))) # 东京时间(UTC+9:00)
+print(tokyo_dt)
+
+
+# 2015-1-21 9:01:30 UTC+5:00 转换为timestamp
+from datetime import datetime,timezone,timedelta
+
+print(os.path.dirname(os.__file__)) # 获取py文件模块路径
+
+def to_timestamp(dt_str, tz_str):
+	time = datetime.strptime(dt_str,'%Y-%m-%d %H:%M:%S')
+
+	hour = int(tz_str[3:-3])
+	utc_time = time.replace(tzinfo=timezone(timedelta(hours=hour)))
+
+	return utc_time.timestamp()
+
+print(to_timestamp('2015-6-1 08:10:30', 'UTC+7:00'))
+print(to_timestamp('2015-5-31 16:10:30', 'UTC-09:00'))
+
+
+
+# collections:集合模块 
+
+# namedtuple
+from collections import namedtuple
+Point = namedtuple('Point',['x','y']) # 自定义tuple对象，规定tuple元素的个数
+p = Point(1,2)
+print(p.x,p.y)
+print('p is an instance of Point:',isinstance(p, Point))
+print('p is an instance of tuple:',isinstance(p, tuple))
+
+Circle = namedtuple('Circle',['x','y','r'])
+
+# deque : 双向列表，适用于栈、队列,插入删除效率比list高
+from collections import deque
+q = deque(['a','b','c'])
+q.append('x')
+q.appendleft('y')
+print(q)
+print(q.pop())
+print(q.popleft())
+
+
+# defaultdict: dict当key不存在时抛出KeyError,defaultdic当key不存在时返回一个默认值
+from collections import defaultdict
+dd = defaultdict(lambda : 'N/A')  # 默认值通过函数调用返回
+
+dd['key1'] = 'abc'
+print(dd['key1'])  # 返回'abc'
+print(dd['key2'])  # 返回'N/A'
+
+
+# OrderedDict : 使key有序,按照插入顺序排列
+from collections import OrderedDict
+od = OrderedDict([('a',1),('b',2),('c',3)])
+print(od)
+
+
+# 使用OrderedDict实现一个FIFO的dict
+from collections import OrderedDict
+
+class LastUpdatedOrderDict(OrderedDict):
+	def __init__(self, capacity):
+		super(LastUpdatedOrderDict, self).__init__()
+		self._capacity = capacity
+
+	def __setitem__(self, key, value):
+		containsKey = 1 if key in self else 0 
+
+		if len(self) - containsKey >= self._capacity:
+			last = self.popitem(last=False)
+			print('Remove:',last)
+		if containsKey:
+			del self[key]
+			print('set:',(key,value))
+		else: 
+			print('add:',(key,value))
+
+		OrderedDict.__setitem__(self,key,value)
+
+fifo = LastUpdatedOrderDict(3)
+fifo['x'] = 1 
+fifo['y'] = 2
+fifo['z'] = 3 
+fifo['m'] = 4
+print(fifo)
+
+
+# ChainMap: 把一组dict串起来并组成一个逻辑上的dict，ChainMap本身也是一个dict，但是查找的时候会按照顺序在内部的dict依次查找
+
+# from collections import ChainMap
+# import os, argparse
+
+# # 构造缺省参数:
+# defaults = {
+#     'color': 'red',
+#     'user': 'guest'
+# }
+
+# # 构造命令行参数:
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-u', '--user')
+# parser.add_argument('-c', '--color')
+# namespace = parser.parse_args()
+# command_line_args = { k: v for k, v in vars(namespace).items() if v }
+
+# # 组合成ChainMap:
+# combined = ChainMap(command_line_args, os.environ, defaults)
+
+# # 打印参数:
+# print('color=%s' % combined['color'])
+# print('user=%s' % combined['user'])
+
+
+
+# Counter:计数器，dict子类
+from collections import Counter
+
+c = Counter()
+
+for ch in 'Programming':
+	c[ch] = c[ch] + 1
+print(c)
+
+
+
+# Base64:用64位字符来表示任意二进制数据, Base编码把3字节二进制数据编码为4字节文本数据，不是3的倍数时，末尾用\x00字节补足，编码末尾加上1或2个'=',表示补了多少字节;Base64是一种查表编码方法，不能用于加密，适用于小段内容的编码，
+#如数字证书签名、cookie内容，标准Base64编码可能会有'=',在url或cookie会有歧义，很多Base64会把'=' 去掉
+
+import base64
+
+print(base64.b64encode(b'binary\x00string'))
+print(base64.b64decode(b'YmluYXJ5AHN0cmluZw=='))
+print(base64.b64encode(b'i\xb7\x1d\xfb\xef\xff'))
+print(base64.urlsafe_b64encode(b'i\xb7\x1d\xfb\xef\xff')) # "url safe"的base64编码，实际上是将'+','/'分别替换为'-','_'
+print(base64.urlsafe_b64decode('abcd--__'))
+
+
+# 自定义能处理去掉'='的base解码函数
+def safe_base64_decode(s):
+	pass
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
