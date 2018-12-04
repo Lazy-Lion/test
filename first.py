@@ -2409,7 +2409,154 @@ print(base64.urlsafe_b64decode('abcd--__'))
 
 # 自定义能处理去掉'='的base解码函数
 def safe_base64_decode(s):
-	pass
+	m = 4 - len(s) % 4 
+	while 0 < m < 4 :
+		s = s + b'='
+		m = m - 1 
+	return base64.b64decode(s) 
+
+
+# 测试:
+assert b'abcd' == safe_base64_decode(b'YWJjZA=='), safe_base64_decode('YWJjZA==')
+assert b'abcd' == safe_base64_decode(b'YWJjZA'), safe_base64_decode('YWJjZA')
+print('ok')
+
+
+# struct: bytes和其他二进制数据类型转换，https://docs.python.org/3/library/struct.html#format-characters
+
+# Python不适合编写底层操作字节流的代码，对性能要求不高的地方可以使用struct模块
+import struct 
+print(struct.pack('>I',10240099))  # pack把任意数据类型变成bytes：1.第一个参数是处理指令，'>I':'>'表示字节顺序是big-endian,'<'表示little-endian,也就是网络序，'I'表示4字节无符号整数
+
+print(struct.unpack('>IH',b'\xf0\xf0\xf0\xf0\x80\x80')) # unpack把bytes变成相应的数据类型：'I'：4字节无符号整数；'H':两字节无符号整数
+
+# 位图分析示例：
+s = b'\x42\x4d\x38\x8c\x0a\x00\x00\x00\x00\x00\x36\x00\x00\x00\x28\x00\x00\x00\x80\x02\x00\x00\x68\x01\x00\x00\x01\x00\x18\x00' # 位图前30个字节
+# BMP格式采用小端方式存储数据，文件头的结构按顺序如下：
+
+# 两个字节：'BM'表示Windows位图，'BA'表示OS/2位图；
+# 一个4字节整数：表示位图大小；
+# 一个4字节整数：保留位，始终为0；
+# 一个4字节整数：实际图像的偏移量；
+# 一个4字节整数：Header的字节数；
+# 一个4字节整数：图像宽度；
+# 一个4字节整数：图像高度；
+# 一个2字节整数：始终为1；
+# 一个2字节整数：颜色数。
+print(struct.unpack('<ccIIIIIIHH',s))
+
+
+# 判断是否是.bmp文件
+import struct
+def bmp_info(data):
+	s = struct.unpack('<ccIIIIIIHH', data[:30])
+
+	if s[0] != b'B' and s[1] != 'M':
+		return None
+
+	return {'width': s[6], 'height': s[7],'color': s[9]}
+
+
+# hashlib:提供常见的摘要算法(又称哈希算法、散列算法，把任意长度的数据转换成一个长度固定的数据串)，如MD5,SHA1
+#         摘要函数是一个单向函数，计算摘要(digest)很容易，但是通过digest反推数据却十分困难。可以用于发现原始数据是否被篡改过。不同数据通过摘要算法也有可能得到相同的摘要(碰撞)，但是非常困难。
+#         摘要算法不是加密算法（因为无法通过摘要反推明文），只能用于防篡改，但是它的单向计算特性决定了可以在不存储明文口令的情况下验证用户口令。(如在数据库中只保存用户密码的摘要，还可以通过加salt,处理简单密码)
+
+import hashlib 
+
+md5 = hashlib.md5()
+md5.update('how to use md5 in python hashlib?'.encode('utf-8'))
+md5.update('the amount of data is large enough, so use another update()'.encode('utf-8'))
+print(md5.hexdigest()) # 返回128bit(32 bytes),如果数据有改动，将会返回完全不同的结果
+
+import hashlib
+sha1 = hashlib.sha1()
+sha1.update('how to use md5 in python hashlib?'.encode('utf-8'))
+sha1.update('the amount of data is large enough, so use another update()'.encode('utf-8'))
+print(sha1.hexdigest()) # 返回160bit(40 bytes)
+
+
+# hmac: Hmac(Keyed-Hash Message Authentication Code)算法(https://en.wikipedia.org/wiki/HMAC)
+import hmac
+message = b'Hello World!'  # 原始消息，bytes类型
+key = b'secret'    # 随机key，类似于加salt，bytes类型
+h = hmac.new(key, message, digestmod='MD5') # hash使用MD5算法
+# 如果消息过长，可以多次调用h.update(msg)
+print(h.hexdigest())  # 输出长度和使用的原始hash算法返回长度一致
+
+
+
+# itertools: 操作迭代对象，返回的是Iterator
+# import itertools
+# natuals = itertools.count(1)  # count()创建一个无限自然数迭代器，只能按ctrl + c 停止,不能直接在sublime3 运行，会让sublime3 失去响应，应在命令行中运行
+# for n in natuals:
+# 	print(n)
+
+# import itertools
+# cs = itertools.cycle('abc') # cycle()把传入的序列无限重复下去，也是无限迭代器
+# for c in cs:
+# 	print(c) # 输出'a','b','c','a','b','c',......
+
+import itertools
+ns = itertools.repeat('AB',3) # repeat()重复一个元素，如果没有第二个参数限定重复次数，将会把元素无限重复下去
+for n in ns:
+	print(n)
+
+
+import itertools
+natuals = itertools.count(1)
+ns = itertools.takewhile(lambda x: x <= 10, natuals) # takewhile()根据条件判断截取一个有限序列, 注意该方法是截取(根据判断条件，两刀割，截取前部分，如itertools.takewhile(lambda x : x > 10, natuals) 得到的是空)
+print(list(ns))
+
+
+for c in itertools.chain('ABC','XYZ'): # chain()串联迭代对象，形成一个更大的迭代器
+	print(c)
+
+for key,group in itertools.groupby('AAABBBCCAAA'): # 把迭代器中相邻的重复元素挑出来放在一起
+	print(key,list(group))
+
+for key,group in itertools.groupby('AaaBbCcaAa', lambda x : x.upper()): # groupby 可以传入函数，只要两个元素通过函数得到的返回值相等，就被认为是一组
+	print(key,list(group))
+
+
+# 计算圆周率
+def pi(N):
+    ' 计算pi的值 '
+    # step 1: 创建一个奇数序列: 1, 3, 5, 7, 9, ...
+    ns = itertools.count(start = 1, step = 2)
+    # step 2: 取该序列的前N项: 1, 3, 5, 7, 9, ..., 2*N-1.
+    ns = itertools.takewhile(lambda x : x < 2*N, ns)
+    # step 3: 添加正负符号并用4除: 4/1, -4/3, 4/5, -4/7, 4/9, ...
+    rc = itertools.cycle([4,-4])
+    ns = map(lambda x : next(rc) / x ,ns)
+    # step 4: 求和:
+    return sum(ns)
+
+
+# 测试:
+print(pi(10))
+print(pi(100))
+print(pi(1000))
+print(pi(10000))
+assert 3.04 < pi(10) < 3.05
+assert 3.13 < pi(100) < 3.14
+assert 3.140 < pi(1000) < 3.141
+assert 3.1414 < pi(10000) < 3.1415
+print('ok')
+
+
+
+# contextlib
+def Query(object):
+
+	def __init__(self, name):
+		self.name = name
+	
+	def __enter__(self):
+		print('Begin')
+		return self
+
+	def __exit__(self,):
+
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
