@@ -18,3 +18,34 @@ VMware Workstation Pro
 <https://www.cnblogs.com/zyl910/p/java_war_properties_path_easy.html>
 
 <https://blog.csdn.net/laoyang360>
+
+
+
+   public ListNode insertionSortList(ListNode head) {
+        if(head == null || head.ext == null){
+            return;
+        }
+        
+        ListNode l = new ListNode(-1);
+        l.next = head;
+        ListNode prev = head;
+        
+        ListNode node;
+        ListNode iter;
+        ListNode iterPrev;
+        while(prev.next != null){
+            node = prev.next;
+            prev.next = node.next;
+            iter = head;
+            iterPrev = l;
+            while(iter != prev){
+                if(iter.val > node.val) break;
+                iter = iter.next;
+                iterPrev = iter;
+            }
+            
+            iterPrev.next = node;
+            node.next = iter;
+        }
+        return l.next;
+    }
