@@ -2546,7 +2546,11 @@ print('ok')
 
 
 # contextlib
-def Query(object):
+
+# with 语句： 
+#    with open(path,'r') as f:   在文件操作中使用with语句管理资源
+#  实际上只要正确实现了上下文管理，就可以使用with语句，实现上下文管理是通过__enter__()和__exit__()实现的
+class Query(object):
 
 	def __init__(self, name):
 		self.name = name
@@ -2555,8 +2559,117 @@ def Query(object):
 		print('Begin')
 		return self
 
-	def __exit__(self,):
+	def __exit__(self, exc_type, exc_value, traceback):
+		print('exc_type:', exc_type)
+		print('exc_value:', exc_value)
+		print('traceback:', traceback) # 关于exception的3个参数
 
+		if exc_type:
+			print('Error')
+		else: 
+			print('End')
+
+	def query(self):
+		# a = 1/0   # 用于测试__exit__()的3个参数
+		print('Query info about %s...' % self.name)
+
+
+with Query('Bob') as q:  # 执行顺序： __enter__()执行 ==> __enter__()返回值赋值给q ==> 执行代码块 ==> __exit__()执行
+	q.query()
+
+
+# @contextmanager: __enter__()和__exit__()的简单写法
+from contextlib import contextmanager
+
+class Query(object):
+
+	def __init__(self, name):
+		self.name = name 
+
+	def query(self):
+		print('Query info about %s...' % self.name)
+
+@contextmanager # 接受一个generator，yield把变量输出,同时是前后执行的分割，先执行yield之前的代码，再执行with代码块，最后执行yield之后的代码
+def create_query(name):
+	print('Begin')
+	q = Query(name)
+	yield q   # yield后不写参数表示没有返回
+	print('End')
+
+with create_query('Bob') as q:
+	q.query()
+
+# @closing
+from contextlib import closing
+from urllib.request import urlopen
+
+with closing(urlopen('https://www.python.org')) as page: # closing()把任意对象变为上下文对象，并支持with语句
+	for line in page:
+		print(line)
+
+
+# closing的实现
+# class closing(AbstractContextManager):
+
+#     def __init__(self, thing):
+#         self.thing = thing
+#     def __enter__(self):
+#         return self.thing
+#     def __exit__(self, *exc_info):
+#         self.thing.close()
+
+
+
+# urllib: 操作url
+
+# GET请求
+# from urllib import request
+
+# with request.urlopen('https://api.douban.com/v2/book/2129650') as f:  
+# 	data = f.read()
+# 	print('Status:', f.status, f.reason)
+# 	for k,v in f.getheaders():
+# 		print('%s: %s' % (k,v))
+# 	print('Data:',data.decode('utf-8'))
+
+
+#  模拟浏览器发送GET请求
+# from urllib import request
+
+# req = request.Request('http://www.douban.com/')
+# req.add_header('User-Agent', 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25')
+# with request.urlopen(req) as f:
+#     print('Status:', f.status, f.reason)
+#     for k, v in f.getheaders():
+#         print('%s: %s' % (k, v))
+#     print('Data:', f.read().decode('utf-8'))
+
+# POST : 模拟微博登录
+from urllib import request, parse
+
+print('Login to weibo.cn...')
+email = input('Email: ')
+passwd = input('Password: ')
+login_data = parse.urlencode([
+    ('username', email),
+    ('password', passwd),
+    ('entry', 'mweibo'),
+    ('client_id', ''),
+    ('savestate', '1'),
+    ('ec', ''),
+    ('pagerefer', 'https://passport.weibo.cn/signin/welcome?entry=mweibo&r=http%3A%2F%2Fm.weibo.cn%2F')
+])
+
+req = request.Request('https://passport.weibo.cn/sso/login')
+req.add_header('Origin', 'https://passport.weibo.cn')
+req.add_header('User-Agent', 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25')
+req.add_header('Referer', 'https://passport.weibo.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F')
+
+with request.urlopen(req, data=login_data.encode('utf-8')) as f:
+    print('Status:', f.status, f.reason)
+    for k, v in f.getheaders():
+        print('%s: %s' % (k, v))
+    print('Data:', f.read().decode('utf-8'))
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
