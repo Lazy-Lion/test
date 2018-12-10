@@ -96,6 +96,9 @@ print('0.0 == False:', 0.0 == False) # 直接比较返回True，相等
 # decode()：bytes->str,例： b'ABC'.decode('ascii') ==> 'ABC'
 # encode(),decode() 方法对于无法正确编码或解码的会报错；对于decode(),如果bytes中只有一小部分无效的字节，可以传入errors='ignore'忽略错误的字节：b'\xe4\xb8\xad\xff'.decode('utf-8', errors='ignore')
 # len() : 计算str包含多少字符: len('中文A') ==> 3；对于len(b'ABC') ==> 3,计算的就是字节数 
+# join(): ','.join(sequence), 将序列中的元素以指定字符连接成一个新的字符串
+seq = {'hello':'nihao','good':2,'boy':3,'doiido':4} 
+print('-'.join(seq))        #如果序列是字典，只对键进行连接 
 
 
 # 全局变量(global variable)和局部变量(local variable):
@@ -2600,12 +2603,12 @@ with create_query('Bob') as q:
 	q.query()
 
 # @closing
-from contextlib import closing
-from urllib.request import urlopen
+# from contextlib import closing
+# from urllib.request import urlopen
 
-with closing(urlopen('https://www.python.org')) as page: # closing()把任意对象变为上下文对象，并支持with语句
-	for line in page:
-		print(line)
+# with closing(urlopen('https://www.python.org')) as page: # closing()把任意对象变为上下文对象，并支持with语句
+# 	for line in page:
+# 		print(line)
 
 
 # closing的实现
@@ -2645,31 +2648,223 @@ with closing(urlopen('https://www.python.org')) as page: # closing()把任意对
 #     print('Data:', f.read().decode('utf-8'))
 
 # POST : 模拟微博登录
-from urllib import request, parse
+# from urllib import request, parse
 
-print('Login to weibo.cn...')
-email = input('Email: ')
-passwd = input('Password: ')
-login_data = parse.urlencode([
-    ('username', email),
-    ('password', passwd),
-    ('entry', 'mweibo'),
-    ('client_id', ''),
-    ('savestate', '1'),
-    ('ec', ''),
-    ('pagerefer', 'https://passport.weibo.cn/signin/welcome?entry=mweibo&r=http%3A%2F%2Fm.weibo.cn%2F')
-])
+# print('Login to weibo.cn...')
+# email = input('Email: ')
+# passwd = input('Password: ')
+# login_data = parse.urlencode([
+#     ('username', email),
+#     ('password', passwd),
+#     ('entry', 'mweibo'),
+#     ('client_id', ''),
+#     ('savestate', '1'),
+#     ('ec', ''),
+#     ('pagerefer', 'https://passport.weibo.cn/signin/welcome?entry=mweibo&r=http%3A%2F%2Fm.weibo.cn%2F')
+# ])
 
-req = request.Request('https://passport.weibo.cn/sso/login')
-req.add_header('Origin', 'https://passport.weibo.cn')
-req.add_header('User-Agent', 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25')
-req.add_header('Referer', 'https://passport.weibo.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F')
+# req = request.Request('https://passport.weibo.cn/sso/login')
+# req.add_header('Origin', 'https://passport.weibo.cn')
+# req.add_header('User-Agent', 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25')
+# req.add_header('Referer', 'https://passport.weibo.cn/signin/login?entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F')
 
-with request.urlopen(req, data=login_data.encode('utf-8')) as f:
-    print('Status:', f.status, f.reason)
-    for k, v in f.getheaders():
-        print('%s: %s' % (k, v))
-    print('Data:', f.read().decode('utf-8'))
+# with request.urlopen(req, data=login_data.encode('utf-8')) as f:
+#     print('Status:', f.status, f.reason)
+#     for k, v in f.getheaders():
+#         print('%s: %s' % (k, v))
+#     print('Data:', f.read().decode('utf-8'))
+
+
+# Handler: ProxyHandler
+# import urllib
+
+# proxy_handler = urllib.request.ProxyHandler({'http':'http://www.example.com:3128/'})
+# proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
+# proxy_auth_handler.add_password('realm', 'host', 'username', 'password')
+# opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
+# with opener.open('http://www.example.com/login.html') as f:
+# 	pass
+
+
+
+# XML : 操作XML的两种方法:DOM,SAX; DOM会把整个XML读入内存，解析为树，因此内存占用大，优点是可以任意遍历树的节点。SAX是流模式，边读边解析，占用内存小，解析块，缺点是我们需要自己处理事件。正常情况下，优先考虑SAX，因为DOM太占内存。
+
+# SAX解析：关心的事件：start_element, end_element, char_data:
+#  for example : <a href="/">python</a>
+#     1. 读取<a href="/"> 产生 start_element 事件； 2. 读取 python 产生 char_data 事件； 3. 读取 </a> 产生end_element 事件
+
+from xml.parsers.expat import ParserCreate
+
+class DefaultSaxHandler(object):
+	def start_element(self, name, attrs):
+		print("sax: start_element: %s, attrs: %s" % (name, str(attrs)))	
+
+	def end_element(self, name):
+		print("sax: end_element: %s" % name)
+
+	def char_data(self, text):
+		print("sax: char_data: %s" % text)
+
+xml = r'''<?xml version="1.0"?>
+<ol>
+    <li><a href="/python">Python</a></li>
+    <li><a href="/ruby">Ruby</a></li>
+</ol>
+'''
+
+# xml = r'<yweather:location xmlns:yweather="http://xml.weather.yahoo.com/ns/rss/1.0" city="Beijing" country="China" region=" Beijing"/>'
+
+handler = DefaultSaxHandler()
+parser = ParserCreate()
+parser.StartElementHandler = handler.start_element
+parser.EndElementHandler = handler.end_element
+parser.CharacterDataHandler = handler.char_data
+parser.Parse(xml)
+
+# 需要注意的是读取一大段字符串时，CharacterDataHandler可能被多次调用，所以需要自己保存起来，在EndElementHandler里面再合并。
+# 生成XML最简单有效的方式是使用字符串拼接，如果要生成复杂的XML，建议使用json代替。
+
+from xml.parsers.expat import ParserCreate
+
+class WeatherSaxHandler(object):
+	def __init__(self):
+		self.forecast = list()
+
+	def start_element(self, name, attrs):
+		if name == 'yweather:location':
+			self.city = attrs['city']
+		elif name == 'yweather:forecast':
+			self.forecast.append({'date': attrs['date'], 'high': attrs['high'], 'low': attrs['low']})
+
+	def end_element(self, name):
+		pass
+
+	def char_data(self, text):
+		pass
+
+
+
+def parseXml(data):
+	handler = WeatherSaxHandler() 
+	parser = ParserCreate()
+	parser.StartElementHandler = handler.start_element
+	parser.EndElementHandler = handler.end_element
+	parser.CharacterDataHandler = handler.char_data
+	parser.Parse(data)
+	return {
+		'city': handler.city,
+		'forecast': handler.forecast
+	}
+
+
+#测试:
+# from urllib import request
+
+# URL = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20%3D%202151330&format=xml'
+
+# with request.urlopen(URL, timeout=40) as f:
+#     data = f.read()
+
+# result = parseXml(data.decode('utf-8'))
+# print(result['city'])
+# print(result['forecast'])
+# assert result['city'] == 'Beijing', 'City is not correct'
+
+# HTMLParser: html本质上是XML的子集，但html的语法没有XML那么严格，所以不能用标准的DOM或SAX来解析html。
+
+from html.parser import HTMLParser
+from html.entities import name2codepoint
+
+class MyHTMLParser(HTMLParser):
+
+	def handle_starttag(self, tag, attrs):
+		print('<%s>' % tag)
+
+	def handle_endtag(self, tag):
+		print('</%s>' % tag)
+
+	def handle_startendtag(self, tag, attrs):
+		print('<%s />' % tag)
+
+	def handle_data(self, data):
+		print(data)
+
+	def handle_comment(self, data):
+		print('<!--', data, '-->')
+
+	def handle_entityref(self, name): # 英文表示的特殊字符
+		print('&%s;' % name)
+
+	def handle_charref(self, name): # 数字表示的特殊字符
+		print('&#%s' % name)
+
+parser = MyHTMLParser()
+parser.feed('''<html>
+<head></head>
+<body>
+<!-- test html parser -->
+    <p>Some <a href=\"#\">html</a> HTML&nbsp;tutorial...<br>END</p>
+</body></html>''')  # feed()方法可以多次调用，可以一部分一部分的把html加入
+
+
+# 十三、常用第三方模块
+
+# Pillow : PIL: Python Imaging Library, Pillow是在PIL基础上创建的兼容版本，支持最新的Python 3.x
+#       https://pillow.readthedocs.org/  官方文档
+
+# import os 
+# print(os.__file__)
+
+# 首先命令行安装： pip install pillow
+from PIL import Image, ImageFilter
+
+im = Image.open('image/image.jpg') #打开当前路径下image文件夹的image.jpg图片
+
+w,h = im.size # 获取图像尺寸
+
+im.thumbnail((w // 2, h // 2)) # 缩放50%
+im.save('image/thumbnail.jpg', 'jpeg') # 缩放后的图像用jpeg格式保存
+
+im2 = im.filter(ImageFilter.BLUR) # 应用模糊滤镜
+im2.save('image/blur.jpg', 'jpeg')
+
+
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import random
+
+def rndChar():  # 随机字符
+	return chr(random.randint(65,90))
+
+def rndColor(): # 随机颜色
+	return (random.randint(64,255), random.randint(64,255), random.randint(64,255))
+
+def rndColor2(): # 随机颜色2
+	return (random.randint(32,127), random.randint(32,127), random.randint(32,127))
+
+def 
+
+width = 60 * 4
+height = 60
+image = Image.new('RGB', (width, height), (255,255,255))
+
+font = ImageFont.truetype('arial.ttf', 36)  # 创建Font对象, windows存放字体文件的文件夹C:\Windows\Fonts
+											# TTF文件： TrueType,是由美国苹果公司和微软公司共同开发的一种电脑轮廓字体（曲线描边字）类型标准。这种类型字体文件的扩展名是.ttf，类型代码是tfil。
+ 											# ImageFont.truetype('Arial.ttf', 36) :can not open resource 
+draw = ImageDraw.Draw(image)  # 创建Draw对象
+
+for x in range(width):  # 填充每个像素
+	for y in range(height):
+		draw.point((x,y), fill = rndColor())
+
+# 输出文字
+for t in range(4):
+	draw.text((60 * t + 10, 10), rndChar(), font = font, fill = rndColor2())
+
+image = image.filter(ImageFilter.BLUR)
+image.save('image/code.jpg', 'jpeg')
+
+
+
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
