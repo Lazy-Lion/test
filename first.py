@@ -2815,10 +2815,13 @@ parser.feed('''<html>
 # import os 
 # print(os.__file__)
 
-# 首先命令行安装： pip install pillow
+# 首先命令行安装： pip install Pillow
 from PIL import Image, ImageFilter
 
-im = Image.open('image/image.jpg') #打开当前路径下image文件夹的image.jpg图片
+im = Image.open('image/image.jpg') #打开当前路径下image文件夹的image.jpg图片,如果文件无法打开IOError
+
+print(im.format, im.size, im.mode)
+# im.show()   # The standard version of show() is not very efficient, since it saves the image to a temporary file and calls a utility to display the image. If you don’t have an appropriate utility installed, it won’t even work. 
 
 w,h = im.size # 获取图像尺寸
 
@@ -2829,6 +2832,7 @@ im2 = im.filter(ImageFilter.BLUR) # 应用模糊滤镜
 im2.save('image/blur.jpg', 'jpeg')
 
 
+## 随机验证码实现
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
 
@@ -2841,15 +2845,40 @@ def rndColor(): # 随机颜色
 def rndColor2(): # 随机颜色2
 	return (random.randint(32,127), random.randint(32,127), random.randint(32,127))
 
-def 
+def rndRotate(): # 随机旋转角度
+	return random.randint(-90,90)
 
-width = 60 * 4
+def position(t): # 字符位置
+	return (60 * t + 10, 10)
+
+def addChar(image):  # 添加字符
+	fontSize = (60, 60)
+	defaultColor = (0, 0, 0)
+
+	rChar = rndChar()
+	rRotate = rndRotate()
+	pos = position(t)
+
+	char = Image.new('RGB', fontSize, defaultColor)
+
+	font = ImageFont.truetype('arial.ttf', 36) # 创建Font对象, windows存放字体文件的文件夹C:\Windows\Fonts
+											# TTF文件： TrueType,是由美国苹果公司和微软公司共同开发的一种电脑轮廓字体（曲线描边字）类型标准。这种类型字体文件的扩展名是.ttf，类型代码是tfil。
+ 											# ImageFont.truetype('Arial.ttf', 36) :can not open resource 
+	drawC = ImageDraw.Draw(char)
+	drawC.text((10,10),rChar, fill = rndColor2(), font = font)
+	char = char.rotate(rRotate)
+
+	r,g,b = char.split()
+
+	image.paste(char, pos, r)
+	image.paste(char, pos, g)
+	image.paste(char, pos, b)
+
+
+width = 60 * 4 
 height = 60
 image = Image.new('RGB', (width, height), (255,255,255))
 
-font = ImageFont.truetype('arial.ttf', 36)  # 创建Font对象, windows存放字体文件的文件夹C:\Windows\Fonts
-											# TTF文件： TrueType,是由美国苹果公司和微软公司共同开发的一种电脑轮廓字体（曲线描边字）类型标准。这种类型字体文件的扩展名是.ttf，类型代码是tfil。
- 											# ImageFont.truetype('Arial.ttf', 36) :can not open resource 
 draw = ImageDraw.Draw(image)  # 创建Draw对象
 
 for x in range(width):  # 填充每个像素
@@ -2858,13 +2887,99 @@ for x in range(width):  # 填充每个像素
 
 # 输出文字
 for t in range(4):
-	draw.text((60 * t + 10, 10), rndChar(), font = font, fill = rndColor2())
+	addChar(image)
 
 image = image.filter(ImageFilter.BLUR)
 image.save('image/code.jpg', 'jpeg')
 
 
 
+# requests 模块
+
+# 安装 pip install requests
+
+import requests
+
+r = requests.get('https://www.douban.com/') # 无参get请求
+print(r.status_code) # 返回状态
+# print(r.text) # 响应内容
+# print(r.content) # 响应内容的bytes对象
+print(r.encoding) # 编码
+
+r = requests.get('https://www.douban.com/search', params = {'q': 'python', 'cat': '1001'}) # 带参get请求
+print(r.url) # 请求的url
+print(r.headers) # 获取响应头
+print(r.headers['Content-Type'])
+print(r.cookies) # cookie
+print(r.cookies['bid'])
+
+r = requests.get('https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20%3D%202151330&format=json')
+# print(r.json())  # 对于特定类型的响应，例如JSON，可以直接获取
+
+r = requests.get('https://www.douban.com/', headers={'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit'}) # 传入HTTP Header
+print(r.status_code)
+
+# 请求中传入cookie
+# cs = {'token': '12345', 'status': 'working'}
+# r = requests.get(url, cookies=cs)
+
+# 指定超时时间
+# r = requests.get(url, timeout=2.5) # 2.5秒后超时
+
+# post请求，data参数作为post请求数据
+r = requests.post('https://accounts.douban.com/login', data={'form_email': 'abc@example.com', 'form_password': '123456'})  
+
+
+# requests默认使用application/x-www-form-urlencoded对POST数据编码，如果要传递JSON数据，可以直接传入json参数
+# params = {'key': 'value'}
+# r = requests.post(url, json=params) # 内部自动序列化为JSON
+
+
+# 上传文件，files参数
+# upload_files = {'file': open('report.xls', 'rb')}  # 在读取文件时，注意务必使用'rb'即二进制模式读取，这样获取的bytes长度才是文件的长度
+# r = requests.post(url, files=upload_files)
+
+# get(),post().put(),delete()
+
+
+# chardet 模块： 对于未知编码的bytes，转换成str需要先检测编码
+# 安装： pip install chardet
+
+# 支持检测的编码列表： https://chardet.readthedocs.io/en/latest/supported-encodings.html
+import chardet
+
+print(chardet.detect(b'Hello World')) 
+
+print(chardet.detect('从认知革命、农业革命到科学革命'.encode('gbk')))
+
+
+# psutil 模块: process and system utilities,它不仅可以通过一两行代码实现系统监控，还可以跨平台使用，支持Linux／UNIX／OSX／Windows等
+# 安装 pip install psutil
+
+import psutil
+print(psutil.cpu_count()) # CPU逻辑数量
+print(psutil.cpu_count(logical=False)) # CPU物理核心
+
+print(psutil.cpu_times())  # 统计CPU的用户／系统／空闲等时间
+
+# CPU使用率，没秒刷新一次，共10次
+for x in range(10):
+	print(psutil.cpu_percent(interval = 1, percpu = True)) 
+
+# 获取内存信息，返回的是以字节为单位的整数
+print(psutil.virtual_memory())
+print(psutil.swap_memory())
+
+# 获取磁盘信息
+print(psutil.disk_partitions()) # 磁盘分区信息
+print(psutil.disk_usage('/')) # 磁盘使用情况
+print(psutil.disk_io_counters()) # 磁盘io
+
+# 获取网络信息
+print(psutil.net_io_counters()) # 获取网络读写字节/包的个数
+print(psutil.net_if_addrs())   # 获取网络接口信息
+print(psutil.net_if_stats())  # 获取网络接口状态
+# print(psutil.net_connections()) # 获取当前网络连接信息
 
 # print('中文输出正常')  # 文件开始指定utf-8编码
 # print('hello word')
@@ -2925,3 +3040,6 @@ image.save('image/code.jpg', 'jpeg')
 # print('hi, %s,you hava $%d' % ('Michael', 10000)) 
 # # 单个，可以省略()
 # print('hi, %s' % 'Michael')
+
+
+print('\u2122') # ™ 字符
