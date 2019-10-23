@@ -113,4 +113,4 @@ Redis keys are binary safe, this means that you can use any binary sequence as a
 \[2\]:[Redis Commands](https://redis.io/commands) <br />
 \[3\]:[Memcached vs Redis](https://www.linkedin.com/pulse/memcached-vs-redis-which-one-pick-ranjeet-vimal)<br />
 \[4\]:[Redis命令参考](http://doc.redisfans.com/)<br />
-\[5\]:[Try Redis](http://try.redis.io/)
+\[5\]:[Try Redis](http://try.redis.io/)<br />
