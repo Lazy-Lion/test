@@ -52,3 +52,4 @@ VMware Workstation Pro
 ```
 
 test for git merge_origin
+test for git merge_local
