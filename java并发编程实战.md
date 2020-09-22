@@ -1,49 +1,261 @@
+#### Word List: 
+ - civil engineering 土木工程
+ - rivet 铆钉
+ - I-beam 工字梁
+ - fall down 失败；倒塌
+ - means to an end 达到目的的手段
+ - encompass 包含
+ - externally 外部地；外表上
+ - coordinate v.调节； n.坐标； adj.坐标的
+ - corruption 贪污；腐败；堕落
+ - mechanism 机制；原理
+ - temptation 引诱；诱惑物
+ - omit 省；，疏忽
+ - trival 不重要的；琐碎的
+ - retrofit 改进；更新
+ - maintainable 可维护的
+ - encapsulation 封装
+ - invariant n.不变量；adj.不变的
+ - at odds with 与..争执；意见不一致
+ - compromise 妥协
+ - sake 目的；利益；理由
+ - compatibility 兼容性
+ - legacy 遗产；遗留问题
+ - not nearly 远非
+ - pursue 继续；追赶；纠缠
+ - realistic 现实的
+ - adhere 坚持；依附；追随
+ - dwarf adj.矮小的；v.变矮；n.矮子，侏儒
+ - fragile 脆的，易碎的
+ - characterize 描绘..特性；塑造人物
+ - interchangeably 可交换地
+ - thus far 迄今，现在为止
+ - composition 作文；作曲；作品；构成；合成物；成分
+ - make sense of 搞清..的意思
+ - make sense to 对..合乎情理；有意义
+ - make sense for 对..有意义
+ - make sense out of 弄明白；理解
+ - tricky 狡猾的；机警的；棘手的
+ - intuitive 直觉的
+ - counterintuitive 违反直觉的
+ - downright 向下；完全地；(坏事)彻头彻尾的；(人的举止或行为)直率的；径直前进的
+ - numerous 许多的
+ - turn up 出现
+ - no wonder 难怪
+ - interaction 交互
+ - suspiciously 怀疑地；猜测地
+ - fuzzy 模糊的；失真的
+ - conform 符合
+ - constrain 约束
+ - adequate 充足的；适当的；胜任的
+ - convince 确信
+ - interleave 交错；交叉
+ - regardless of 不管；不顾
+ - violate 违反；妨碍；侵犯
+ - post-conditions 后置条件
+ - stem from 起源于
+ - facility 设施；设备；才能；天赋
+ - factorization 因式分解
+ - preserve 保留；保存
+ - transient 短暂的
+ - solely 单独地；仅仅
+ - burden 负担
+ - susceptible 易受影响的；敏感的
+ - compact 袖珍的；紧凑的
+ - indivisible 不可分割的
+ - shorthand 速记
+ - discrete 离散的；不连续的
+ - derive from 源于
+ - simultaneously 同时地
+ - permanently 永久地
+ - integrity 完整；正直；诚实
+ - presence 存在；出席
+ - arise 出现；发生
+ - stand up 坚持；拥护；站得住脚
+ - frustrated 沮丧的
+ - nip 夹；捏；剪断；冻伤；阻止
+ - idiom 习语
+ - defer 推迟
+ - undermine 破坏
+ - vagary n.变换莫测
+ - compound n.化合物，混合物；adj.混合的；v.合成，混合，恶化，和解，妥协
+ - with respect to 相对于
+ - prespective n.视角，远景，透视图；adj.透视的
+ - either or 两者择一的
+ - neither nor 既不是..也不是
+ - refer 涉及；参考；查阅
+ - collectively 集体地；共同地
+ - necessarily 必要地；必然地；必定地
+ - arbitrary 任意的；武断的；专制的
+ - reason about 推出
+ - consecutive 连续的
+ - vulnerability 易损性；弱点
+ - span v.跨越;n.跨度
+ - guard 保卫；看守
+ - mutual 共同的
+ - intrinsic 本质的；固有的
+ - fairly 相当地；公平地
+ - extreme adj.极端的；n.极端
+ - inhibit 阻止
+ - be addressed 得到解决
+ - basis 基础
+ - acquisition 获得
+ - stall n.货摊，畜栏，（房间内的）小隔间，车位，（车辆）熄火，（飞机）失速；v.熄火，拖延，暂缓
+ - inherent 固有的；内在的；与生俱来的
+ - convention 大会；惯例；约定；协定；习俗
+ - throughout 自始至终；遍及
+ - retrospect 回顾
+ - tradeoff 权衡；折衷；（公平）交易
+ - subvert 颠覆；推翻；破坏
+ - audit 审计
+ - ripple 波纹；涟漪
+ - periodic 周期的；定期的
+ - cure v.治疗，解决（问题）；n.药物，治疗
+ - indiscriminate 任意的；无差别的
+ - merely 仅仅，只不过
+ - render v.致使，提供，提出，渲染
+ - coarse-grained 粗鲁的；木纹粗糙的；粗略的；大概的
+ - intend 打算
+ - idle 闲置的
+ - bonus 奖金；红利
+ - constitute 构成；任命
+ - portion n.部分；v.将..分配
+ - revert 重新提到；回复
+ - overhead n.经常性支出；adv.在头顶上方，在空中；adj.（费用开支等）日常的，在空中的
+ - unduly 过度地；不适当地
+ - tension n.张力，拉力，紧张，电压；v.使紧张，使拉紧
+ - resist v.抵抗，忍耐；n.抗蚀剂
+ - prematurely 过早地
+ - sacrifice 牺牲
+ - misconception 误解
+ - demarcate 划分界线；区别
+ - subtle 微妙的；精细的
+ - intervene v.介于；adj.介于中间的
+ - phenomenon 现象；奇迹；杰出人才
+ - apparent 显然的；表面上的
+ - in the absence of 缺少..时
+ - weird 怪异的；不可思议的
+ - insufficiently 不足地；不能胜任地
+ - prohibitively 禁止地；过分地
+ - scary 可怕的
+ - stale 陈旧的
+ - all or nothing 孤注一掷的；全部或一无所有的
+ - edible adj.可食用的；n.食品
+ - prevent 阻止；妨碍
+ - analogous 类似的
+ - hazard n.危害；v.使冒危险
+ - out of thin air 无中生有地
+ - prior 优先的
+ - alternative 供选择的
+ - propagate 传播；宣传；繁殖
+ - roughly 大致；粗略地
+ - anthropomorphized  给..赋予人性
+ - cumbersome 笨重的
+ - hoist v.升高，举起；n. 提升，起重
 
-> java同步机制：
- - synchronized关键字： 提供一种独占的加锁方式
- - volatile 
- - 显示锁 (Explicit Lock)
- - 原子变量
+Writing thread-safe code is about managing access to **shared, mutable** state.
 
-> 如果多个线程访问同一个可变的状态变量时没有使用合适的同步，那么程序就会出现错误。可以有三种方式修复这个问题：
-  - 不在线程间共享该状态变量；
-  - 将状态变量修改为不可变的变量；
-  - 在访问状态变量时使用同步；
+
+> java synchronization：
+
+ - synchronized keywords： provide exclusive locking 
+ - volatile variables
+ - Explicit Lock
+ - atomic variables
+
+> if multiple threads access the same mutable state variable without appropriate synchronization, your program is broken. There are three ways to fix it: 
+
+  - Don't share the state variable across thread;
+  - Make the state variable immutable
+  - Use synchronization whenever accessing the state variable
   
-> 编写并发代码的原则：
 
- 首先使代码正确运行，然后再提高代码的速度。即使如此，最好也只是当性能测试结果和应用需求告诉你必须提高性能，以及测量结果表明这种优化在实际环境中确实能带来性能的提升时，才进行优化。
- 
-> 竞态条件(Race Condition)：多个线程由于不恰当的执行时序而出现不正确的结果
+> Practice:
 
-大多数竞态条件的本质：基于一种可能失效的观察结果来做出判断或者执行某个计算。
-( **数据竞争：如果在访问共享的非final类型的域时没有采用同步来进行协同，那么就会出现数据竞争。**)
+  It is always a good practice first to make your code right, and then make it fast. Even then, pursue optimization only if you performance measurements and requirements tell you that you must, and if those some measurements tell you that your optimization actually made a difference under realistic conditions.
 
-> 通常在简单性和性能之间存在相互制约因素。当实现某个同步策略时，一定不要盲目地为了性能而牺牲简单性(这可能会破坏安全性)。
+a program that consists entirely of thread-safe class may not be thread-safe, and a thread-safe classes may contain classes that are not thread-safe.
 
-> 当执行时间较长的计算或者可能无法快速完成的操作时(例如，网络I/O或控制台I/O),一定不要持有锁。
 
-> 重排序：只要在某个线程中无法检测到重排序的情况(即使在其他线程中可以明显地看到该线程中的重排序)，那么就无法确保线程中的操作将按照程序中指定的顺序来执行。
+> Thread-safe class:
 
-在没有同步的情况下，编译器、处理器以及运行时等都可能对操作的执行顺序进行一些意想不到的调整。在缺乏足够同步的多线程程序中，要想对内存操作的执行顺序进行判断，几乎无法得出正确的结论。
+ A class is thread-safe if it behaves correctly when accessed from multiple threads, regardless of the scheduling or interleaving of the execution of those threads by the runtime environment, and with no additional synchronization or other coordinationon the part of the calling code. <br />
 
-> java内存模型要求，变量的读取操作和写入操作都必须是原子操作，但对于非volatile类型 的double和long变量，JVM允许将64位的读操作和写操作分解成两个32位的操作。当读取一个非volatile类型的long变量时，如果该变量的读操作和写操作在不同的线程中执行，那么很可能会读取到某个值的高32位和另一个值的低32位。
+ No set of operations performed sequentially or concurrently on instances of a thread-safe class can cause an instance to be in an invalid state. <br />
 
-> 加锁的含义不仅仅局限于互斥行为，还包括内存可见性，为了确保所有线程都能看到共享变量的最新值，所有执行读操作或者写操作都必须在同一个锁上同步。
+ Thread-safe classes encapsulate any needed synchronization so that clients need not provide their own.
 
-> volatile 变量: 在访问volatile变量时不会执行加锁操作，因此也就不会执行线程阻塞，所以volatile变量是比synchronized关键字更轻量级的同步机制；volatile变量会限制一些重排序操作，volatile变量不会被缓存在寄存器或者对其他处理器不可见的地方，因此在读取volatile类型的变量时总会返回最新写入的值。
+ Stateless objects are always thread-safe.
 
-volatile变量的正确使用方式： 确保它们自身状态的可见性，确保它们所引用对象的状态的可见性，以及标识一些重要的程序生命周期事件的发生(例如，初始化或关闭)。
-<br />
-加锁机制既可以确保可见性又可以确保原子性，而volatile变量只能确保可见性。
-<br />
-当且仅当满足以下条件时，才应该使用volatile变量：
- - 对变量的写入操作不依赖变量的当前值，或者能确保只有单个线程更新变量的值；
- - 该变量不会与其他状态变量一起纳入不变性条件中；
- - 在访问变量时不需要加锁；
+> Race Conditions
 
-<br />
-volatile关键字保证可见性和有序性，但不保证原子性。
+  A race condition occurs when the correctness of a computation depends on the relative timing or interleaving of multiple threads by the runtime; in other words, when gettig the right answer relieson lucky timing. <br />
+
+  The most common type of race condition is check-then-act, where a potentially stale observation is used to make a descision on what to do next.<br />
+
+  To ensure thread safety, check-then-act operations (like lazy initialization) and read-modify-write operations (like increment) must always be atomic.
+
+( **data race: arises when synchronization is not used to coordinate all access to a shared non-final field. Not all race conditions are data races, and not all data races are race conditions, but they both can cause concurrent programs to fail in unpredictable ways.** )
+
+> synchronized:
+
+``` java
+  synchronized (lock) {
+    // body 
+  }
+```
+synchronized block has two parts:
+
+ - a reference to an object that will serve as the lock (Synchronized method's lock is the object on which the mehtod is being invoked. Static synchronized methods use the Class object for the lock.)
+ - a block of code to be guarded by that lock (synchronized method spans an entire method body)
+
+> Intrinsic locks 
+
+  Every Java object can implicitly act as a lock for purposes of synchronization; these built-in locks are called intrinsic locks or monitor locks. The lock is automatically acquired by the executing thread before entering a synchronized block and automatically released when control exits the synchronized block, whether by the normal control path or by throwing an exception out of the block.The only way to acquire an intrinsic lock is to enter a synchronized blcok or method guarded by that lock. <br />
+
+  Intrinsic locks in Java act as mutexes (or mutual exclusion locks), which means that at most one thread may own the lock.<br />
+
+  Intrinsic locks are reentrant, if a thread tries to acqire a lock that it already holds, the request succeeds.
+
+> Serialized access:
+
+  Serialized acess to an object has nothing to do with object serialization; serialized access means that threads take turns accessing the object exclusively, rather than doing so concurrently.
+
+Every shared, mutable variable should be guardedd by exactly **one lock**.
+
+There is frequently a tension between simplicity and performance.When implementing a synchronization policy, resist the temptation to prematurely sacrifice simplicity (potentially compromising safety) for the sake of performance.
+
+Avoid holding locks during lengthy computations or operations at risk of not completing quickly such as network or console IO.
+
+> Memory Visibility 
+
+In order to ensure visibility of memory writes across threads, you must use synchronization.
+
+> Reordering
+
+There is no guarantee that operations in one thread will be performed in the order given by the program, as long as the reordering is not detectable from within that thread - even if the reordering is apparent to other threads.
+
+> The Java Memory Model requires fetch and store operations to be atomic, bur for nonvolatile long and double variables, the JVM is permitted to treat a 64-bit read or write as two separate 32-bit operations.If the reads and writes occur in different threads, it is therefore possible to read a nonvolatile long and get back the high 32 bits of one value and the low 32 bits of another.
+
+> Locking is not just about mutual exclusion; it is also about memory visibility. To ensure that all thread see the most up-to-date values of shared mutable variables, the reading and writing threads must synchronize on a common lcok.
+
+> Volatile Variables 
+
+When a field is declared volatile, the compiler and runtime are put on notice that this variable is shared and that operations on it should not be reordered with other memory operations.Volatile variables are not cached in registers or in caches where they are hidden from other processors, so a read of a volatile variable always returns the most recent write by any thread.<br />
+
+Yet accessing a volatile variable perfroms no locing and so cannot cause the executing thread to block, making volatile variables a lighter-weight synchronization mechanism than synchronized. (Volatile reads are only slightly more expensive than nonvolatile reads on most current processor architectures.) <br />
+
+Use volatile variables only when they simplify implementing and verifying your synchronization policy; avoid using volatile variables when verifying correctness would require subtle reasoning about visibility. Good uses of volatile variables include ensuring the visibility of their own state, that of the object they refer to, or indicating that an important lifecycle event(such as initialization or shutdown) has occurred. <br />
+
+Locking can guarantee both visibility and atomicity; volatile variables can only guarantee visibility.<br />
+
+You can use volatile variables only when all the following criteria are met:
+
+- Writes to the variable do not depend on its current value, or you can ensure that only a single thread ever updates the value;
+- The variable does not participate in invariants with other state variables;
+- Locing is not required for any other reason while the variable is being accessed.
+
+> Publication and Escape
 
 > 发布(publish)与逸出(escape)： 发布一个对象是指使对象能在当前作用域之外的代码中使用。当某个不应该发布的对象被发布时，这种情况被称为逸出。
 ``` java
