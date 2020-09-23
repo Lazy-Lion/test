@@ -4,7 +4,6 @@
  - I-beam 工字梁
  - fall down 失败；倒塌
  - means to an end 达到目的的手段
- - encompass 包含
  - externally 外部地；外表上
  - coordinate v.调节； n.坐标； adj.坐标的
  - corruption 贪污；腐败；堕落
@@ -31,6 +30,7 @@
  - interchangeably 可交换地
  - thus far 迄今，现在为止
  - composition 作文；作曲；作品；构成；合成物；成分
+ - make sense 有意义
  - make sense of 搞清..的意思
  - make sense to 对..合乎情理；有意义
  - make sense for 对..有意义
@@ -152,6 +152,94 @@
  - anthropomorphized  给..赋予人性
  - cumbersome 笨重的
  - hoist v.升高，举起；n. 提升，起重
+ - blatant 喧嚣的；公然的；炫耀的；显眼的
+ - indirectly 间接地
+ - abbreviation 缩写
+ - misuse 误用
+ - maliciously 有敌意地；恶意地
+ - carelessly 粗心地
+ - compelling 引人注目的；令人信服的；不可抗拒的
+ - compel v.强迫
+ - steal 偷窃
+ - mischief 恶作剧；伤害
+ - confinement 限制
+ - swing n.摇摆，秋千；adj.旋转的，悬挂的，强节奏爵士音乐的；v.摇摆，转向，悬挂
+ - extensively 广阔地；广泛地
+ - dispatch 派遣；发送
+ - other than 除了
+ - dispense 分发；免除
+ - enforce 实施；执行；强制
+ - responsibility 责任；义务
+ - responsiveness n.响应能力，有同情心
+ - even with 即使有
+ - outweight 比..重要
+ - sparingly 节俭地；保守地；爱惜地
+ - primitively 最初地；原始地
+ - associate v.联系，关联；n.伙伴，联想；adj.联合的，副的
+ - straightforward 简单的；直截了当地
+ - mundane 平凡的；世俗的；宇宙的；世界的
+ - consult 请教；咨询
+ - conceptually 概念上
+ - port n.港口，口岸，端口，舱门，左舷；v.持（枪），左转舵
+ - abuse 滥用
+ - property 性质；性能；财产；所有权
+ - detract 贬低；减去；转移；使分心
+ - reusability 可重用性
+ - couple n.对，夫妇；v.结合，连接，成婚
+ - buggy 多虫的
+ - delicate 微妙的；精美的；可口的
+ - benign 良性的；和蔼的；吉利的
+ - unwarranted 无根据的；无保证的
+ - eliminate 消除，排除
+ - interfere 干涉；妨碍；冲突；介入
+ - harmless 无害的；无恶意的
+ - immune adj.免疫的，免于..的；n.免疫者
+ - entail 需要
+ - for the moment 暂时；暂且；目前
+ - fulfill 满足
+ - engagement 婚约；约会；诺言；参与度
+ - compose 组成；构成；作曲；写作
+ - comprise 包含，由..组成
+ - encompass 包含；环绕
+ - take on 承担
+ - derive 源于；导出
+ - impose 强加；利用
+ - transition 过渡；转变
+ - underlying 潜在的；根本的
+ - obey 服从
+ - precondition 先决条件
+ - tightly 紧紧地
+ - implied 暗指的；隐式的 
+ - embody 体现；具体表达
+ - ownership 所有权
+ - short-term 短期的
+ - long-term 长期的
+ - loan n.贷款；v.借
+ - envision 想象；预想
+ - joint adj.联合的，合办的，共同拥有的；n.关节，接合处，（非正式）娱乐场所；v.连接
+ - precise 精确的；严格的
+ - exhibit n.展览品，展览会，证据；v.展览，提出（证据等）
+ - infrastructure 基础设施；公共建设
+ - safekeep 保护
+ - passivation 钝化处理
+ - discipline n.学科，纪律，训练，惩罚；v.训练，惩戒
+ - so long as 只要
+ - inspire 激发；鼓舞
+ - sophisticated 复杂的；久经世故的
+ - scalability 扩展性
+ - widget 装饰品；小部件
+ - fleet adj.快速的，敏捷的，（水）浅的；n.船队，舰队，海军，车队，小河，水道，沟；v.（诗歌或文学）飞逝，疾驰，使（时间）飞快地过去，消失，转瞬即逝 
+ - concise 简明的
+ - taxicab 出租车
+ - manually 手动地
+ - drawback 缺点，不利条件，退税
+ - degrade 降低
+ - scratch n.擦伤，抓痕；v.抓，刮，乱涂；adj.打草稿用的，凑合的
+ - substantial adj.大量的，实质的；n.本质，重要材料
+ - liability 责任；债务；倾向；可能性；不利因素
+ - shallow n.浅滩；adj.浅的，肤浅的；v.变浅
+ - accommodate 容纳；适应；调解
+ - at once 立刻；马上
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -221,7 +309,7 @@ synchronized block has two parts:
 
   Serialized acess to an object has nothing to do with object serialization; serialized access means that threads take turns accessing the object exclusively, rather than doing so concurrently.
 
-Every shared, mutable variable should be guardedd by exactly **one lock**.
+Every shared, mutable variable should be guarded by exactly **one lock**.
 
 There is frequently a tension between simplicity and performance.When implementing a synchronization policy, resist the temptation to prematurely sacrifice simplicity (potentially compromising safety) for the sake of performance.
 
@@ -257,58 +345,151 @@ You can use volatile variables only when all the following criteria are met:
 
 > Publication and Escape
 
-> 发布(publish)与逸出(escape)： 发布一个对象是指使对象能在当前作用域之外的代码中使用。当某个不应该发布的对象被发布时，这种情况被称为逸出。
-``` java
-	public static Set<Secret> knownSecrets;
-	
-	public void initialize() {
-		knownSecrets = new HashSet<Secret>();
-	}
-```
-> 线程封闭： 当访问共享的可变数据时，通常需要同步。一种避免使用同步的方式就是不共享数据。如果仅在单线程内访问数据，就不需要同步。
+Publishing an object means making it available to code outside of its current scope, such as by storing a reference to it where other code can find it, returning it from a non-private method, or passing it to a method in another class.<br />
 
-- Ad-hoc 线程封闭： 维护线程封闭性的职责完全由程序实现来承担。(脆弱，少用)
-- 栈封闭：只能通过局部变量才能访问对象。java语言的语义确保了基本类型的局部变量始终封闭在线程内；在维持对象引用的栈封闭性时需要额外工作确保被引用的对象不会逸出。
-- ThreadLocal类：ThreadLocal对象通常用于防止对可变的单实例变量或全局变量进行共享。当某个频繁执行的操作需要一个临时对象，例如一个缓冲区，而同时又希望避免在每次执行时都重新分配该临时对象，就可以使用该技术。(实现上ThreadLocal中存储值的对象ThreadLocalMap保存在相应线程的Thread对象中，当线程终止后，这些值会作为垃圾回收)。
+An object that is published when it should not have been is said to have escaped.<br />
+
+An object is in a predictable, consistent state only after its constructor returns, so publishing an object from within its constructor can publish an imcompletely constructed object. This is true even if the publication is the last statement in the constructor. If the this reference escapes during construction, the object is considered not properly constructed.<br />
+
+When an object create a therad from its constructor, it almost always shares its this reference with the new thread, either explicitly (by passing it to the constructor) or implicitly (because the Thread or Runnable is an inner class of the owing object). The new Thread might then be able to see the owning object before it is fully constructed. There is noting wrong with creating a thread in a consturctor, but it is best not to start the thread immediately. Instead, expose a start or initialize method that starts the owned thread.Calling an overrideable instance method (one that is neither private nor final) from the constructor can also allow the this reference to escape.
+
+> Thread Confinement
+
+If data is only accessed from a single thread, no synchronization is needed.When an object is confined to a thread, such usage is automatically thread-safe even if the confined object itself is not.This technique, thread confinement, is one of the simplest ways to achieve thread safety.<br />
+
+- Ad-hoc Thread Confinement: Ad-hoc thread confinement describes when the responsibility for maintaining thread confinement falls entirely on the implementation.Ad-hoc thread confinement can be fragile because none of the language features, it should be used sparingly.
+- Stack Confinement: An object can only be reached through local variables.Maintaining stack confinement for object references requires a little more assistance from the programmer to ensure that the referent does not escape.
+- ThreadLocal: Allows you to associate a per-thread value with a value-holding object. The thread-specific values are stored in the Thread object itself, when the thread terminates, the thread-specific values can be garbage collected.
+
 ``` java
  private static ThreadLocal<Connection> connectionHolder =
    new ThreadLocal<Connection>(){
-       public Connection initialValue(){ // 某个线程初次调用ThreadLocal.get(),就会调用获取初始值
+       public Connection initialValue(){ 
+       // when a thread calls ThreadLocal.get for the first time, initialValue is consulted to provide the initial value for that thread.
            return DriverManager.getConnection(DB_URL);
        }
    };
-```
-> 不变性： 不可变对象(immutable object)一定是线程安全的。
 
-当满足以下条件时，对象才是不可变的：
- - 对象创建以后其状态就不能修改；
- - 对象的所有域都是final类型(从技术上来看，不可变对象并不需要将其所有的域都声明为final类型，如String的hash域)；
- - 对象是正确创建的(在对象的创建时期，this 没有逸出)；
+ public static Connection getConnection() {
+    return connectionHolder.get();
+ }
+```
+
+> Immutability 
+
+An immutable object is one whose state cannot be changed after construction. Immutable objects are inherently thread-safe; their invariants are established by the consturctor, and if their state cannot be changed, these invariants always hold.
+
+An object is immutable if: 
+
+- Its state cannot be modified after construction
+- All its field are final (It is technically possible to have an immutable object without all fields being final. java.lang.String lazily computes the hash code the first time hashCode is called and caches it in a non-fianl field, but this work only because that field can take on only one non-default value that is the same every time it is computed because it is derived deterministically from immutable state.)
+- It is properly constructed (the this reference does not escape during construction)
+
  ```java
-     public int hashCode() { // hash的计算推迟到第一次调用hashCode(),基于final域value,每次计算结果都相同
-        int h = hash; 
-        if (h == 0 && value.length > 0) {
-            char val[] = value;
-            for (int i = 0; i < value.length; i++) {
-                h = 31 * h + val[i];
-            }
-            hash = h;
-        }
-        return h;
-    }
+ public int hashCode() { 
+ // hash的计算推迟到第一次调用hashCode(),基于final域value,每次计算结果都相同
+   int h = hash; 
+   if (h == 0 && value.length > 0) {
+     char val[] = value;
+     for (int i = 0; i < value.length; i++) {
+       h = 31 * h + val[i];
+     }
+     hash = h;
+   }
+   return h;
+ }
  ```
 
-> final 域：final类型的域是不能修改的(但如果final域所引用的对象是可变的，那么这些被引用的对象是可以修改的)。在java内存模型中，final域有着特殊的语义。final域能确保初始化过程的安全性，从而可以不受限制的访问不可变对象，并在共享这些对象时无需同步。
+> Final Fields
 
-**"除非需要更高的可见性，否则应将所有的域都声明为私有域"是一个良好的编程习惯；"除非需要某个域是可变的,否则应将其声明为final域"也是一个良好的编程习惯。**
+Final fields cannot be modified (although the objects they refer to can be modified if they are mutable), but they also have special semantics under the Java Memory Model. It is the use of final fields that makes possible the guarantee of initialization safety that lets immutable objects be freely accesssed and shared without synchronization.<br />
 
-> 在并发程序中使用和共享对象时，实用的一些策略：
- - 线程封闭： 线程封闭的对象只能由一个线程拥有，对象被封闭在该线程中，并且只能由该线程修改；
- - 只读共享： 在没有额外的同步情况下，共享的只读对象可以由多个线程并发访问，但任何线程都不能修改它。共享的只读对象包括不可变对象和事实不可变对象(Effectively Immutable Object, 对象从技术上来看是可变的，但其状态在发布后不会再改变)。
- - 线程安全共享： 线程安全的对象在其内部实现同步，因此多个线程可以通过对象的公有接口来进行访问而不需要进一步的同步；
- - 保护对象： 被保护的对象只能通过持有特定的锁访问。保护对象包括封装在其他线程安全对象中的对象，以及已发布的并且由某个特定锁保护的对象。
+Just as it is a good practice to make all fields private unless they need greater visibility, it is a good practice to make all fields final unless they need to be mutable.
 
-------
+> safe publication
+
+``` java
+// unsafe publication
+public Holder holder;
+
+pubic void initialize() {
+    holder = new Holder(42);
+}
+```
+
+Two things can go wrong with improperly published objects.Other threads could see a stale value for the Holder field, and thus see a null reference or other older value even though a value has been placed in Holder (While it may seem that field values set in a constructor are the first values written to those fileds and therefore that there no "older" values to see stale value, the Object constructor first writes the default values to all fields before subclass construcotrs run. It is therefore possible to see the default value for a field stale value.).
+
+> Immutable Objects and Initialization Safety
+
+Because immutable objects are so important, the java Memory Model offers a special guarantee of initialization safety for sharing immutable object. An object reference becomes visible to another thread does not necessarily mean that the state of that object is visible to the consuming thread. In order to guarantee a consistent view of the object's state, synchronization is needed.<br />
+
+Immutable objects can be safely accessed even when synchronization is not used to publish the object reference. For this guarantee of initialization safety to hold, all of the requirements for immutability must be met: unmodifiable state, all fields are final, and proper construction. <br />
+
+Immutable objects can be used safely by any thread without additional synchronization, even when synchronization is not used to publish them.<br />
+
+This guarantee extends to the values of all final fields of properly constructed objects; final fields can be safely accessed without additional synchronization. However, if final fields refer to mutable objects, synchronization is still required to access the state of the objects they refer to.
+
+> Safe Publication Idioms
+
+To publish an object safely, both the reference to the object and the object's state must be made visible to other threads at the same time. A properly constructed object can be safely published by:
+
+- Initializing an object reference from static initializer;
+- Storing a reference to it into a volatile field or AtomicReference;
+- Storing a reference to it into a final field of a properly constructed object
+- Storing a reference to it into a field that is properly guarded by a lock
+
+> Effectively Immutable Objects
+
+Objects that are not technically immutable, but whose state will not modified after publication, are called effectively immutable.<br />
+
+Safely published effectively immutable objects can be used safely by any thread without additional synchronization.
+
+> Mutable Objects
+
+To share mutable objects safely, they must be safely published and be either thread-safe or guarded by a lock. <br />
+
+The publication requirements for an object depend on its mutability:
+
+- Immutable objects can be published through any mechanism
+- Effectively immutable objects must be safely published
+- Mutable objects must be safely published, and must be either thread-safe or guarded by a lock.
+
+> Sharing Objects Safely 
+
+The most useful policies for using and sharing objects in a conucrrent program are: 
+
+- Thread-confined. A thread-confined object is owned exclusively by and confined to one thread, and can be modified by its owning thread.
+- Shared read-only. A shared read-only object can be accessed concurrently by multiple threads without additional synchronization, but cannot be modified by any thread. Shared read-only objects include immutable and effectively immutable objects.
+- Shared thread-safe. A thread-safe object performs synchronization internally, so multiple threads can freely access it through its public interface without further synchronization.
+- Guarded. A guarded object can be accessed only with a specific lock held. Guarded objects include those that are encapsulated within other thread-safe objects and pubished objects that are known to be guarded by a specific lock.
+
+
+> Instance Confinement 
+
+If an object is not thread-safe, several techniques can still let it be used safely in a multithreaded program. You can ensure that it is only accessed from a single thread (thread confinement), or that all access to it is properly guarded by a lock.<br />
+
+Encapsulating data within an object confines access to the data to the object's methods, make it easier to ensure that the data is always accessed with the appropriate lock held.<br />
+
+Confined objects must not escape their intended scope. An object may be confined to a class instance (such as a private class member), a lexical scope (such as a local variable), or a thread (such as an object that is passed from method to method within a thread, but not supposed to be shared across threads.)
+
+> The Java Monitor Pattern
+
+```java
+public class PrivateLock {
+    private final Object myLock = new Object();
+    @GuardedBy("myLock") Widget widget;
+
+    void someMethod() {
+        synchronized (myLock) {
+            // access or modify the state of widget
+        }
+    }
+}
+```
+
+Making the lock object private encapsulates the lock so that client code cannot acquire it, whereas a publicly accessible lock allows client code to participate in its synchronization policy - correctly or incorrectly.
+
+
 > 同步容器类：Vector 、Hashtable 、 Collections.synchronizedXxx() ， 实现线程安全的方式是将状态封装起来，并对每个公有方法都进行同步，使得每次只有一个线程能访问容器的状态。同步容器将所有对容器状态的访问都串行化，以实现它们的线程安全性。这种方法的代价是严重降低并发性，当多个线程竞争容器的锁时，吞吐量将严重降低。
 
 同步容器类都是线程安全的，但是在某些情况下可能需要额外的客户端加锁来保护符合操作。常见的符合操作：
