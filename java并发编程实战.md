@@ -35,6 +35,7 @@
  - make sense to 对..合乎情理；有意义
  - make sense for 对..有意义
  - make sense out of 弄明白；理解
+ - in a sense 在某种意义上
  - tricky 狡猾的；机警的；棘手的
  - intuitive 直觉的
  - counterintuitive 违反直觉的
@@ -83,6 +84,7 @@
  - prespective n.视角，远景，透视图；adj.透视的
  - either or 两者择一的
  - neither nor 既不是..也不是
+ - neither of 没有一个
  - refer 涉及；参考；查阅
  - collectively 集体地；共同地
  - necessarily 必要地；必然地；必定地
@@ -240,6 +242,120 @@
  - shallow n.浅滩；adj.浅的，肤浅的；v.变浅
  - accommodate 容纳；适应；调解
  - at once 立刻；马上
+ - building block 积木；构件
+ - effort 努力；成就
+ - bell n.铃；v.系铃
+ - warning bell 警铃
+ - go off 离开；爆炸；动身
+ - interpretation 解释；翻译；演出
+ - facilitate 促进；帮助；使容易
+ - comprehension n.理解；包含
+ - admit 承认；容许
+ - subtly 精细地；巧妙地
+ - suffer from 忍受；遭受
+ - functionality 功能；函数性
+ - illusion 幻觉；错觉
+ - albeit 虽然；尽管
+ - obliquely 倾斜地；转弯抹角地
+ - penalty 罚款；罚金；处罚
+ - mimic v.模仿；adj.模仿的；n.模仿者
+ - outstanding 杰出的；显著的；未解决的
+ - contend 竞争；斗争；争论；主张
+ - underutilize 未充分利用
+ - inadvertently 无意地；不经意地
+ - constituency 选民；支持者
+ - blur v.变模糊；沾上污迹；n.模糊不清的事物；污迹
+ - craft n.工艺，太空船；v.精巧地制作
+ - affair 事情；绯闻；私事
+ - clue n.线索；v.为..提供线索
+ - woefully 悲伤地；不幸地
+ - prudence n.审慎，谨慎
+ - ought to 应该
+ - intuition 直觉
+ - neglect n.忽视，忽略；v.忽视，忽略
+ - erroneous 错误的；不正确的
+ - vague 模糊的
+ - forthcoming n.来临；adj.即将来临的
+ - vendor 卖主；小贩；供应商；自动售货机
+ - compliant 顺从的；服从的；应允的
+ - frustratingly 令人泄气地；令人沮丧地
+ - omission 省略
+ - despite prep.即使，尽管；n.侮辱，轻视
+ - revision 修订本
+ - as opposed to 与..截然相反；对照
+ - merely 仅仅
+ - absurd n.荒诞，荒诞作品；adj.荒谬的，可笑的
+ - bolster v.支持，支撑，改善，给（座位）加软垫；n.垫枕，托木，支持
+ - replication 复制；回答；反响
+ - take responsibility for 对..负责
+ - exhausted adj.精疲力尽的，耗尽的；v.使..精疲力尽，耗尽
+ - navigation 航行；航海
+ - corrupt adj.腐败的，堕落的；v.腐烂，堕落
+ - opinion 意见；主张
+ - shrink v.收缩；缩小，退缩，（衣服）缩水；n.心理医生，收缩，畏缩
+ - leap v.跳跃，猛冲，剧增；n.跳跃，剧增
+ - in conformance with 与..一致；符合
+ - impair 损害；削弱；减少
+ - clarity 清楚；明晰；透明
+ - obviate 排除；避免
+ - foolproof 极简单的
+ - indicator 指示器；指示灯
+ - deliberate adj.故意的，深思熟虑的，从容的；v.仔细考虑，商议
+ - starvation 饿死；挨饿；绝食
+ - throughput 吞吐量
+ - utilization 利用率；利用
+ - favorable 有利的；良好的；赞成的
+ - bold 大胆的；英勇的；黑体的；险峻的
+ - concatenation 连接；串联
+ - dominant 占优势的；统治的
+ - retrieval n.检索，取回，恢复，拯救
+ - spread out 展开；传播
+ - unevenly 不均衡地；不平坦地
+ - degenerate v.退化，恶化，堕落；adj.退化的，堕落的；n.堕落的人
+ - strip v.脱去衣服，剥去（外皮），拆卸，剥夺，修剪（树枝）；n.条状物，脱衣舞，（纸、金属、织物等）带
+ - along with 沿着；与..一道
+ - estimate 估计；评估
+ - approximation 近似值
+ - continuously 连续不断地
+ - drop-in adj.不用预约的，立即使用的；n.非正式造访，不速之客
+ - briefly 短暂的；简略的；暂时的
+ - criterion （批评判断的）标准；准则；规范
+ - deliver 发表；投递；释放
+ - as well as 也；和..一样
+ - equivalent n.对等的人，当量；adj.等价的
+ - workload 工作量
+ - rate n.比率，速度，价格，等级；v.认为，估价，责骂，被评价 
+ - labor n.劳动，工作，分娩；v.劳动，努力，使厌烦，详细分析 
+ - rack n.架子，拷问台，齿条；v.变形，折磨，榨取，小步跑 
+ - dry adj.干的，口渴的；n.干涸；v.变干
+ - fill up 装满
+ - analogy n.类比，类推
+ - sink v.下沉；n.水槽
+ - crawler 爬行者；爬虫
+ - eventually 最后；终于
+ - catch up 赶上；追上
+ - shed n.小屋，棚，分水岭；v.流出，脱落，散布
+ - excess adj.额外的，过量的；n.超过，过度
+ - throttle n.节流阀，喉咙；v.节流，窒息
+ - robust 强健的；粗野的
+ - threaten 威胁；恐吓
+ - keep up 保持；继续；不落后
+ - rearchitect 重构
+ - up front 预先
+ - feed back 反馈
+ - amenable 有责任的；有义务的；顺从的；经得起检验的
+ - decomposition n.分解，腐烂，变质
+ - agent n.代理人，代理商，特工 ；v.由..代理，由..作中介；adj.代理的
+ - hierarchy 层级；等级制度
+ - monolithic adj.整体的，庞大的；n.单片电路
+ - yield v.生产；产出，屈服，放弃，停止争论，给..让路；n.产量，利润
+ - overall adj.全部的；adv.总的来说；n.工装裤，罩衫
+ - exploit n.功绩；v.开发，开采，剥削
+ - eligible n.合格者，有资格者；adj.合格的，符合条件的
+ - sensible 明智的；合乎情理的
+ - get away with 侥幸成功
+ - deprive 使丧失，剥夺
+ - swallow v.忍受，吞没，咽下；n.燕子，一次吞咽的量
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -490,39 +606,115 @@ public class PrivateLock {
 Making the lock object private encapsulates the lock so that client code cannot acquire it, whereas a publicly accessible lock allows client code to participate in its synchronization policy - correctly or incorrectly.
 
 
-> 同步容器类：Vector 、Hashtable 、 Collections.synchronizedXxx() ， 实现线程安全的方式是将状态封装起来，并对每个公有方法都进行同步，使得每次只有一个线程能访问容器的状态。同步容器将所有对容器状态的访问都串行化，以实现它们的线程安全性。这种方法的代价是严重降低并发性，当多个线程竞争容器的锁时，吞吐量将严重降低。
+``` java
+@NotThreadSafe
+public class ListHelper<E> {
+    public List<E> list = Collections.synchronizedList(new ArrayList<E>());
 
-同步容器类都是线程安全的，但是在某些情况下可能需要额外的客户端加锁来保护符合操作。常见的符合操作：
-- 迭代
-- 跳转(根据指定顺序找到当前元素的下一个元素)
-- 条件运算
+    // it synchronizes on wrong lock, use different locks
+    public synchronized boolean putIfAbsent (E x) {
+        boolean absent = !list.contains(x);
+        if (absent) {
+            list.add(x);
+        }
+        return absent;
+    }
+} 
+```
 
-在同步容器类中，这些复合操作在没有客户端加锁的情况下仍然是线程安全的，但当其他线程并发地修改容器时，它们可能会表现出意料之外的行为。
+```java 
+@ThreadSafe
+public class ListHelper<E> {
+    public List<E> list = Collections.synchronizedList(new ArrayList<E>());
 
-> 迭代器(Iterator) 和 ConcurrentModificationException: 当发现容器在迭代过程中被修改，就会抛出一个ConcurrentModificationException (fail-fast机制)；实现上是将计数器的变化和容器关联，如果迭代期间计数器被修改，则抛出异常。(**在单线程代码中也可能抛出ConcurrentModificationException异常，当对象直接从容器中删除而不是通过Iterator.remove()来删除时就会抛出该异常。<remove()方法会修改exceptedModCount的值>**)
+    public boolean putIfAbsent (E x) {
+        synchronized (list) {
+          boolean absent = !list.contains(x);
+          if (absent) {
+              list.add(x);
+          }
+          return absent;
+        }
+    }
+}
+```
 
-迭代过程中避免出现ConcurrentModificationException:
-- 对容器加锁
-- 克隆容器，在副本上进行迭代
+```java
+@ThreadSafe
+public class ImporvedList<T> implements List<T> {
+    private final List<T> list;
 
-容器的某些方法会间接地执行迭代操作，如hashCode(),equals()等，这些同样可能会抛出ConcurrentModificationException;
+    public ImporvedList(List<T> list) { this.list = list; }
 
--------
-> 并发容器： ConcurrentHashMap (替代同步且基于散列的Map), ConcurrentSkipListMap (替代同步的SortedMap), ConcurrentSkipListSet (替代同步的SortedSet), CopyOnWriteArrayList (在遍历操作为主要操作的情况下代替同步的List), ConcurrentLinkedQueue (FIFO队列),BlockingQueue (阻塞队列，"生产-消费者"模式)<PriorityQueue，优先队列，不是并发的>
+    public synchronized boolean putIfAbsent(T x) {
+        boolean contains = list.contains(x);
+        if (!contains) {
+            list.add(x);
+        }
+        return !contains;
+    }
 
-- ConcurrentHashMap : jdk 7 : segment 实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值；<br /> jdk 8 : CAS，synchronized 实现
+    public synchronized void clear() {
+        list.clear();
+    }
+}
+```
+
+> Synchronized Collections: Vector, Hashtable, synchronized wrapper class created by the Collections.synchronizedXXX factory methods. These classes achieve thread safety by encapsulating their state and synchronizing every public method so that only one thread at a time can access the collection state. 
+
+Synchronized Collections achieve their thread safety by serializing all access to the collection's state. The cost of this approach is poor concurrency; when multiple threads contend for the collection-wide lock, throughput suffers.
 
 
- [为并发而生的 ConcurrentHashMap（Java 8）](https://www.jianshu.com/p/e99e3fcface4)
-  <br />
- [为什么ConcurrentHashMap的读操作不需要加锁？](https://juejin.im/entry/5b98b89bf265da0abd35034c)
- 
- 并发容器提供的迭代器不会抛出 ConcurrentModificationException ,因此不需要在迭代过程中对容器加锁。ConcurrentHashMap 返回的迭代器具有**弱一致性** (Weaklly Consistent)，而并非"fail-fast"。弱一致性的迭代器可以容忍并发的修改，当创建迭代器时会遍历已有的元素，并可以(但不保证)在迭代器被构造后将修改操作反映给容器。
- <br />
+> Iterator and ConcurrentModificationException 
 
-- CopyOnWriteArrayList : 每次修改容器都会复制底层数组(并且使用 ReentrantLock )，所以仅当迭代操作远远多于修改操作时才应该使用。容器的迭代器保留一个指向底层数组的引用，由于底层数组不会被改变，所以对其进行同步只需确保数组内容的可见性。该容器的迭代器不会抛出 ConcurrentModificationException 。
+fail-fast: if they detect that the collection has changed since iteration began, they throw the unchecked ConcurrentModificationException. They are implemented by associating a modification count with the collection: if the modification count changes during iteration, hasNext() or next() throws ConcurrentModificationException.However, this check is done without synchronization, so there is a risk of seeing a stale value of the modification count and therefore that the iterator does not realize a modification has been made. This was a deliberate design tradeoff to reduce the performance impact of the concurrent modification detection code.<br />
 
-- BlockingQueue 和 producer-consumer模式
+(**在单线程代码中也可能抛出ConcurrentModificationException异常，当对象直接从容器中删除而不是通过Iterator.remove()来删除时就会抛出该异常。<remove()方法会修改exceptedModCount的值>**) <br />
+
+The way to prevent ConcurrentModificationException:
+
+- hold the collection lock for the duration of the iteration
+- clone the collection and iterate the copy instead (The collection still must be locked during the clone operation itself.)<br />
+
+Iteration is indirectly invoked by the collection's hashcode, equals and toString methods, which may be called if the collection is used as an element of key of another collection. Similarly, the containsAll, removeAll, and retainAll methods, as well as the constructors that take collections are arguments, also iterate the collection. All of these indirect uses of iteration can cause ConcurrentModificationException.
+
+> Concurrent Collections: 
+
+- ConcurrentHashMap: a replacement for synchronized hash-based Map implementation. 
+  
+   ConcurrentHashMap, along with the other concurrent collections, further improve on the synchronized collection classes by providing iterators that do not throw ConcurrentModificationException, thus eliminating the need to lock the collection during iteration. The iterators returned by ConcurrentHashMap are weakly consistent instead of fail-fast. <br />
+
+   A weakly consistent iteartor can tolerate concurrent modification, traverses elements as they existed when the iterator was constructed, and may (but is not guarantee to) reflect modifications to the collection after the construction of the iterator.<br />
+
+
+
+    jdk 7 : segment 实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值；<br /> 
+    jdk 8 : CAS，synchronized 实现<br />
+
+    [为并发而生的 ConcurrentHashMap（Java 8）](https://www.jianshu.com/p/e99e3fcface4)<br />
+    [为什么ConcurrentHashMap的读操作不需要加锁？](https://juejin.im/entry/5b98b89bf265da0abd35034c)
+
+- ConcurrentSkipListMap: a replacement for a synchronized SortedMap
+
+- ConcurrentSkipListSet: a replacement for a synchronized SortedSet
+
+- CopyOnWriteArrayList: a replacement for synchronized List implementations for cases where traversal is the dominant operation.
+    
+    They implement mutability by creating and republishing a new copy of the collection every time it is modified. Iterators for the copy-on-write collections retain a reference to the backing array that was current at the start of iteration, and since this will never change, they need to synchronize only brieflyto ensure visibility of the array contents. The iteartors returned by the copy-on-write collections do not throw ConcurrentModificationException and return the elements exactly as they were at the time the iterator was created, regardless of subsequent modifications.<br />
+
+    The copy-on-write collections are reasonable to use only when iteration is far more common than modification.
+
+- ConcurrentMap： new interface, adds support for common compound actions such as put-if-absent, replace, and conditional remove.<br />
+
+- Queue: is intended to hold a set of elements temporarily while they await processing. Queue operations do not block; if the queue is empty, the retrieval operation returns null.
+
+- ConcurrentLinkedQueue: a traditional FIFO queue
+
+- PriorityQueue: a (non concurrent) priority ordered queue
+
+- BlockingQueue: extends Queue to add blocking insertion and retrieval operations. If the queue is empty, a retrieval blocks until an element is available, and if the queue is full (for bounded queues) an insertion blcoks until there is space available. Blocking queues are extremely useful in producer-consumer design.
+
+- BlockingQueue and producer-consumer
 
 ```java
 /* Inserts the specified element into this queue, waiting if necessary for space to become available. */
@@ -532,12 +724,12 @@ Making the lock object private encapsulates the lock so that client code cannot 
     E take() throws InterruptedException;
 ```
 
-| Implements | |
+| Implements | Detail |
 | - | - |
 | ArrayBlockingQueue | FIFO，有界 |
 | LinkedBlockingQueue | FIFO，有界或无界 |
-| PriorityBlockingQueue | 有界，按优先级排序，自然序:Comparable 或 比较器：Comparator |
-| SynchronousQueue | 同步队列，不为队列中的元素维护存储空间;它维护一组线程，这些线程在等待把元素加入或移出队列; 不是一个真正的队列，而是一种在线程之间进行移交的机制，Executors.newCachedThreadPool()使用了这种队列 |
+| PriorityBlockingQueue | 有界，process elements in priority-ordered other than FIFO, can compare elements according to their natural order (if they implement Comparable) or using Comparator. |
+| SynchronousQueue | in that it maintains no storage space for queued element. Instead, it maintains a list of queued threads waiting to enqueue or dequeue an element. SynchronousQueue has no storage capacity, put and take will block unless another thread is already waiting to partcipate in the handoff. Synchronous queues are generally suitable only when there are enough consumers that there nearly always will be one ready to take the handoff. Executors.newCachedThreadPool() use this queue. |
 
 队列可以是有界的，也可以是无界的，无界队列永远不会充满，因此无界队列上的 put 永远不会阻塞(通常这种无界不是真的无界，而是容量是Integer.MAX_VALUE)。
 <br />
@@ -545,26 +737,44 @@ Making the lock object private encapsulates the lock so that client code cannot 
 
 **在构建高可用的应用程序时，有界队列是一种强大的资源管理工具，它们能抑制并防止产生过多的工作项，使应用程序在负荷过载的情况下变得更加健壮。**
 
+- Deque (pronounced "deck") and BlockingDeque: extend Queue and BlockingQueue.
 
-> java 6 新增两个容器类型 ： Deque (发音"deck") 和 BlockingDeque, 分别对Queue和BlockingQueue进行扩展。实现类包括 ArrayDeque 和 LinkedBlockingDeque。 Deque 是一个双端队列，实现了在队列头和队列尾高效插入和移除。<br /> 双端队列适用的模式是**工作密取(Work Stealing)**:在生产者-消费者模式中，所有消费者有一个共享的工作队列，在工作密取中，每个消费者都有各自的双端队列。如果一个消费者完成自己双端队列中的全部工作，那么它可以从其他消费者双端队列末尾秘密地获取工作。
+A Deque is a double-ended queue that allows efficient insertion and removal from both the head and the tail. Implementations include ArrayDeque and LinkedBlockingDeque. <br />
 
-------
+Work Stealing: A producer-consumer design has one shared work queue for all consumers; in a word stealing design, every consumer has its own deque. If a consumer exhausts the work in its own deque, it can steal work from the tail of someone else's deque. Work stealing can be more scalable than a traditional producer-consumer design because workers don't contend for a shared work queue; most of the time they access only their own deque, reducing contention. When a worker has to access another's queue, it does so from the tail rather than the head, further reducing contention. <br />
+
+Work stealing is well suited to problems in which consumers are also producers - when performing a unit of work is likely to result in the identification of more work.
+
+> Blocking and Interruptible Methods 
+
+Threads may block or pause for serveral reasons: 
+
+- waiting for I/O completion 
+- waiting to acquire a lock
+- waiting to wake up from Thread.sleep
+- waiting for the result of a computation in another thread
+
+When a thread blocks, it is usually suspended and palced in one of the blocked thread states (BLOCKED, WAITING, or TIMED_WAITING). <br />
+
+The distinction between a blocking operation and an ordinary opeartion that merely takes a long time to finish is that a blocked thread must wait for an event that is beyond its control before it can proceed - the I/O completes, the lock becomes available, or the external computation finishes. When that external event occurs, the thread is placed back in the RUNNABLE state and becomes eligible again fro scheduling.<br />
+
+When a method can throw InterruptedException, it is telling you that it is a blocking method, and further that if it is interrupted, it will make an effort to stop blocking early. Thread provides the interrupt method for interrupting a thread and for querying whether a thread has been interrupted. Each thread has a boolean property that represents its interrupted status; interrupting a thread sets this status.<br />
+
+Interruption is a cooperative mechanism. One thread cannot force another to stop what it is doing and do something else; when thread A interrupts thread B, A is merely requesting that B stop what it is doing when it gets to a convenient stopping point - if it feels like it.<br />
+
+When your code calls a method that throws InterruptedException, then your method is a blocking method too, and must have a plan for responding to interruption. For library code, there are basically two choices:
+
+- Propagate the InterruptedException. just propagate the InterruptedException or catching it and throwing it again after performing some brief activity-specific cleanup.
+- Restore the interrupt. catch InterruptedException and restore the interrupted status by calling interrupt on the current thread.
+
 线程状态转换：
 ![](https://github.com/CyC2018/CS-Notes/blob/master/pics/ace830df-9919-48ca-91b5-60b193f593d2.png)
 
-> 阻塞方法和中断方法： 
 
-线程阻塞(BLOCKED、WAITING、TIMED_WAITING)的一些原因： 
-  - 等待I/O 操作结束
-  - 等待获得锁
-  - 等待从Thread.sleep方法中醒来
-  - 等待另一个线程的计算结果
+> Synchronizers: A synchronizer is any object that coordinates the control flow of threads based on its state; like blocking queues, semaphores, barriers, latches.
 
-**阻塞操作与执行时间很长的普通操作的差别在于，被阻塞的线程必须等待某个不受它控制的事件发生后才能继续执行。当某个外部事件发生时，线程被置回RUNNABLE状态，并可以再次被调度执行。**
+All synchronizers share certain structual properties: they encapsulate state that determines whether threads arriving at the synchronizer should be allowed to pass or forced to wait, provide methods to manipulate that state, and provide methods to wait efficiently for the synchronizer to enter the desired state.
 
-> 当某个方法抛出InterruptedException时，表示该方法是一个阻塞方法，如果这个方法被中断，那么它将努力提前结束阻塞状态。Thread提供interrupt方法，用于中断线程或者查询线程是否已经被中断。
-
-> 中断是一种协作机制。一个线程不能强制其他线程停止正在执行的操作而去执行其他的操作。当线程A中断B时，A仅仅是要求B在执行到某个可以暂停的地方停止正在执行的操作，前提是线程B愿意停止下来。
 
 > 同步工具类： 可以是任何一个对象，只要它根据自身的状态来协调线程的控制流。
 
