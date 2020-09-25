@@ -356,6 +356,25 @@
  - get away with 侥幸成功
  - deprive 使丧失，剥夺
  - swallow v.忍受，吞没，咽下；n.燕子，一次吞咽的量
+ - in bulk 整批；散装；大批；大量
+ - gate n.大门，出入口，门道；v.给..装大门
+ - bother with 为..费心；用..打扰
+ - presumably 大概；推测起来；可假定
+ - vary v.改变；变化；违反；使多样化
+ - bear v.忍受，承受，不适于某事，承担责任，经得起，坏心情，支持，携带，生（孩子），产生（利息）；n.熊，泰迪熊
+ - subsume 把..归入；把..包含在内
+ - convey 传达；运输
+ - lengthy 漫长的；冗长的；啰嗦的
+ - inadvisable 失策的；不明智的
+ - coerce 强制；迫使
+ - rendezvous n.约会，约会地点，集结地；v.会合，约会，在指定地点与..相会
+ - elect v.选举，选择，决定（做某事）；adj.卓越的，当选（而尚未就职的）的；n.被选的人
+ - trip n.旅行，赛程，绊倒，错误，（机器、电路的）开关，奇妙有趣的经历；v.绊倒，（部分电路）自动断开，触发（开关）
+ - particle 颗粒；[物]质点；极小量
+ - cellular n.移动电话，单元；adj.细胞的，多孔的
+ - automata 自动机；不动脑筋机械行事的人；自动装置；小机器人（automaton的复数）
+ - asymmetric 不对称的
+ - bottleneck 瓶颈；障碍物
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -773,32 +792,203 @@ When your code calls a method that throws InterruptedException, then your method
 
 > Synchronizers: A synchronizer is any object that coordinates the control flow of threads based on its state; like blocking queues, semaphores, barriers, latches.
 
-All synchronizers share certain structual properties: they encapsulate state that determines whether threads arriving at the synchronizer should be allowed to pass or forced to wait, provide methods to manipulate that state, and provide methods to wait efficiently for the synchronizer to enter the desired state.
+All synchronizers share certain structual properties: they encapsulate state that determines whether threads arriving at the synchronizer should be allowed to pass or forced to wait, provide methods to manipulate that state, and provide methods to wait efficiently for the synchronizer to enter the desired state.<br />
 
+> Latches: A latch is a synchronizer that can delay the progress of threads until it reaches its terminal state. A latch acts as gate: until the latch reaches the terminal state the gate is closed and no thread can pass, and in the terminal state the gate opens, allowing all thread to pass. Once the latch reaches the terminal state, it cannot change state again, so it remains open forever.
 
-> 同步工具类： 可以是任何一个对象，只要它根据自身的状态来协调线程的控制流。
+Latches can be used to ensure that certain activities do not proceed until other one-time activities complete, such as:
 
-- 闭锁：延迟线程的进度直到其到达终止状态，**到达结束状态后将不会再改变状态**。CountDownLatch：维护一个计数器(实际是AbstractQueuedSynchronizer的状态)，countDown()递减计数器，await()方法等待计数器达到0。
+- Ensuring that a computation does not proceed until resoures it needs have been initialized.
+- Ensuring that a service does not start until other services on which it depends have started.
+- Waiting until all the parties involved in an activity.
 
-- FutureTask: 实现Future语义，表示一种抽象的可生产结果的计算。
+CountDownLatch: is a flexible latch implementation that can be used in any of these situations; it allows one or more threads to wait for a set of events to occur.
 
-Treiber stack : FutureTask中使用到了这种无锁并发栈,用来保存等待的线程，其实现方式是 CAS + 重试<br />
+```java
+public class TestHarness {
+    public long timeTasks(int nThreads, final Runnable task) throws InterruptedException {
+        final CountDownLatch startGate = new CountDownLatch(1);
+        final CountDownLatch endGate = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Thread t = new Thread() {
+                public void run() {
+                    try {
+                        startGate.await();
+                        try {
+                            task.run();
+                        } finally {
+                            endGate.countDown();
+                        }
+                    } catch (InterruptedException ignored) {}
+                }
+            }
+            t.start();
+        }
+
+        long start = System.nanoTime();
+        startGate.countDown();
+        endGate.await();
+        long end = System.nanoTime();
+        return end - start;
+    }
+}
+```
+
+> FutureTask: acts like a latch. (FutureTask implements Future, which descibes an abstract result-bearing computation.) A computation represented by a FutureTask is implemented with a Callable, the result-bearing equivalent of Runnable, and can be in one of three states: waiting to run, running or completed. Completion subsumes all the ways a computation can complete, including normal completion, cancellation, and exception. Once a FutureTask enters the completed state, it stays in the state forever.
+
+The behavior of Future.get depends on the state of the task. If it is completed, get returns the result immediately, and otherwise blocks until the task transitions to the completed state and then returns the result or throws an exception. FutureTask conveys the result from the thread executing the computation to the thread retrieving the result; the specification of FutureTask guarantees that this transfer constitutes a safe publication of the result.
+
+``` java
+public class Preloader {
+    private final FutureTask<ProductInfo> future = new FutureTask<ProductInfo>(new Callable<ProductInfo>() {
+          public ProductInfo call() throws DataLoadException {
+            return loadProductInfo();
+          }
+    });
+
+    private final Thread thread = new Thread(future);
+
+    pubilc void start() {
+        // it is inadvisable to start a thread from a constructor or static initializer 
+        thread.start(); 
+    }
+
+    public ProductInfo get() 
+        throws DataLoadException, InterruptedException {
+            try {
+                // whatever the task code may throw, it is wrapped in an ExecutionException and rethrown from Future.get
+                return future.get();
+            } catch (ExecutionException e) {
+                Throable cause = e.getCause();
+                if (cause instanceof DataLoadException) {
+                    throw (DataLoadException) cause;
+                } else {
+                    throw launderThrowable(cause);
+                }
+            }
+    }
+}
+```
+
+Treiber stack : FutureTask中使用到了这种无锁并发栈,用来保存等待的线程，其实现方式是 CAS + 重试 <br />
 [FutureTask源码解读](http://www.cnblogs.com/micrari/p/7374513.html)
 
-- Semaphore: 用来控制同时访问某个特定资源的操作数量，或同时执行某个指定操作的数量。
+> Semaphores: Counting semaphores are used to control the number of activities that can access a certain resource or perform a given action at the same time.Counting semaphores can be used to implement resource pools or to impose a bound on a collection.
 
-- 栅栏(Barrier): 阻塞一组线程直到某个事件发生。栅栏与闭锁的关键区别在于，所有线程必须到达了栅栏位置，才能继续执行。闭锁用于等待事件(事件完成，线程允许执行)，而栅栏用于等待其他线程(所有线程到达栅栏，允许继续执行后面的操作)。
+A Semaphore manages a set of virtual permits; the initial number of permits is passed to the Semaphore consturctor. Activities can acquire permit (as long as some remain) and release permits when they are done with them. If no permit is available, acquire blocks until one is (or until interrupted or the operation times out). The release method returns a permit to the Semaphore.
 
- CyclicBarrier: 栅栏可以重置，多次使用。
+```java
+public class BoundedHashSet<T> {
+    private final Set<T> set;
+    private final Semaphore sem; 
+
+    public BoundedHashSet(int bound) {
+        this.set = Collections.synchronizedSet(new HashSet<T>());
+        sem = new Semaphore(bound);
+    }
+
+    public boolean add(T o) throws InterruptedException {
+        sem.acquire();
+        boolean wasAdded = false; 
+        try {
+            wasAdded = set.add(o);
+            return wasAdded;
+        } finally {
+            if (!wasAdded) {
+                sem.release();
+            }
+        }
+    }
+
+    public boolean remove(Object o) {
+        boolena wasRemoved = set.remove(o);
+        if (wasRemoved) {
+            sem.release();
+        }
+        return wasRemoved;
+    }
+} 
+```
+
+> Barriers: Latches are single-use objects; once a latch enters the terminal state, it cannot be reset. Barriers are similar to latches in that they block a group of threads until som event has occurred. The key difference is that with a barrier, all the threads must come together at a barrier point at the same time in order to proceed. Latches are for waiting for events; barriers are for waiting for other threads.
+
+CyclicBarrier allows a fixed number of parties to rendezvous repeatedly at a barrier point and is useful in parallel iterative algorithms that break down a problem into a fixed number of independent subproblems. Thread call await when theye reach the barrier point, and await blocks until all the threads have reached the barrier point. If alll threads meet at the barrier point, the barrier has been successfully passed, in which case all threads are released and the barrier is reset so it can be used again. If a call to await times out or a thread blocked in await is interrupted, then the barrier is considered broken and all outstanding calls to await terminate with BrokenBarrierException.
+
  ```java
   public CyclicBarrier(int parties);
+
+  /**
+   * execute the given barrier action when the barrier is tripped,
+   * performed by the last thread entering the barrier.
+   */
   public CyclicBarrier(int parties, Runnable barrierAction);
-  
-  /* Waits until all parties have invoked await on this barrier.*/
+  /**
+   * Waits until all parties have invoked await on this barrier.
+   * @return the arrival index of the current thread, where index
+   *         {@code getParties() - 1} indicates the first
+   *         to arrive and zero indicates the last to arrive
+   */
   public int await() throws InterruptedException, BrokenBarrierException；
  ```
-<br />
-Exchanger: 两方(Two-Party)栅栏
+
+ ``` java
+ public class CellularAutomata {
+    private final Board mainBoard;
+    private final CyclicBarrier barrier; 
+    private final Worker[] workers;  
+
+    public CellularAutomata(Board board) {
+        this.mainBoard = board;
+        int count = Runtime.getRuntime().availableProcessors();
+        this.barrier = new CyclicBarrier(count, new Runnable() {
+            public void run() {
+                mainBoard.commitNewValues();
+            }
+        });
+        this.worker = new Worker[count];
+        for (int i = 0; i < count; i++) {
+            worker[i] = new Worker(mainBoard.getSubBoard(count, i));
+        }
+    }
+
+    private class Worker implements Runnable {
+    private final Board board;
+
+    public Worker(Board board) {
+        this.board = board;
+    }
+
+    public void run() {
+        while (!board.hasConverged()) {
+            for (int x = 0; i < boardMaxX(); x++) {
+                for (int y = 0; y < board.getMaxY(); y++) {
+                    board.setNewValue(x, y, computeValue(x, y));
+                }
+            }
+            try {
+                barrier.await();
+            } catch (InterruptedException ex) {
+                return;
+            } catch (BrokenBarrierException ex) {
+                return;
+            }
+        }
+    }
+ }
+
+ public void start() {
+    for (int i = 0; i < workers.length; i++) {
+        new Thread(workers[i]).start();
+    }
+    mainBoard.waitForConvergence();
+ } 
+}
+ ```
+
+Another form of barrier is Exchanger, a two-party barrier in which the parties exchange data at the barrier point.<br />
+
+[Exchanger](!https://www.cnblogs.com/12344321hh/p/10637358.html)
 
 ```java
 //实现一个缓存器
