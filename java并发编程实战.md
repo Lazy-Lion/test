@@ -118,7 +118,7 @@
  - render v.致使，提供，提出，渲染
  - coarse-grained 粗鲁的；木纹粗糙的；粗略的；大概的
  - intend 打算
- - idle 闲置的
+ - idle adj.闲置的，懒惰的；v.虚度，使空转，无所事事
  - bonus 奖金；红利
  - constitute 构成；任命
  - portion n.部分；v.将..分配
@@ -375,6 +375,145 @@
  - automata 自动机；不动脑筋机械行事的人；自动装置；小机器人（automaton的复数）
  - asymmetric 不对称的
  - bottleneck 瓶颈；障碍物
+ - conservative n.保守派，守旧者；adj.保守的
+ - sort v.分类，协调，交往；n.种类，方式，品质，分类，排序
+ - awful adj.可怕的，极坏的，极讨厌的，使人敬畏的，非常的；adv.极其，非常
+ - defect n.缺点；v.变节，叛变
+ - far worse 糟糕得多
+ - notion 概念，见解，打算
+ - head over to 前往
+ - hang out 闲逛
+ - transparent 透明的，显然的，坦率的，易懂的
+ - eviction 逐出，赶出，收回
+ - material adj.物质的，身体需要的，重要的，（证据或事实）决定性的，客观存在的，物欲的；n.材料，用具，（有指明特征的）人才，素材，曲目，布料
+ - cheat n.欺骗，作弊，骗子；v.欺骗，作弊
+ - headquarter 总部，司令部，总公司
+ - campaign v.领导或参加运动，参见竞选；n.运动，活动，战役，竞选
+ - boil down to 归结于
+ - tremendously 非常地；可怕地；惊人地
+ - defensive n.防御，守势；adj.自卫的，防御用的
+ - comply 遵守；顺从；应允
+ - clever 聪明的；机灵的；熟练的 
+ - ideally 理想地；观念上地
+ - fraction 分数；部分；小部分；稍微
+ - provision n.规定，条款，供应品；v.供给..食物和必需品
+ - grateful 感谢的；令人愉快的；宜人的
+ - graceful 优雅的；优美的
+ - degradation n.退化；降级；堕落
+ - fall over 跌倒
+ - percentage 百分比；百分数
+ - potential n.潜能，可能性；adj.潜在的；可能的
+ - theoretically 理论地；理论上
+ - alternate v.交替，轮流；adj.交替的，轮流的，间隔的，每隔（..天等）的，另外的，可供选择的，（两者）互不相容的，另类的，非传统的，（叶、芽）互生的；n.替换物，代理人
+ - congestion 拥挤；拥塞；淤血
+ - pend n.拱道；v.等候判定，悬挂，垂下
+ - moderate adj.稳健的，温和的，适度的，中等的，有节制的；v.节制，减轻，变缓和
+ - teardown n.拆卸，待拆房屋
+ - tie up 占用；包扎；绑好；阻碍；密切联系；合伙；停泊
+ - tie n.领带，鞋带，领结，关系，纽带，束缚，平局，（英）淘汰赛（尤指足球）；v.（用线、绳等）系，打结，连接，联合，约束，与..平局，不分胜负 
+ - megabyte 兆字节
+ - prototype n.原型，样本，标准，模范；v.制作原型 
+ - surface n.表面，外观；adj.肤浅的，表面的；v.浮出水面是，使成平面 
+ - gather n.聚集，衣褶，收获量；vt.收集，收割，使..聚集，使..皱起，聚集 
+ - hook n.挂钩，吊钩；v.钩住，弯成钩状 
+ - substitute n.代替者，代用品；v.替代 
+ - invasive 侵入的；入侵的；扩散的
+ - tend to 趋向；易于
+ - strew 散播；撒满
+ - specify 指定；详细说明；列举；把..列入说明书 
+ - victim n.受害人，牺牲品，牺牲者，受骗者，上当的人，祭品，牺牲，无助者，被动者
+ - scarce adj.缺乏的，不足的，稀有的；adv.仅仅，几乎不，几乎没有 
+ - practical 实际的；实用的
+ - homogeneous 均匀的；同类的 
+ - amortize 摊销；分期偿还
+ - tune n.曲调，和谐，心情；v.调整，使一致，为..调音，协调 
+ - thrash n.打谷，逆风浪行进，踢水动作；v.打，使逆行，打谷，猛烈摆动 
+ - reap 收获；收割
+ - spectrum 光谱；范围
+ - abrupt 生硬的；突然的；唐突的；陡峭的
+ - imply v.意味，暗示，隐含
+ - disacrd n.抛弃，被丢弃的东西或人；v.抛弃，放弃
+ - recur v.复发，循环，重现，递归
+ - accuracy 精确度；准确性
+ - resurrect 复活；复兴
+ - leakage 泄露；渗漏物
+ - exploitable 可开发的；可利用的
+ - intersperse 散布；点缀；在..中夹杂某物 
+ - dimension n.方面，维度，尺寸，次元，容积；adj.规格的；v.标出尺寸 
+ - markup n.涨价，利润，审定 
+ - placeholder 占位符
+ - rectangular 矩形的
+ - anticipate v.预期，预料，期盼，先于..做，早于..行动，在期限内履行（义务），偿还（债务），提前使用 
+ - express n.快车，快递，捷运公司；v.表达，快递；adj.明确的，迅速的，专门的
+ - cooperate v.合作，配合，协力 
+ - get a head start 良好的开端
+ - heterogeneous adj.由很多种类组成的，混杂的，各种各样的，（化学）不均一的，多相的，（数学）不纯一的，参差的 
+ - scale n.规模，比例，鳞，刻度，天平，数值范围；v.测量，攀登，剥落，生水垢，改变大小，刮鳞，依比例决定  
+ - show up 露面；露出；揭露
+ - get in the way 妨碍；阻碍
+ - division n.除法，部门，分配，分割，师（军队），赛区 
+ - finer-grained 细粒度
+ - diminish v.减少，缩小 
+ - disparate n.无法相比的东西；adj.不同的，不相干的，全异的 
+ - worthwhile adj.重要的，值得的，有价值的
+ - compensate v.补偿，赔偿，抵消，付报酬 
+ - payoff adj.支付的，决定性的，产生结果的；n.报酬，结果，发工资，结算 
+ - tedious 沉闷的，冗长乏味的 
+ - portal n.大门，入口
+ - budget n.预算；adj.廉价的；v.安排，预定，把..编入预算，做预算 
+ - abort n.中止计划；v.使中止，流产，堕胎，夭折，发育不全 
+ - expire v.期满，终止，死亡，呼吸，呼出（空气） 
+ - reservation 保留；预定
+ - generalize v.形成概念，概括，归纳，推广，使..一般化 
+ - bid n.出价，投标，努力，叫牌；v.出价，叫牌，向..表示问候，（诗、文）命令，邀请，努力争取，企图获得，告诉，吩咐 
+ - airline n.航空公司，航线；adj.航线的
+ - rental n.租金收入，租金，租赁，租用的房屋（或汽车、设备等）；adj.租赁的，收取租金的 
+ - identical n.完全相同的事物；adj.同一的，完全相同的 
+ - whereas conj.然而，鉴于；n.序言，开场白，条件语句 
+ - flawed 有缺陷的；有瑕疵的；有裂纹的
+ - rarely 很少地；罕有地
+ - preemptively 先发制人地 
+ - agreed-upon 一致同意的 
+ - enumerate v.列举，枚举，计算
+ - take a while 需要一段时间
+ - get ahead of 胜过；领先
+ - emerge 浮现；摆脱；暴露 
+ - sustain 维持；支撑；承担；忍受；供养；证实 
+ - sticky 粘性的
+ - trigger n.扳机，起因，触发器；v.触发，引起 
+ - persist v.坚持，持续，固执 
+ - deliberately 故意地
+ - deny v.否认，拒绝 
+ - restrict 限制；约束
+ - recipient n.容器，接受者，容纳者；adj.容易接受的，容纳的 
+ - house-sit （主人外出时）代为照看房子 
+ - mail n.邮件，邮政，邮递，盔甲；v.邮寄，给..穿盔甲
+ - throw out 扔掉；伸出；说出；否决；突出 
+ - postpone 延缓；把..放在次要位置
+ - opportune 适当的；恰好的  
+ - critic 批评家，评论家，爱挑剔的人
+ - deride 嘲笑；嘲弄  
+ - robustness 鲁棒性；稳健性；健壮性 
+ - higher-up 上级；上司；大人物
+ - take forever 花很长时间 
+ - somewhat adv.有点，稍微；pron.某物，几分 
+ - appealingly 上诉地；哀求地；吸引人地 
+ - irritate v. 刺激，使兴奋，激怒，过敏
+ - deficiency 缺陷；缺点 
+ - refine 精炼；提纯；改善；使..文雅 
+ - persuade v.说服
+ - dictate n.命令，指示；v.命令，口述，听写  
+ - transitive n.传递，及物动词；adj.及物的，过渡的，可传递的 
+ - dedicated adj.专用的，专注的，献身的；v.以..奉献，把..用于 (dedicate) 
+ - drain n.排水沟，下水道，负担，消耗；v.排水，流干，喝光，（感情）变淡，耗尽 
+ - likelihood 可能性
+ - variant adj.不同的，多样的；n.变体，转化  
+ - poison n.毒药，极有害的思想；v.毒害，下毒，败坏，污染（地区、空气等），抑制..的活性 
+ - pill n.药丸，弹丸，子弹；v.制成丸剂，服药丸，抢劫，掠夺 
+ - unwieldy 笨拙的；笨重的
+ - preclude 排除；妨碍；阻止
+ - commence v.开始，着手，<英>获得学位 
+ - instrument n.仪器，工具，乐器，手段，器械；v.给..装测量仪器 
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -996,8 +1135,8 @@ public interface Computable<A, V> {
 	V compute(A args) throws InterruptedException;
 }
 
-public class Memoizer<A,V> implements Computable<A,V>{
-	private final ConcurrentHashMap<A,FutureTask<V>> cache = 
+public class Memoizer<A, V> implements Computable<A, V>{
+	private final Map<A, FutureTask<V>> cache = 
 			new ConcurrentHashMap<>();
 	
 	private final Computable<A,V> comp;
@@ -1006,7 +1145,7 @@ public class Memoizer<A,V> implements Computable<A,V>{
 		this.comp = comp;
 	}
 	
-	public V compute(A args) throws InterruptedException {
+	public V compute(final A args) throws InterruptedException {
 		
 		while(true) {
 			FutureTask<V> f = cache.get(args);
@@ -1041,33 +1180,71 @@ public class Memoizer<A,V> implements Computable<A,V>{
 }
 ```
 
--------
-> 无限制地创建线程的问题：
- - 线程生命周期的开销非常高；
- - 资源消耗；如果可运行的线程数量多于可用的处理器数量，那么有些线程将闲置。大量空闲的线程会占用许多内存，给垃圾回收器带来压力，而且大量线程在竞争CPU资源时还将产生其他性能开销。如果已经有足够多的线程使所有CPU保持忙碌状态，那么再创建更多线程反而会降低性能。
- - 稳定性；在可创建线程的数量上存在一个限制，如果破坏这些限制，可能会抛出OutOfMemoryError。
+> Main concepts and rules:
 
-> Executor框架：任务是一组逻辑工作单元，而线程则是使任务异步执行的机制。在Java类库中，任务执行主要抽象不是Thread，而是Executor。**Executor基于生产者-消费者模式，提交任务的操作相当于生产者，执行任务的线程则相当于消费者。任务的提交和执行解耦。**
-```java
+- It's the mutable state, stupid. 
+  All concurrency issues boil down to coordinating access to mutable state. The less mutable state, the easier it is to ensure thread safety.
+- Make fields final unless they need to be mutable.
+- Immutable objects are automatically thread-safe.
+  Immutable objects simplify concurrent programming tremendously. They are simpler and safer, and can be shared freely without lokcing or defensive copying.
+- Encapsulation makes it practical to manage the complexity.
+- Guard each mutable variable with a lock.
+- Guard all variables in an invariant with the same lock.
+- Hold locks for the duration of compound actions.
+- A program that accesses a mutable variable from multiple threads without synchronization is a broken program.
+- Don't rely on clever reasoning about why you don't need to synchronize.
+- Include thread safety in the design processor explicitly document that your class is not thread-safe.
+- Document your synchronization policy.
+
+> Up to a certain point, more threads can improve throughput, but beyond that point creating more threads just slows down your application, and creating one thread too many can cause your entire application to crash horribly.
+
+> The Executor Framework 
+
+The primary abstraction for task execution in the Java class library (java.util.concurrent) is not Thread, but Executor. Executor forms the basis for a flexible and powerful framework for asynchronous task execution that supports a wide variety of task execution policies. It provides a standard means of decoupling task submission from task execution, describing tasks with Runnable. The Executor implementations also provide lifecycle support and hooks for adding statistics gathering, application management, and monitoring.<br />
+
+```java 
 public interface Executor {
     void execute(Runnable command);
-}
+} 
 ```
 
-> 线程池：通过调用Executors中的静态方法创建线程池
+Executor is based on the producer-consumer pattern, where activities that submit tasks are the producers (producing units of work to be done) and the threads that execute tasks are the consumers (consuming those units of work). Using an Executor is usually the easiest path to implementing a producer-consumer design in your application.
 
-- newFixedThreadPool
-- newCachedThreadPool
-- newSingleThreadExecutor
-- newScheduledThreadPool
 
-> Executor生命周期： 
- 
-为了解决执行服务的生命周期问题，Executor扩展了ExecutorService接口,Executor生命周期有3中状态：运行、关闭、已终止。
+> Thread Pools: A thread pool is tightly bound to a work queue holiding tasks waiting to be executed. Worker threads have a simple life: request the next task from the work queue, execute it, and go back to waiting for another task.
+
+You can create a thread pool by calling one of the static factory methods in Executros: (阿里建议使用ThreadPoolExecutor自定义线程池替代Executors的静态方法)
+
+- newFixedThreadPool: adds new thread if threads if a thread dies due to an unexpected Exception.
+- newCachedThreadPool: places no bounds on the size of the pool
+- newSingleThreadExecutor: replace thread if it dies unexpected.
+- newScheduledThreadPool: A fixed-size thread pool that supports delayed and periodic taks execution.
+
+
+> Executor Lifecycle
+
+To address the issue of execution service lifecycle, the ExecutorService interface extends Executor, adding a number of methods for lifecycle management (as well as some convenience methods for task submission). <br />
+
+The lifecycle implied by ExecutorService has three states - running, shutting down, and terminated.
+
 ```java
 public interface ExecutorService extends Executor {
-    void shutdown();
-    List<Runnable> shutdownNow();
+
+    /**
+     * Initiates an orderly shutdown in which previously submitted
+     * tasks are executed, but no new tasks will be accepted.
+     * Invocation has no additional effect if already shut down.
+     *
+     * <p>This method does not wait for previously submitted tasks to
+     * complete execution.  Use {@link #awaitTermination awaitTermination}
+     * to do that.
+     */
+    void shutdown(); // initiates a graceful shutdown: no new tasks are accepted but perviously submitted tasks are allowed to complete - including those that have not yet begun execution.
+
+    /**
+     * @return list of tasks that never commenced execution
+     */
+    List<Runnable> shutdownNow(); // initiates an abrupt: it attempts to cancel outstanding tasks and does not start any tasks that are queued but not begun.
     boolean isShutdown();
     boolean isTerminated();
     Future<?> submit(Runnable task);
@@ -1083,11 +1260,21 @@ public interface ExecutorService extends Executor {
 }
 ```
 
-------
-> Runnable 、 Callable
+> Delayed and Periodic Tasks 
+
+Timer does have support for scheduling based on absolute, not relative time, so that tasks can be sensitive to changes in the system clock; ScheduledThreadPoolExecutor supports only relative time. <br />
+
+A Timer creates only a single thread for executing timer tasks. If a timer task takes too long to run, the timing accuracy of other TimerTasks can suffer. If a recurring TimerTask is scheduled to run every 10 ms and another TimerTask takes 40 ms to run, the recurring task either (depending on whether it was scheduled at fixed rate or fixed delay) gets called four times in rapid sucession after the long-running task completes, or "misses" four invocations completely. Scheduled thread pools address this limitation by letting you provide multiple thread for executing deferred and periodic tasks.<br />
+
+Timer behaves poorly if a TimerTask throws an unchecked exception. The Timer thread doesn't catch the exception, so an unchecked exception thrown from a TimerTask terminates the timer thread. Timer also doesn't resurrect the thread in this situation.
+
+> Result-bearing Tasks: Callable and Future 
+
+The Executor framework uses Runnable as its basic task representation.
+
 ```java
 public interface Runnable {
-// 不能返回值，不能抛出异常
+    // cannot return a value or throw checked excepitons
     public abstract void run();  
 }
 
@@ -1097,6 +1284,9 @@ public interface Callable<V> {
 
 ```
 
+Future represents the lifecycle of a task and provides methods to test whether the task has completed or been cancelled, retrieve its result, and cancel the task. Future is that task lifecycle can only move forwards, not backwards - just like the ExecutorService lifecycle. Once a task is completed, it stays in that state forever.<br />
+
+The behavior of get varies depending on the task state (not yet started, running, completed). It returns immediately or throws an Exception if the task has already completed, but if not it blocks until the task completes. If the task completes by throwing an exception, get rethrows it wrapped in an ExecutionException; if it was cancelled, get throws CancellationException.
 
 ```java
 
@@ -1111,22 +1301,119 @@ public interface Future<V> {
 
 ```
 
-> CompletionService : 将 Executor 和 BlockingQueue 功能融合。ExecutorCompletionService 是其实现类。
+There are several ways to create a Future to describe a task. The submit methods in ExecutorService all return a Future, so that you can submit a Runnable or a Callable to an executor and get back a Future that can be used to retrieve the result or cancel the task. You can also explicitly instantiate a FutureTask for a given Runnable or Callable (FutureTask implements Runnable).
+As of Java 6, ExecutorService implementations can override newTaskFor in AbstractExecutorService to control instantiation of the Future corresponding to a submitted Callable or Runnable.
 
-------
-> 任务取消：java中没有一种安全的抢占式方法来停止线程，因此也没有安全的抢占式方法来停止任务。只有一些协作式的机制，使请求取消的任务和代码都遵循一种协商好的协议。
 
-**通常，中断是实现取消的最合理方式。**
+> CompletionService
 
-> Thread中的中断方法：
- 
+CompletionService combines the functionality of an Executor and BlockingQueue. You can submit Callable tasks to it for execution and use the queue-like methods take and poll to retrieve completed results, packaged as Futrues, as they become available. ExecutorCompletionService implements CompletionService, delegating the computation to an Executor. 
+
+
+> Cancellation and Shutdown
+
+Getting tasks and threads to stop safely, quickly, and reliably is not always easy. Java does not provide any mechanism for safely forcing a thread to stop what it is doing (The deprecated Thread.stop and suspend methods were an attempt to provide such a mechanism, but were quickly realized to be seriously flawed and should be avoided.). Instead, it provides interruption, a cooperative mechanism that lets one thread ask another to stop what it is doing.
+
+> Task Cancellation 
+
+There is no safe way to preemptively stop a thread in Java, and therefore no safe way to preemptively stop a task. There are only cooperative mechanisms, by which the task and the code requesting cancellation follow an agreed-upon protocol.<br />
+
+One such cooperative mechanism is setting a "cancellation requested" flag that the task checks periodically; if it finds the flag set, the task terminates early. <br />
+
+There is nothing in the API or language specification that ties interruption to any specific cancellation semantics, but in practice, using interruption for anything but cancellation is fragile and difficult to sustain in larger applications. <br />
+
+Each thread has a boolean interrupted status; interrupting a thread sets its interrupted status to true. Thread contains methods for interrupting a thread and querying the interrupted status of a thread.<br />
+
 ```java
-    public void interrupt(); // 中断目标线程
-    public boolean isInterrupted(); // 返回目标线程的中断状态
-    public static boolean interrupted(); // 清除当前线程的中断状态，并返回清除之前的值
-    
+public class Thread {
+    // interrupt the target thread
+    public void interrupt() { ... }
+    // return the interrupted status of the target thread
+    public boolean isInterrupted() { ... }
+    // clear the interrupted status of the current thread and return its previous value; this is the only way to clear the interrupted status.
+    public static boolean interrupted() { ... }
+} 
 ```
-中断操作并不会真正地中断一个正在运行的线程，而只是发出中断请求，然后由线程在下一个合适的时刻中断自己。
+
+Blocking library methods like Thread.sleep and Object.wait try to detect when a thread has been interrupted and return early. They respond to interruption by clearing the interrupted status and throwing InterruptedException, indicating that the blocking opeartion completed early due to interruption. The JVM makes no guarantees on how quickly a blocking method will detect interruption, but in practice this happens reasonably quickly. <br />
+
+Calling interrupt does not necessarily stop the target thread from doing what it is doing; it merely delivers the message that interruption has been requested. **Interruption is usually the most sensible way to implement cancellation.** <br />
+
+Because each thread has its own interruption policy, you should not interrupt a thread unless you know what interruption means to that thread.<br />
+
+When you call an interruptible blocking method such as Thread.sleep or BlockingQueue.put, there are two practical strategies for handling InterruptedException:
+
+- Propagete the exception (possibly after some task-specific cleanup), making your method an interruptible blocking method, too
+- Restore the interruption status so that code higher up on the call stack can deal with it. The standard way to do this is to restore the interrupted status by calling interrupt again. What you should not do is swallow the InterruptedException by catching it and doing nothing in the catch block, unless your code is actually implementing the interruption policy for a thread.
+
+> Cancellation Via Future 
+
+```java
+public interface Future<V> {
+    /**
+     * Attempts to cancel execution of this task.  This attempt will
+     * fail if the task has already completed, has already been cancelled,
+     * or could not be cancelled for some other reason. If successful,
+     * and this task has not started when {@code cancel} is called,
+     * this task should never run.  If the task has already started,
+     * then the {@code mayInterruptIfRunning} parameter determines
+     * whether the thread executing this task should be interrupted in
+     * an attempt to stop the task.
+     */
+    boolean cancel(boolean mayInterruptIfRunning);
+}
+```
+
+When Future.get throws InterruptedException or TimeoutException and you know that the result is no longer needed by the program, cancel the task with Future.cancel.
+
+> Dealing with Non-interruptible Blocking 
+
+Not all blocking methods or blcoking mechanisms are responsive to interruption; if a thread is blocked performing synchronous socket I/O or waiting to acquire an intrinsic lock, interruption has no effect other than setting the thread's interrupted status.<br />
+
+Synchronous socket I/O in java.io. The common form of blocking I/O in server applications is reading or writing to a socket. Unfortunately, the read and write methods in InputStream and OutputStream are not responsive to interruption, but closing the underlying socket makes any threads blocked in read or write throw a SocketException.<br />
+
+Synchronous I/O in java.nio. Interrupting a thread waiting on an InterruptibleChannel causes it to throw ClosedByInterruptException and close the channel (and also causes all other threads blocked on the channel to throw ClosedByInterruptException). Closing an InterruptibleChannel causes threads blocked on the channel operations to throw AsynchronousCloseException. Most standard Channels implement InterruptibleChannel.<br />
+
+Asynchronous I/O with Selector. If a thread is blocked in Selector.select (in java.nio.channels), wakeup causes it to return prematurely by throwing a ClosedSelectorException.<br />
+
+Lock acquisition. If a thread is blocked waiting for an intrinsic lock, there is nothing you can do to stop it short of ensuring that it eventually acquires the lock and makes enough progress that you can get its attention some other way. However, the explicit Lock classes offer the lockInterruptibly method, which allows you to wait for a lock and still be responsive to interrupts.
+
+> Stopping a Thread-based Service
+
+Sensible encapsulation practices dictate that you should not manipultate a thread - interrupt it, modify its priority, etc. - unless you own it. The thread API has no formal concept of thread ownership: a thread is represented with a Thread object that can be freely shared like any other object. However, it makes sense to think of a thread as having an owner, and this is usually the class that created the thread. So a thread pool owns its worker threads, and if those threads need to be interrupted, the thread pool should take care of it.<br />
+
+Provide lifecycle methods whenever a thread-owning service has a lifetime longer than that of the method that created it.<br />
+
+There is no general way to find out which tasks started but did not complete. This means that there is no way of knowing the state of the tasks in progress at shutdown time unless the tasks themselves perform some sort of checkpointing. 
+
+``` java
+public class TrackingExecutor extends AbstractExecutorService {
+    private final ExecutorService exec;
+    private final Ser<Runnable> tasksCancelledAtShutdown = Collections.synchronizedSet(new HashSet<Runnable>());
+    ...
+    public List<Runnable> getCancelledTasks() {
+        if (!exec.isTerminated()) {
+            throw new IllegalStateException(...);
+        }
+        return new ArrayList<Runnable>(tasksCancelledAtShutdown);
+    } 
+
+    public void execute(final Runnable runnable) {
+        exec.execute(new Runnable() {
+            public void run() {
+                try {
+                    runnable.run();
+                } finally {
+                    if (isShutdown() && Thread.currentThread().isInterrupted()){
+                        tasksCancelledAtShutdown.add(runnable);
+                    }
+                }
+            }
+        });
+    }
+} 
+```
+
 
 > JVM 关闭：JVM 既可以正常关闭，也可以强行关闭。
 
