@@ -432,7 +432,7 @@
  - spectrum 光谱；范围
  - abrupt 生硬的；突然的；唐突的；陡峭的
  - imply v.意味，暗示，隐含
- - disacrd n.抛弃，被丢弃的东西或人；v.抛弃，放弃
+ - discard n.抛弃，被丢弃的东西或人；v.抛弃，放弃
  - recur v.复发，循环，重现，递归
  - accuracy 精确度；准确性
  - resurrect 复活；复兴
@@ -514,6 +514,62 @@
  - preclude 排除；妨碍；阻止
  - commence v.开始，着手，<英>获得学位 
  - instrument n.仪器，工具，乐器，手段，器械；v.给..装测量仪器 
+ - idempotent n.幂等；adj.幂等的 
+ - abnormal 反常的；不规则的；变态的
+ - disastrous 灾难性的；损失惨重的；悲伤的 
+ - freeze v.冻结，结冰，冷冻，冷藏，惊呆，使定格；n.冻结，凝固，停止，冰冻期，霜冻
+ - commission n.委员会，佣金，服务费，犯，委任，委任状；v.委任，使服役  
+ - out of commission 损坏的；退役的；不能使用的
+ - take a leap of faith 信心剧增
+ - skeptical 怀疑的；多疑的；（哲学）怀疑论的
+ - be informed of 听说
+ - corrective n.矫正物，改善法；adj.矫正的，惩治的
+ - controversy n.争论，论战，辩论 
+ - proactive 前摄的；有前瞻性的；主动的；先行一步的 
+ - complementary 补足的；辅助性的；补充的；互补的 
+ - indepth 深入的；彻底的
+ - bubble n.气泡，泡沫，泡状物，圆形顶；v.冒泡，发出气泡声，沸腾，滔滔不绝地说 
+ - diagnostic n.诊断法，诊断结论；adj.诊断的，特征的 
+ - daemon 守护进程；后台程序 
+ - halt n.停止，（英）小火车站，瘸，（口令）立定；adj.瘸的；v.停止，立定，突然停下，完全停止，犹豫，跛行，(尤指逻辑或诗韵)有缺陷
+ - inventory n.存货，存货清单，详细目录，财产清册
+ - wound n.创伤，伤口；v.使受伤，伤害  
+ - unwound adj.未上发条的，松散的；v.松开(unwind的过去式和过去分词)，解开
+ - wind n.风，呼吸，气味，卷绕；v.缠绕，上发条，使弯曲，吹号角 
+ - reclaim n.改造，感化；v.开拓，回收再利用，改造某人，抗议，喊叫 
+ - nontrivial 重要的
+ - overstatement 大话，夸大的叙述
+ - clog n.障碍，木底鞋；v.阻塞，阻碍 
+ - steady n.关系固定的情侣，固定支架；adj.稳定的，不变的，沉着的；v.稳定，稳固 
+ - mitigate v.减轻，缓和 
+ - intensive n.加强器；adj.密集的，加强的，集中的，透彻的 
+ - occasionally 偶尔
+ - govern v.管理，支配，统治，控制 
+ - incur v.招致，遭受，带来 
+ - notable n.名人，显要人物；adj.显著的，著名的，值得注意的 
+ - burst n.爆炸，冲刺，迸发；v.爆炸，爆裂，戳破，装满，充满感情，冲开，分页 
+ - smooth n.平滑部分；adj.顺利的，光滑的，平稳的；v.光滑，缓和，平静，消除（障碍等），使优雅 
+ - progressively 渐进地；日益增多地 
+ - retransmit 转播；中继；重新发送 
+ - queue up 排队等候
+ - saturation 饱和，饱和度，浸透 
+ - puzzle v.迷惑，（因迷惑）而苦思，使..为难；n.谜，智力游戏，拼图 
+ - insanity n.疯狂，精神错乱，精神病 
+ - instant n.瞬间，立即，片刻；adj.立即的，紧急的 
+ - solitaire n.单人跳棋，单人纸牌游戏，独立宝石首饰 
+ - unsanitary 不卫生的；有碍健康的 
+ - dine v.宴请，用餐
+ - philosopher 哲学家 
+ - chopstick 筷子
+ - diner 用餐者；路边小饭店 
+ - embrace n.拥抱；v.拥抱，信奉，皈依，包含，围绕 
+ - intervention n.干预，介入 
+ - manifest n.载货单，旅客名单；v.表明，显示；adj.显然的，明显的；adv.明显地  
+ - inspect v.检查；视察；检阅 
+ - fund n.基金，资金，存款；v.投资，资助 
+ - debit v.借记，借方，（从银行账户中）取款；n.借记，借方
+ - credit n.信用，信誉，贷款，学分，信任，声望；v.相信，归功于，赞颂  
+ - spot n.地点，斑点；v.认出，弄脏，用灯光照射；adv.准确地，恰好 
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -1414,66 +1470,183 @@ public class TrackingExecutor extends AbstractExecutorService {
 } 
 ```
 
+> Handling Abnormal Thread Termination
 
-> JVM 关闭：JVM 既可以正常关闭，也可以强行关闭。
+The leading cause of premature thread death is RuntimeException. 
 
-正常关闭的触发方式包括：
-- 最后一个"正常(非守护)"线程结束
-- 调用System.exit()
-- 通过其他特定于平台的方法关闭(如发送SIGINT信号或键入 Ctrl-C)
+```java
+// Typical Thread-pool Worker Thread Structure
+public void run() {
+    Throwable thrown = null;
+    try {
+        while (!isInterrupted()) {
+            runTask(getTaskFromWorkQueue());
+        }
+    } catch (Throwable e) {
+        thrown = e;
+    } finally {
+        threadExited(this, thrown);
+    }
+} 
+```
 
-强行关闭：调用 Runtime,halt 或者在操作系统中"kill" JVM 进程(如发送SIGKILL)。
+The Thread API provides the UncaughtExceptionHandler facility, which lets you detect when a thread dies due to an uncaught exception. When a thread exits due to an uncaught exception, the JVM reports this event to an application-provided UncaughtExceptionHandler; if no handler exists, the default behavior is to print the stack trace to System.err.<br />
 
-> 关闭钩子: 
+```java
+public interface UncaughtExceptionHandler {
+    void uncaughtException(Thread t, Throwable e);
+} 
+```
+
+Before Java 5.0, the only way to control the UncaughtExceptionHandler was by subclassing ThreadGroup. In Java 5.0 and later, you can set an UncaughtExceptionHandler on a per-thread basis with Thread.setUncaughtExceptionHandler, and can also set the default UncaughtExceptionHandler with Thread.setDefaultUncaughtExceptionHandler. However, only one of these handlers is called first the JVM looks for a per-thread handler, then for a ThreadGroup handler. The default handler implementation in ThreadGroup delegates to its parent thread group, and so on up the chain until one of the ThreadGroup handlers deals with the uncaught exception or it bubbles up to the top-level thread group. The top-level thread group handler delegates to the default system handler (if one exist; the default is none) and otherwise prints the stack trace to the console.
+
+To set an UncaughtExceptionHandler for pool threads, provide a *ThreadFactory* to the *ThreadPoolExecutor* constructor. Somewhat confusingly, exceptions thrown from tasks make it to the uncaught exception handler only for tasks submitted with *execute*; for tasks submitted with *submit*, any thrown exception, checked or not, is considered to be part of the task's return status. If a task submitted with *submit* terminates with an exception, it is rethrown by Future.get, wrapped in an ExecutionException.
+
+> JVM shutdown: The JVM can shut down in either an orderly or abrupt manner. An orderly shutdown is initiated when the last "normal"(non-daemon) terminates, someone calls *System.exit*, or by other platform-specific means (such as sending a SIGINT or hitting Ctrl-C). While this is the standard and preferred way for the JVM to shut down, it can also be shut down abruptly by calling *Runtime.halt* or by killing the JVM process through the operating system (such as sending a SIGKILL).
+
+> shutdown hooks: Shutdown hooks are unstarted threads that are registered with *Runtime.addShutdownHook*. The JVM makes no guarantees on the order in which shutdown hooks are started.
 
 ```java
 Runtime.getRuntime().addShutdownHook(Thread hook);
 ```
 
-> 守护线程(Daemon Thread)：线程分为两种：普通线程和守护线程。在 JVM 启动时创建的所有线程中，除了主线程以外，其他的线程都是守护线程(如垃圾回收器以及其他执行辅助工作的线程)。当创建一个新线程时，新线程将继承创建它的线程的守护状态，因此在默认情况下，主线程创建的所有线程都是普通线程。
+> Daemon Threads: Sometimes you want to create a thread that performs some helper function but you don't want the existence of this thread to prevent the JVM from shutting down. This is what daemon threads are for.
 
-普通线程和守护线程的差异仅在于当线程退出时发生的操作。当一个线程退出时，JVM会检查其他正在运行的线程，如果这些线程都是守护线程，那么JVM 会正常退出。当JVM 停止时，所有仍然存在的守护线程都将被抛弃(既不会执行finally代码块，也不会执行回卷栈，JVM只是直接退出)。
+Threads are divided into two types: normal threads and daemon threads. When the JVM starts up, all the threads it creates (such as garbage collector and other housekeeping threads) are daemon threads, except the main thread. When a new thread is created, it inherits the daemon status of the thread that created it, so by default any threads created by the main thread are also normal threads.<br />
 
-> finalize() ： **避免使用**
+Normal threads and daemon threads differ only in what happens when they exit. When a thread exits, the JVM performs an inventory of running threads, and if the only threads that are left are daemon threads, it initiates an orderly shutdown. When the JVM halts, any remaining daemon threads are abandoned - finally blocks are not executed, stacks are not unwound - the JVM just exits.
+<br />
 
-------
+Daemon threads should be used sparingly - few processing activities can be safely abandoned at any time with no cleanup. In particular, it is dangerous to use daemon threads for tasks that might perform any sort of I/O. Daemon threads are best saved for "housekeeping" tasks, such as a background thread that periodically removes expired entries from an in-momory cache.
 
-## 线程池： 
-> 线程饥饿死锁(Thread Starvation Deadlock)：线程池中的任务需要无限期地等待一些必须由池中其他任务才能提供的资源或条件，除非线程池足够大，否则将发生线程饥饿死锁。
+> Finalizers:  finalize()
 
-> 获取CPU数目：
+The garbage collector does a good job of reclaiming memory resources when they are no longer needed, but some resources, such as file or socket handles, must be explicitly returned to the operating system when no longer needed. <br />
+
+In most cases, the combination of *finally* blocks and explicit *close* methods does a better job of resource management than finalizers; Work hard to avoid writing or using classes with finalizers.
+
+> Applying Thread Pools
+
+ThreadLocal should not be used in pool threads to communicate values between tasks.<br />
+
+Thread pools work best when tasks are homogeneous and independent. Mixing long-running and short-running tasks risks "clogging" the pool unless it is very large; submitting tasks that depend on other tasks risks deadlock unless the pool is unbounded.
+
+> Thread Starvation Deadlock: can occur whenever a pool task initiates an unbounded blocking wait for some resource or condition that can succeed only through the action of another pool task, such as waiting for the return value or side effect of another task, unless you can guarantee that the pool is large enough. 
+
+> Long-running Tasks 
+
+One technique that can mitigate the ill effects of long-running tasks is for tasks to use timed resource waits instead of unbounded waits. Most blocking methods in the platform libraries come in both untimed and timed versions, such as *Thread.join*, *BlockingQueue.put*, *CountDownLatch.await*, and *Selector.select*.
+
+> Sizing Thread Pools 
 
 ```java
+// determine the number of CPUs
 Runtime.getRuntime().availableProcessors();
 ```
 
-> ThreadPoolExecutor:
- Executors中 newCachedThreadPool 和 newFixedThreadPool 返回的线程池都是 ThreadPoolExecutor 类型。
- 
- **只有当任务相互独立时，为线程池或工作队列设置界限才是合理的。如果任务之间存在依赖性，那么有界的线程池或队列可能导致线程"饥饿"死锁问题。此时，应该使用无界的线程池，如 Executors.newCachedThreadPool()。**
- 
-> 饱和策略：当有界队列被填满后，饱和策略开始发挥作用(如果某个任务被提交到一个已被关闭的Executor,也会用到饱和策略)。
+For compute-intensive tasks, an N cpu processor system usually achieves optimum utilization with a thread pool of N cpu + 1 threads. For tasks that also include I/O or other blocking operations, you want a larger pool, since not all of the threads will be schedulable at all times. <br />
 
-JDk提供的饱和策略(均实现了 RejectedExecutionHandler 接口)：
-- AbortPolicy ： 默认策略，抛出 RejectedExecutionException
-- CallerRunsPolicy ：Executes task in the caller's thread, unless the executor has been shut down, in which case the task is discarded.
-- DiscardPolicy ：新提交的任务无法保存到队列中等待执行时，悄悄抛弃该任务，do nothing
-- DiscardOldestPolicy ： 抛弃下一个将被执行的任务，然后尝试重新提交新任务
+Of course, CPU cycles are not the only resource you might want to manage using thread pools. Other resources that can contribute to sizing constraints are memory, file handles, socket handles, and database connections. Calculating pool size constraints for these types of resources is easier: just add up how much of that resource each task requires and divide that into the total quantity available. The result will be an upper bound on the pool size.<br />
+
+When tasks require a pooled resource such as database connections, thread pool size and resource pool size affect each other. If each task requires a connection, the effective size of the thread pool is limited by the connection pool size. Similarly, when the only consumers of connections are pool tasks, the effective size of the connection pool is limited by the thread pool size.
+
+
+> ThreadPoolExecutor:
+
+The core pool size, maximum pool size, and keep-alive time govern thread creation and teardown. The core size is the targe size; the implementation attempts to maintain the pool at this size even when there are no tasks to execute, and will not create more threads than this unless the work queue is full (When a ThreadPoolExecutor is initially created, the core threads are not started immediately but instead as tasks are submitted, unless you call prestartAllCoreThreads.). The maximum pool size is the upper bound on how many pool threads can be active at once. A thread that has been idle for longer than the keep-alive time becomes a candidate for reaping and can be terminated if the current pool size exceeds the core size.
+
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue<Runnable> workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler); 
+```
+
+
+There are three basic approaches to task queuing: unbounded queue, bounded queue, and synchronous handoff. The choice of queue interacts with other configuration parameters suc as pool size. <br />
+
+The default for newFixedThreadPool and newSingleThreadExecutor is to use an unbounded LinkedBlockingQueue. Tasks will queue up if all worker threads are busy, but the queue could grow without bound if the tasks keep arriving faster than they can be executed. A more stable resource management strategy is to use a bounded queue, such as an ArrayBlockingQueue or a bounded LinkedBlockingQueue or PriorityQueue. Bounded queues help prevent resource exhaustion but introduce the question of what to do with new tasks when the queue is full. <br />
+
+For very large or unbounded pools, you can also bypass queuing entirely and instead hand off tasks directly from producers to worker threads using a SynchronousQueue. A SynchronousQueue is not really a queue at all, but a mechanism for managing handoffs between threads. In order to put an element on a SynchronousQueue, another thread must already be waiting to accept the handoff. If no thread is waiting but the current pool size is less than the maximum, ThreadPoolExecutor creates a new thread; otherwise the task is rejected according to the saturation policy. SynchronousQueue is a practical choice only if the pool is unbounded or if rejecting excess tasks is acceptable. The newCachedThreadPool factory uses a SynchronousQueue.<br />
+
+Bounding either the thread pool or the work queue is suitable only when tasks are independent. With tasks that depend on other tasks, bounded thread pools or queues can cause thread starvation deadlock; instead, use an unbounded pool configuration like newCachedThreadPool.
+
+> Saturation Policies: When a bounded work queue fills up, the saturation policy comes into play. The saturation policy for a ThreadPoolExecutor can be modified by calling setRejectedExecutionHandler.(The saturation policy is also used when a task is submitted to an Executor that has been shut down.) Several implementations of RejectedExecutionHandler are provided, each implementing a different saturation policy: 
+
+- AbortPolicy: the default policy, abort, causes execute to throw the unchecked RejectedExecutionException; the caller can catch this exception and implement its own overflow handling as it sees fit.
+- CallerRunsPolicy: implements a form of throttling that neither discards tasks nor throws an exception, but instead tries to slow down the flow of new tasks by pushing some of work back to the caller. It executes the newly submitted task not in a pool thread, but in the thread that calls *execute*. 
+- DiscardPolicy: silently discards the newly submitted task if it cannot be queued for execution.
+- DiscardOldestPolicy: discards the task that would otherwise be executed next and tries to resubmit the new task.
 
 ```java
 //ThreadPoolExecutor通过调用该方法修改饱和策略
 public void setRejectedExecutionHandler(RejectedExecutionHandler handler);
+```
 
+```java
 // RejectedExecutionHandler 接口定义
 public interface RejectedExecutionHandler {
 	void rejectedExecution(Runnable r, ThreadPoolExecutor executor);
 }
 ```
 
-> 线程工厂：线程池需要创建一个新线程时，调用ThreadFactory.newThread();默认的线程工厂方法创建一个新的、非守护的线程，并且不包含特殊的配置信息。
+> Thread Factories: Whenever a thread pool needs to create a thread, it does so through a thread factory. 
 
-```java 
+*ThreadFactory* has a single method, *newThread*, that is called whenever a thread pool needs to create a new thread.
+
+```java  
 public interface ThreadFactory {
-	Thread newThread(Runnable r);
+
+    /**
+     * Constructs a new {@code Thread}.  Implementations may also initialize
+     * priority, name, daemon status, {@code ThreadGroup}, etc.
+     *
+     * @param r a runnable to be executed by new thread instance
+     * @return constructed thread, or {@code null} if the request to
+     *         create a thread is rejected
+     */
+    Thread newThread(Runnable r);
 }
+```
+
+Executors includes a factory method, *unconfigurableExecutorService*, which takes an existing *ExecutorService* and wraps it with one exposing only the methods of *ExecutorService* so it cannot be further configured. Unliked the pooled implementations, *newSingleThreadExecutor* returns an *ExecutorService* wrapped in this manner, rather than a raw *ThreadPoolExecutor*. <br />
+
+If you will be exposing an ExecutorService to code you don't trust not to modify it, you can wrap it with an *unconfigurableExecutorService*.
+
+> Extending ThreadPoolExecutor: ThreadPoolExecutor was designed for extension, providing several "hooks" for subclasses to override *beforeExecute*, *afterExecute*, and *terminated* that can be used to extend the behavior of *ThreadPoolExecutor*.
+
+The *beforeExecute* and *afterExecute* hooks are called in the thread that executes the task, and can be used for adding logging, timing, monitoring, or statistics gathering. The *afterExecute* hook is called whether the task completes by returning normally from run or by throwing an Exception. (If the task completes with an *Error*, *afterExecute* is not called.) If *beforeExecute* throws a RuntimeException, the task is not executed and *afterExecute* is not called. <br />
+
+The *terminated* hook is called when the thread pool completes the shutdown process, after all tasks have finished and all worker threads have shut down. It can be used to release resources allocated by the *Executor* during its lifecycle, perform notification or logging, or finalize statistics gathering.
+
+
+> Deadlock
+
+Deadlock is illustrated by the classic, if somewhat unsanitary, "dining philosophers" problem. <br />
+
+When a thread holds a lock forever, other threads attempting to acquire that lock will blok forever waiting. When thread A holds lock L and tries to acquire lock M, but at the same time thread B holds M and tries to acqire L, both thread will wait forever. This situation is the simplest case of deadlock, where multiple threads wait forever due to a cyclic locking dependency. <br />
+
+> Lock-ordering Deadlocks
+
+A program will be free of lock-ordering deadlocks if all threads acquire the locks they need in a fixed global order. 
+
+> Dynamic Lock Order Deadlocks
+
+```java
+// deadlock-prone. The lock order depends on the order of arguments passed to transferMoney 
+public void transferMoney(Account fromAccount, Account toAccount, DollarAmount amount) throws InsufficientFundsException {
+    synchronized (fromAccount) {
+        synchronized (toAccount) {
+            if (fromAccount.getBalance().compareTo(amount) < 0) {
+                throw new InsufficientFundsException();
+            } else {
+                fromAccount.debit(amount);
+                toAccount.credit(amount);
+            }
+        }
+    }
+} 
 ```
