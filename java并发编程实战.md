@@ -138,7 +138,7 @@
  - in the absence of 缺少..时
  - weird 怪异的；不可思议的
  - insufficiently 不足地；不能胜任地
- - prohibitively 禁止地；过分地
+ - prohibitively 禁止地；过分地；过高地
  - scary 可怕的
  - stale 陈旧的
  - all or nothing 孤注一掷的；全部或一无所有的
@@ -453,6 +453,7 @@
  - get in the way 妨碍；阻碍
  - division n.除法，部门，分配，分割，师（军队），赛区 
  - finer-grained 细粒度
+ - fine-grained 细粒的；详细的；深入的
  - diminish v.减少，缩小 
  - disparate n.无法相比的东西；adj.不同的，不相干的，全异的 
  - worthwhile adj.重要的，值得的，有价值的
@@ -570,6 +571,57 @@
  - debit v.借记，借方，（从银行账户中）取款；n.借记，借方
  - credit n.信用，信誉，贷款，学分，信任，声望；v.相信，归功于，赞颂  
  - spot n.地点，斑点；v.认出，弄脏，用灯光照射；adv.准确地，恰好 
+ - induce v.诱导，引起，引诱，感应
+ - tie breaking 打破僵局的
+ - vanishingly 难以察觉地；趋于零地 
+ - overstate v.夸张，夸大的叙述
+ - thorough 彻底的；十分的；周密的 
+ - regimen 养生法；生活规则；政体；支配 
+ - disclose 公开；揭露
+ - latent 潜在的；隐藏的  
+ - ironically 讽刺地；说反话地 
+ - inform 通知；告诉；告密
+ - shield n.盾，防护物，保护者；v.遮蔽，防御，避开，保卫 
+ - offend v.冒犯，使..不愉快；违反；进攻 
+ - diagnose v.诊断，断定 
+ - fatal 致命的；重大的；毁灭性的；命中注定的 
+ - perpetually 永恒地；持久地 
+ - blunt adj.钝的，不锋利的，生硬的；v.使迟钝 
+ - wise adj.明智的，聪明的，博学的；v.了解，教导 
+ - tweak n.扭，轻微调整；v.扭，（非正式）稍微调整机器或系统，用力拉，焦急 
+ - overeager 过于热切的；过于渴望的
+ - collide v.碰撞，抵触，冲突 
+ - exponential n.指数；adj.指数的 
+ - put up with 忍受；容忍
+ - counterproductive 反生成的；达不到预期目标的 
+ - squeeze v.挤，紧握，勒索，压榨，向..施加压力，（尤于金融或商业）破坏；n.挤压，榨出液体，紧握，拥挤，佣金，（可获得的钱、工作岗位等的）减少 
+ - colleague 同事；同僚
+ - anecdote 轶事；奇闻
+ - outset n.开始，开端
+ - versus 与..相对；与..相比；对抗 
+ - acknowledge v.承认；答谢；报偿 
+ - intertwine v.缠绕，纠缠 
+ - tier n.层，排，行，列，等级；v.层叠  
+ - thick adj.厚的，浓密的，粘稠的，浑浊的，迟钝的，明显的，（字体）粗体的，思路不清的；n.最激烈处，最密集处，中心处 
+ - routine n.常规，惯例；adj.常规的，平常的，乏味的；v.按惯例安排 
+ - metrics n.度量；指标；韵律学 
+ - quest n.追求，寻找；v.追求，寻找，探索 
+ - undertake v.承担，保证，从事，同意，试图 
+ - imperative adj.必要的，不可避免的，紧急的，命令的，专横的，势在必行的；n.必要的事，命令，规则 
+ - concrete n.具体物，凝结物；adj.混凝土的，实在的，具体的；v.凝固，凝结 
+ - harvest n.收获，产量，结果；v.收割，得到，收割庄稼
+ - crop n.产量，农作物，庄稼；v.种植，收割，修剪，剪短，收获    
+ - fundamentally 根本地；从根本上；基础地 
+ - harness v.治理，利用，驾驭；n.马具，背带，甲胄，日常工作  
+ - infer v.推断，推论 
+ - curve n.曲线，弯曲，曲线球，曲线图表；adj.弯曲的，曲线形的；v.弯曲 
+ - qualitatively 定性地 
+ - mental adj.精神的，脑力的，疯的；n.精神病患者 
+ - insight n.洞察力，洞悉 
+ - granularity n.间隔尺寸，粒度
+ - the lens of ..的视角
+ - lens n.透镜，镜头，晶状体，隐形眼镜；v.给..摄影 
+
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
 
@@ -1650,3 +1702,179 @@ public void transferMoney(Account fromAccount, Account toAccount, DollarAmount a
     }
 } 
 ```
+
+> Deadlocks Between Cooperating Objects 
+
+```java
+// Lock-ordering Deadlock Between Cooperating Objects. Don't Do This.
+class Taxi {
+    @GuardedBy("this") private Point location, destination;
+    private final Dispatcher dispatcher; 
+
+    public Taxi(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    public synchronized Point getLocation() {
+        return location;
+    }
+
+    public synchronized void setLocation(Point location) {
+        this.location = location;
+        if (location.equals(destination)) {
+            dispatcher.notifyAvailable(this);
+        }
+    }
+} 
+
+class Dispatcher {
+    @GuardedBy("this") private final Set<Taxi> taxis;
+    @GuardedBy("this") private final Set<Taxi> availableTaxis;
+
+    public Dispatcher() {
+        taxis = new HashSet<Taxi>();
+        availableTaxis = new HashSet<Taxi>();
+    }
+
+    public synchronized void notifyAvailable(Taxi taxi) {
+        availableTaxis.add(taxi);
+    }
+
+    public synchronized Image getImage() {
+        Image image = new Image();
+        for (Taxi t : taxis) {
+            image.drawMarker(t.getLocation());
+        }
+        return image;
+    }
+}
+```
+
+Invoking an **alien method** (a method you call for which you have no control over the code and further don't even know what the code does, other than the method signature. Most commonly, the term is used for delegate methods, but strictly speaking it could refer to calls to third party libraries.) with a lock held is asking for liveness trouble. The alien method might acquire other locks (risking deadlock) or block for an unexpectedly long time, stalling other threads that need the lock you hold.
+ 
+> Open Calls: Calling a method with no locks held is called an open call, and classes that rely on open calls are more well-behaved and composable than classes that make calls with locks held.
+
+Strive to use open calls throughout your program. Programs that rely on open calls are far easier to analyze for deadlock-freedom than those that allow calls to aline methods with locks held. 
+
+```java
+// Using Open Calls to Avoid Deadlock Between Cooperating Objects.
+@ThreadSafe
+class Taxi {
+    @GuardedBy("this") private Point location, destination;
+    private final Dispatcher dispatcher; 
+
+    public Taxi(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    public synchronized Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        boolean reachedDestination;
+        synchronized (this) {
+            this.location = location;
+            reachedDestination = location.equals(destination);
+        }
+
+        if (reachedDestination) {
+            dispatcher.notifyAvailable(this);
+        }
+    }
+} 
+
+@ThreadSafe
+class Dispatcher {
+    @GuardedBy("this") private final Set<Taxi> taxis;
+    @GuardedBy("this") private final Set<Taxi> availableTaxis;
+
+    public Dispatcher() {
+        taxis = new HashSet<Taxi>();
+        availableTaxis = new HashSet<Taxi>();
+    }
+
+    public synchronized void notifyAvailable(Taxi taxi) {
+        availableTaxis.add(taxi);
+    }
+
+    public Image getImage() {
+        Set<Taxi> copy;
+        synchronized (this) {
+            copy = new HashSet<Taxi>(taxis);
+        }
+        Image image = new Image();
+        for (Taxi t : copy) {
+            image.drawMarker(t.getLocation());
+        }
+        return image;
+    }
+}
+```
+
+
+> Resource Deadlocks: Just as threads can deadlock when they are each waiting for a lock that the other holds and will not release, they can also deadlock when waiting for resources.
+
+> Avoiding and Diagnosing Deadlocks
+
+A program that never acquires more than one lock at a time connot experience lock-ordering deadlock.<br />
+
+In programs that use fine-grained locking, audit your code for deadlock freedom using a two-part strategy: first, identify where multiple locks could be acquired (try to make this a small set), and then perform a global analysis of all such instances to ensure that lock ordering is consistent across your entire program. Using open calls wherever possible simplifies this analysis substantially. <br />
+
+Another technique for detecting and recovering from deadlocks is to use the timed *tryLock* feature of the explicit *Lock* classes instead of intrinsic locking. Where intrinsic locks wait forever if they cannot acquire the lock, explicit locks let you specify a timeout after which *tryLock* returns failure.<br />
+
+Deadlock analysis with thread dumps.<br />
+
+While deadlock is the most widely encountered liveness hazard, there are several other liveness hazards you may encounter in concurrent programs including starvation, missed signals, and livelock.
+
+> Starvation
+
+Starvation occurs when a thread  is perpetually denied access to resources it needs in order to make progress; the most commonly starved resource is CPU cycles. <br />
+
+It is generally wise to resist the temptation to tweak thread priorities. As soon as you start modifying priorities, the behavior of your application becomes platform-specific and you introduce the risk of starvation. You can often spot a program that is trying to recover from priority tweaking or other responsiveness problems by the presence of *Thread.sleep* or *Thread.yield* calls in odd places, in an attempt to give more time to lower-priority threads.<br />
+
+Avoid the temptation to use thread priorities, since they increase platform dependence and can cause liveness problems. Most concurrent applications can use the default priority for all threads.
+
+> Livelock
+
+Livelock is a form of liveness failure in which a thread, while not blocked, still cannot make progress because it keeps retrying an operation that will always fail. Livelock often occurs in transactional messaging applications, where the messaging infrastructure rolls back a transaction if a message cannot be processed successfully, and puts it back at the head of the queue. This form of livelock often comes from overeager error-recovery code that mistakenly treats an unrecoverable error as a recoverable one. Livelock can also occur when multiple cooperating threads change their state in response to the others in such a way that no thread can ever make progress. This is similar to what happens when two overly polite people are walking in opposite directions in a hallway: each steps out of the other's way, and now they are again in each other's way. So they both step aside again, and again... <br />
+
+The solution for this variety of livelock is to introduce some randomness into the retry mechanism. 
+
+
+> Performance and Scalability
+
+First make your program right, then make it fast - and then only if your performance requirements and measurements tell you it needs to be faster.<br />
+
+While the goal may be to improve performance overall, using multiple threads always introduces some performance costs compared to the single-threaded approach. These include the overhead associated with coordinating between threads (locking, signaling, and memory synchronization), increased context switching, thread creation and teardown, and scheduling overhead.<br />
+
+Scalability describes the ability to improve throughput or capacity when additional computing resources (such as additional CPUs, memory, storage, or I/O bandwidth) are added.<br />
+
+Of the various aspects of performance, the "how much" aspects - scalability, throughput, and capacity - are usually of greater concern for server application than the "how fast" aspects. (For interactive applications, latency tends to be more important, so that user need not wait for indications of progress and wonder what is going on.) <br />
+
+Avoid premature optimization. First make it right, then make it fast - if it is not already fast enough.
+
+> Amdahl's Law
+
+Amdahl's law describes how much a program can theoretically be sped up by additional computing resources, based on the proportion of parallelizable and serial components. If F is the fraction of the calculation that must be executed serially, then Amdahl's law say that on a machine with N processors, we can achieve a speedup of at most:  <br />
+
+  Speedup <= (1 / (F + (1 - F) / N))  <br />
+
+All concurrent applications have some sources of serialization; if you think yours does not, look again.
+
+> Costs Introduced by Threads 
+
+Single-threaded programs incur neither scheduling nor synchronization overhead, and need not use locks to preserve the consistency of data structures. Scheduling and interthread coordination have performace costs; for threads to offer a performance improvement, the performance benefits of parallelization must outweight the costs introduced by concurrency.
+
+> Context Switching 
+
+
+
+
+
+
+
+
+
+
+
