@@ -1,3 +1,7 @@
+---
+typora-copy-images-to: image
+---
+
 Redis 是单进程、单线程的
 Nginx是多进程、单线程的
 Memcached是单进程、多线程的
@@ -179,7 +183,7 @@ A *distributed system* is a system whose components are located on different net
 ### High-availability clusters 
 High-availability clusters (also known as HA clusters , fail-over clusters or Metroclusters Active/Active) are groups of computers that support server applications that can be reliably utilized with a minimum amount of down-time. They operate by using high availability software to harness redundant computers in groups or clusters that provide continued service when system components fail.
 
-Redis 3.0 之后便支持集群。Redis 集群中内置了 16384个哈希槽。Redis会根据节点数量大致均等的将哈希槽映射到不同的节点。所有节点之间彼此互联(PING-PONG机制)，当超过半数的主机认为某台主机挂了，则该主机就是真的挂掉了，整个集群就不可用了。
+Redis 3.0 之后便支持集群。Redis 集群中内置了 16384个哈希槽（Redis集群没有使用一致性哈希）。Redis会根据节点数量大致均等的将哈希槽映射到不同的节点。所有节点之间彼此互联(PING-PONG机制)，当超过半数的主机认为某台主机挂了，则该主机就是真的挂掉了，整个集群就不可用了。
 
 Redis 集群部署方式大部分采用类 Twemproxy 的方式进行部署。即通过 Twemproxy 对 redis key 进行分片计算，将 redis key 进行分片计算，分配到多个 redis 实例中的其中一个。tewmproxy 架构图如下：
 
