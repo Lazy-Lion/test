@@ -302,6 +302,8 @@
  - indicator 指示器；指示灯
  - deliberate adj.故意的，深思熟虑的，从容的；v.仔细考虑，商议
  - starvation 饿死；挨饿；绝食
+ - saturation n. 饱和；色饱和度；浸透；磁化饱和
+ - monopolize v. 垄断；独占；拥有…的专卖权
  - throughput 吞吐量
  - utilization 利用率；利用
  - favorable 有利的；良好的；赞成的
@@ -621,6 +623,8 @@
  - granularity n.间隔尺寸，粒度
  - the lens of ..的视角
  - lens n.透镜，镜头，晶状体，隐形眼镜；v.给..摄影 
+ - quota n. 定额；限额；配额；指标；（候选人当选所需的）规定票数，最低票数
+ - mandate n. 授权，命令，指令，委托管理，受命进行的工作；v. 授权，托管
 
 
 Writing thread-safe code is about managing access to **shared, mutable** state.
@@ -638,7 +642,7 @@ Writing thread-safe code is about managing access to **shared, mutable** state.
   - Don't share the state variable across thread;
   - Make the state variable immutable
   - Use synchronization whenever accessing the state variable
-  
+
 
 > Practice:
 
@@ -956,7 +960,7 @@ Iteration is indirectly invoked by the collection's hashcode, equals and toStrin
 
     jdk 7 : segment 实现，对整个Map进行计算的方法语义进行弱化，如size返回的结果可能已经过期，实际上只是个估计值；<br /> 
     jdk 8 : CAS，synchronized 实现<br />
-
+    
     [为并发而生的 ConcurrentHashMap（Java 8）](https://www.jianshu.com/p/e99e3fcface4)<br />
     [为什么ConcurrentHashMap的读操作不需要加锁？](https://juejin.im/entry/5b98b89bf265da0abd35034c)
 
@@ -965,7 +969,7 @@ Iteration is indirectly invoked by the collection's hashcode, equals and toStrin
 - ConcurrentSkipListSet: a replacement for a synchronized SortedSet
 
 - CopyOnWriteArrayList: a replacement for synchronized List implementations for cases where traversal is the dominant operation.
-    
+  
     They implement mutability by creating and republishing a new copy of the collection every time it is modified. Iterators for the copy-on-write collections retain a reference to the backing array that was current at the start of iteration, and since this will never change, they need to synchronize only brieflyto ensure visibility of the array contents. The iteartors returned by the copy-on-write collections do not throw ConcurrentModificationException and return the elements exactly as they were at the time the iterator was created, regardless of subsequent modifications.<br />
 
     The copy-on-write collections are reasonable to use only when iteration is far more common than modification.
@@ -1751,7 +1755,7 @@ class Dispatcher {
 ```
 
 Invoking an **alien method** (a method you call for which you have no control over the code and further don't even know what the code does, other than the method signature. Most commonly, the term is used for delegate methods, but strictly speaking it could refer to calls to third party libraries.) with a lock held is asking for liveness trouble. The alien method might acquire other locks (risking deadlock) or block for an unexpectedly long time, stalling other threads that need the lock you hold.
- 
+
 > Open Calls: Calling a method with no locks held is called an open call, and classes that rely on open calls are more well-behaved and composable than classes that make calls with locks held.
 
 Strive to use open calls throughout your program. Programs that rely on open calls are far easier to analyze for deadlock-freedom than those that allow calls to aline methods with locks held. 

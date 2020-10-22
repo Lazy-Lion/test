@@ -1,3 +1,7 @@
+---
+typora-root-url: image
+---
+
 Kafka: A distributed streaming platform.
 
 # Concepts
@@ -216,7 +220,7 @@ To remove an override you can do
 - `value.deserializer`: Deserializer class for value that implements the `org.apache.kafka.common.serialization.Deserializer` interface.
 - `bootstrap.servers`
 - `fetch.min.bytes`: The minimum amount of data the server should return for a fetch request. If insufficient data is available the request will wait for that much data to accumulate before answering the request. The default setting of 1 byte means that fetch requests are answered as soon as a single byte of data is available or the fetch request times out waiting for data to arrive.
-- `group.id`: A unique string that identifies the consumer group this consumer belongs to. This property is required if the consumer uses either the group management functionality by using `subscribe(topic)` or the Kafka-based offset management strategy.
+- `group.id`: A unique string that identifies the **consumer group** this consumer belongs to. This property is required if the consumer uses either the group management functionality by using `subscribe(topic)` or the Kafka-based offset management strategy.
 - `heartbeat.interval.ms`
 - `max.partition.fetch.bytes`
 - `session.timeout.ms`
@@ -333,13 +337,177 @@ There is a side benefit of this decision. A consumer can deliberately *rewind* b
 
 ##### Offline Data Load
 
+##### Static Membership
 
+### Message Delivery Semantics
 
+Clearly there are multiple possible message delivery guarantees that could be provided:
 
+- *At most once*—Messages may be lost but are never redelivered.
+- *At least once*—Messages are never lost but may be redelivered.
+- *Exactly once*—this is what people actually want, each message is delivered once and only once.
+
+It's worth noting that this breaks down into two problems: the durability guarantees for publishing a message and the guarantees when consuming a message.
+
+Prior to 0.11.0.0, if a producer failed to receive a response indicating that a message was committed, it had little choice but to resend the message. This provides at-least-once delivery semantics since the message may be written to the log again during resending if the original request had in fact succeeded. Since 0.11.0.0, the Kafka producer also supports an **idempotent** delivery option which guarantees that resending will not result in duplicate entries in the log. To achieve this, the broker assigns each producer an ID and deduplicates messages using a sequence number that is sent by the producer along with every message. Also beginning with 0.11.0.0, the producer supports the ability to send messages to multiple topic partitions using transaction-like semantics: i.e. either all messages are successfully written or none of them are. The main use case for this is exactly-once processing between Kafka topics.
+
+Now let's describe the semantics from the point-of-view of the consumer. All replicas have the exact same log with the same offsets. The consumer controls its position in this log. If the consumer never crashed it could just store this position in memory, but if the consumer fails and we want this topic partition to be taken over by another process the new process will need to choose an appropriate position from which to start processing. Let's say the consumer reads some messages -- it has several options for processing the messages and updating its position.
+
+1. It can read the messages, then save its position in the log, and finally process the messages. In this case there is a possibility that the consumer process crashes after saving its position but before saving the output of its message processing. In this case the process that took over processing would start at the saved position even though a few messages prior to that position had not been processed. This corresponds to "at-most-once" semantics as in the case of a consumer failure messages may not be processed.
+2. It can read the messages, process the messages, and finally save its position. In this case there is a possibility that the consumer process crashes after processing messages but before saving its position. In this case when the new process takes over the first few messages it receives will already have been processed. This corresponds to the "at-least-once" semantics in the case of consumer failure. In many cases messages have a primary key and so the updates are idempotent (receiving the same message twice just overwrites a record with another copy of itself).
+
+So what about exactly once semantics (i.e. the thing you actually want)? When consuming from a Kafka topic and producing to another topic (as in a Kafka Streams application), we can leverage the new transactional producer capabilities in 0.11.0.0 that were mentioned above. The consumer's position is stored as a message in a topic, so we can write the offset to Kafka in the same transaction as the output topics receiving the processed data. If the transaction is aborted, the consumer's position will revert to its old value and the produced data on the output topics will not be visible to other consumers, depending on their "isolation level." In the default "read_uncommitted" isolation level, all messages are visible to consumers even if they were part of an aborted transaction, but in "read_committed," the consumer will only return messages from transactions which were committed (and any messages which were not part of a transaction).
+
+When writing to an external system, the limitation is in the need to coordinate the consumer's position with what is actually stored as output. The classic way of achieving this would be to introduce a two-phase commit between the storage of the consumer position and the storage of the consumers output. But this can be handled more simply and generally by letting the consumer store its offset in the same place as its output. This is better because many of the output systems a consumer might want to write to will not support a two-phase commit. As an example of this, consider a Kafka Connect connector which populates data in HDFS along with the offsets of the data it reads so that it is guaranteed that either data and offsets are both updated or neither is. We follow similar patterns for many other data systems which require these stronger semantics and for which the messages do not have a primary key to allow for deduplication.
+
+Kafka guarantees at-least-once delivery by default, and allows the user to implement at-most-once delivery by disabling retries on the producer and committing offsets in the consumer prior to processing a batch of messages.
+
+### Replication
+
+Kafka replicates the log for each topic's partitions across a configurable number of servers (you can set this replication factor on a topic-by-topic basis).This allows automatic failover to these replicas when a server in the cluster fails so messages remain available in the presence of failures.
+
+The unit of replication is the topic partition. Under non-failure conditions, each partition in Kafka has a single leader and zero or more followers. The total number of replicas including the leader constitute the replication factor. **All reads and writes go to the leader of the partition. ** Typically, there are many more partitions than brokers and the leaders are evenly distributed among brokers. The logs on the followers are identical to the leader's log—all have the same offsets and messages in the same order (though, of course, at any given time the leader may have a few as-yet unreplicated messages at the end of its log).
+
+For Kafka node liveness has two conditions:
+
+1. A node must be able to maintain its session with ZooKeeper (via ZooKeeper's heartbeat mechanism)
+2. If it is a follower it must replicate the writes happening on the leader and not fall "too far" behind
+
+We refer to nodes satisfying these two conditions as being "in sync" to avoid the vagueness of "alive" or "failed". The leader keeps track of the set of "in sync" nodes. If a follower dies, gets stuck, or falls behind, the leader will remove it from the list of in sync replicas. The determination of stuck and lagging replicas is controlled by the `replica.lag.time.max.ms` configuration.
+
+##### Replicated Logs: Quorums, ISRs, and State Machines (Oh my!)
+
+At its heart a Kafka partition is a replicated log. 
+
+ISR: in-sync replicas.
+
+##### Unclean leader election: What if they all die?
+
+Note that Kafka's guarantee with respect to data loss is predicated on at least one replica remaining in sync. If all the nodes replicating a partition die, this guarantee no longer holds.
+
+However a practical system needs to do something reasonable when all the replicas die. If you are unlucky enough to have this occur, it is important to consider what will happen. There are two behaviors that could be implemented:
+
+1. Wait for a replica in the ISR to come back to life and choose this replica as the leader (hopefully it still has all its data).
+2. Choose the first replica (not necessarily in the ISR) that comes back to life as the leader.
+
+This is a simple tradeoff between availability and consistency. If we wait for replicas in the ISR, then we will remain unavailable as long as those replicas are down. If such replicas were destroyed or their data was lost, then we are permanently down. If, on the other hand, a non-in-sync replica comes back to life and we allow it to become leader, then its log becomes the source of truth even though it is not guaranteed to have every committed message. By default from version 0.11.0.0, Kafka chooses the first strategy and favor waiting for a consistent replica. This behavior can be changed using configuration property `unclean.leader.election.enable`, to support use cases where uptime is preferable to consistency.
+
+##### Availability and Durability Guarantees
+
+When writing to Kafka, producers can choose whether they wait for the message to be acknowledged by 0,1 or all (-1) replicas. Note that "acknowledgement by all replicas" does not guarantee that the full set of assigned replicas have received the message. **By default, when acks=all, acknowledgement happens as soon as all the current in-sync replicas have received the message.**
+
+Therefore, we provide two topic-level configurations that can be used to prefer message durability over availability:
+
+1. Disable unclean leader election \- if all replicas become unavailable, then the partition will remain unavailable until the most recent leader becomes available again.
+2. Specify a minimum ISR size \- the partition will only accept writes if the size of the ISR is above a certain minimum, in order to prevent the loss of messages that were written to just a single replica, which subsequently becomes unavailable. 
+
+##### Replica Management
+
+### Log Compaction
+
+Log compaction ensures that Kafka will always retain at least the last known value for each message key within the log of data for a single topic partition. 
+
+Log compaction is a mechanism to give finer-grained per-record retention, rather than the coarser-grained time-based retention. The idea is to selectively remove records where we have a more recent update with the same primary key. This way the log is guaranteed to have at least the last state for each key.
+
+This retention policy can be set per-topic, so a single cluster can have some topics where retention is enforced by size or time and other topics where retention is enforced by compaction.
+
+##### Log Compaction Basics
+
+Log compaction adds an option for handling the tail of the log.
+
+![img](/log_cleaner_anatomy.png)
+
+The compaction is done in the background by periodically recopying log segments. Cleaning does not block reads and can be throttled to use no more than a configurable amount of I/O throughput to avoid impacting producers and consumers. The actual process of compacting a log segment looks something like this:
+
+![img](/log_compaction.png)
+
+##### What guarantees does log compaction provide?
+
+- `min.compaction.lag.ms`, `max.compaction.lag.ms`
+- Ordering of messages is always maintained. Compaction will never re-order messages, just remove some.
+- The offset for a message never changes. It is the permanent identifier for a position in the log.
+-  Since the removal of delete markers happens concurrently with reads, it is possible for a consumer to miss delete markers if it lags by more than `delete.retention.ms`.
+
+##### Log Compaction Details
+
+Log compaction is handled by the log cleaner, a pool of background threads that recopy log segment files, removing records whose key appears in the head of the log. Each compactor thread works as follows:
+
+1. It chooses the log that has the highest ratio of log head to log tail
+2. It creates a succinct summary of the last offset for each key in the head of the log
+3. It recopies the log from beginning to end removing keys which have a later occurrence in the log. New, clean segments are swapped into the log immediately so the additional disk space required is just one additional log segment (not a fully copy of the log).
+4. The summary of the log head is essentially just a space-compact hash table. It uses exactly 24 bytes per entry. As a result with 8GB of cleaner buffer one cleaner iteration can clean around 366GB of log head (assuming 1k messages).
+
+##### Configuring The Log Cleaner
+
+The log cleaner is enabled by default. This will start the pool of cleaner threads.
+
+```properties
+# enable log cleaning on a particular topic, defined in the broker's `server.properties` file 
+log.cleanup.policy=compact 
+
+log.cleaner.min.compaction.lag.ms
+
+log.cleaner.max.compaction.lag.ms
+
+```
+
+# Quotas
+
+Kafka cluster has the ability to enforce quotas on requests to control the broker resources used by clients. Two types of client quotas can be enforced by Kafka brokers for each group of clients sharing a quota:
+
+1. Network bandwidth quotas define byte-rate thresholds (since 0.9)
+2. Request rate quotas define CPU utilization thresholds as a percentage of network and I/O threads (since 0.11)
+
+### Quota Configuration
+
+User and (user, client-id) quota overrides are written to ZooKeeper under ***/config/users*** and client-id quota overrides are written under ***/config/clients***. These overrides are read by all brokers and are effective immediately. This lets us change quotas without having to do a rolling restart of the entire cluster. 
+
+##### Network Bandwidth Quotas
+
+##### Request Rate Quotas
+
+# Implementation
+
+### Network Layer
+
+The network layer is a fairly straight-forward NIO server. The `sendfile` implementation is done by giving the `MessageSet` interface a `writeTo` method. This allows the file-backed message set to use the more efficient `transferTo` implementation instead of an in-process buffered write. The threading model is a single acceptor thread and *N* processor threads which handle a fixed number of connections each. 
+
+### Messages
+
+Messages consist of a variable-length header, a variable-length opaque key byte array and a variable-length opaque value byte array. 
+
+### Message Format
+
+Messages (aka Records) are always written in batches. The technical term for a batch of messages is a record batch, and a record batch contains one or more records. In the degenerate case, we could have a record batch containing a single record. Record batches and records have their own headers.
+
+### Log
+
+A log for a topic named "my_topic" with two partitions consists of two directories (namely `my_topic_0` and `my_topic_1`) populated with data files containing the messages for that topic.
+
+Each log file is named with the offset of the first message it contains. So the first file created will be 00000000000.kafka, and each additional file will have an integer name roughly *S* bytes from the previous file where *S* is the max log file size given in the configuration.
+
+![img](/kafka_log.png)
+
+##### Writes
+
+**The log allows serial appends which always go to the last file.** This file is rolled over to a fresh file when it reaches a configurable size (say 1GB). The log takes two configuration parameters: *M*, which gives the number of messages to write before forcing the OS to flush the file to disk, and *S*, which gives a number of seconds after which a flush is forced. This gives a durability guarantee of losing at most *M* messages or *S* seconds of data in the event of a system crash.
+
+##### Reads
+
+Reads are done by giving the 64-bit logical offset of a message and an *S*-byte max chunk size. This will return an iterator over the messages contained in the *S*-byte buffer. *S* is intended to be larger than any single message, but in the event of an abnormally large message, the read can be retried multiple times, each time doubling the buffer size, until the message is read successfully. A maximum message and buffer size can be specified to make the server reject messages larger than some size, and to give a bound to the client on the maximum it needs to ever read to get a complete message. It is likely that the read buffer ends with a partial message, this is easily detected by the size delimiting.
+
+The actual process of reading from an offset requires first locating the log segment file in which the data is stored, calculating the file-specific offset from the global offset value, and then reading from that file offset. The search is done as a simple binary search variation against an in-memory range maintained for each file.
+
+The log provides the capability of getting the most recently written message to allow clients to start subscribing as of "right now". This is also useful in the case the consumer fails to consume its data within its SLA-specified number of days. In this case when the client attempts to consume a non-existent offset it is given an `OutOfRangeException` and can either reset itself or fail as appropriate to the use case.
+
+##### Deletes 
+
+**Data is deleted one log segment at a time.** The log manager applies two metrics to identify segments which are eligible for deletion: time and size. For time-based policies, the record timestamps are considered, with the largest timestamp in a segment file (order of records is not relevant) defining the retention time for the entire segment. Size-based retention is disabled by default. When enabled the log manager keeps deleting the oldest segment file until the overall size of the partition is within the configured limit again. If both policies are enabled at the same time, a segment that is eligible for deletion due to either policy will be deleted. To avoid locking reads while still allowing deletes that modify the segment list we use a copy-on-write style segment list implementation that provides consistent views to allow a binary search to proceed on an immutable static snapshot view of the log segments while deletes are progressing.
 
 
 
 # Reference 
 
-[Kafka 官网](http://kafka.apache.org/documentation/)
+[Kafka 文档](http://kafka.apache.org/documentation/)
+[Kafka 文档中文版](https://kafka.apachecn.org/documentation.html)
 [Kafka 系列](https://xie.infoq.cn/article/c866a4560967dc6bb5e0cf809)
