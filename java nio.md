@@ -448,6 +448,6 @@ public class UseCharsets {
 
 # Reference
 
-[Java NIO vs IO](http://tutorials.jenkov.com/java-nio/nio-vs-io.html#main-differences-between-java-nio-and-io)
-[Getting started with new I/O (NIO)](https://developer.ibm.com/languages/java/tutorials/j-nio/?mhsrc=ibmsearch_a&mhq=java%20nio&_ga=2.262063882.682083932.1603089350-864276855.1603089350)
-[文件锁](https://zhuanlan.zhihu.com/p/25134841)
+\[1\]:[Java NIO vs IO](http://tutorials.jenkov.com/java-nio/nio-vs-io.html#main-differences-between-java-nio-and-io)
+\[2\]:[Getting started with new I/O (NIO)](https://developer.ibm.com/languages/java/tutorials/j-nio/?mhsrc=ibmsearch_a&mhq=java%20nio&_ga=2.262063882.682083932.1603089350-864276855.1603089350)
+\[3\]:[文件锁](https://zhuanlan.zhihu.com/p/25134841)
