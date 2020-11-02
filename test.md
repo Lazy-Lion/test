@@ -1,8 +1,6 @@
 # test file for git
- the common context
- ~ change file for update
- ~ change file for update2 
-VMware Workstation Pro
+
+# VMware Workstation Pro
 
 
 *Master and Feature1 branch add context dev issue*
@@ -50,6 +48,3 @@ VMware Workstation Pro
         return l.next;
     }
 ```
-
-test for git merge_origin
-test for git merge_local
