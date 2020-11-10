@@ -105,7 +105,7 @@ PUT my-index-000001
 | fields | Multi-fields  |
 | index | Should the field be searchable? Accepts `true` (default) or `false`. |
 | store | Whether the field value should be stored and retrievable separately from the `_source` field. Accepts `true` or `false` (default). |
-| search_analyzer |The analyzer that should be used at search time on the text field. Defaults to the analyzer setting.|
+| search_analyzer |The analyzer that should be used at **search time** on the text field. Defaults to the analyzer setting.|
 ##### keyword - 不分词
 
 ```json
@@ -667,6 +667,27 @@ The fact that all field types support multi-value fields out of the box is a con
 This means that even a simple text field must be able to support multiple values by default. When other data types were added, such as numbers and dates, they used the same data structure as strings, and so got multi-values for free.
 
 # Rest API
+
+### Index APIs
+
+##### create index
+
+```json
+PUT /my-index-000001
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 2
+  },
+  "mappings": {
+    "properties": {
+    "field1": { "type": "text" }
+    }
+  }
+}
+```
+
+
 
 
 
