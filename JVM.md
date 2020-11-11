@@ -184,7 +184,7 @@ java堆分为新生代 young generation，老年代 old generation。
 3. 标记-整理算法：Mark Compact
 
 移动和不移动对于吞吐量的影响：
-吞吐量受用户程序和收集器影响。不移动提升收集器效率，但是内存分配和访问耗时增加，而这部分比垃圾收集的频率高很多，这部分耗时增加，总的吞吐量是下降的。**关注吞吐量的Parallel Sacvenge 基于标记-整理算法。关注延迟的CMS基于标记-清除算法，内存空间碎片化程度很大时，再采用标记-整理算法收集一次。  **
+吞吐量受用户程序和收集器影响。不移动提升收集器效率，但是内存分配和访问耗时增加，而这部分比垃圾收集的频率高很多，这部分耗时增加，总的吞吐量是下降的。**关注吞吐量的Parallel Scavenge 基于标记-整理算法。关注延迟的CMS基于标记-清除算法，内存空间碎片化程度很大时，再采用标记-整理算法收集一次。  **
 
 ##### 垃圾收集分类
 
@@ -202,165 +202,275 @@ java堆分为新生代 young generation，老年代 old generation。
 
 <a href="https://www.iteye.com/blog/rednaxelafx-1044951">
 
-hotspot实现细节：
-  根节点枚举： stop the world
-    OopMap: 可作为GC Roots的节点主要在全局性的引用（如常量或类静态变量）与执行上下文（如栈帧中的本地变量表）中
-        类加载完成后，对象的类型信息里记录自己的OopMap,记录了在该类型的对象内什么偏移量上是什么类型的数据
-        每个被JIT编译过的方法也会在特定的位置上（安全点）记录下OopMap,记录执行到该方法的某条指令时，栈上和寄存器里哪些位置是引用。
+解决问题： JVM栈上如何判断一个数据是引用类型？
 
-    安全点(safe point): 用户程序执行时必须执行到安全点才能暂停进行垃圾回收。 方法调用、循环跳转、异常跳转等
-         hotspot为了避免安全点过多带来过重的负担，对循环有一项优化措施：使用int类型或范围更小的数据类型作为索引值的循环默认不会被放置安全点。这种循环被称为可数循环（Counted Loop）。使用long或范围更大的数据类型作为索引的循环被称为不可数循环（Uncounted loop）,会被放置安全点。
-         -XX:+UseCountedLoopSafepoints 强制在可数循环中也放置安全点(jdk 8 中有bug，有导致虚拟机崩溃的风险)，实际处理可将可数循环转换成不可数循环(int → long)
-    
-    如何在垃圾回收时让所有线程(不包括执行JNI调用的线程)都跑到最近的安全点，停顿下来？
-      抢先式中断：preemptive suspension, 当垃圾收集发生时，系统首先把所有用户线程全部中断，如果发现有用户线程中断的地方不在安全点上，恢复这条线程执行，让它一会再重新中断，直到跑到安全点上。（几乎没有虚拟机采用抢先式中断）
-      主动式中断：voluntary suspension, 当垃圾回收需要中断线程时，设置一个标志位，各个线程执行时不停地主动轮询这个标志，一旦发现中断标志为真时就自己在最近的安全点上主动中断挂起。
+HotSpot采用准确式GC的方式，使用OopMap记录映射表（需要JVM的解释器和JIT编译器提供支持）。
 
 
-​    
-​    安全区域(safe region)： 对于没有分配处理器时间片的线程，线程无法响应中断请求（执行到安全点挂起）=> 引入安全区域
-​              确保在某一段代码片段中，引用关系不会发生变化 => 区域中任意地方开始垃圾收集都是安全的。
-​              当用户线程执行到安全区域里的代码，标识自己进入了安全区域，这段时间发起垃圾收集不必管这些线程。当线程要离开安全区域时，要检查虚拟机是否已经完成根节点枚举（或者垃圾收集过程中其他需要暂停用户线程的阶段），
-​                如果完成了，线程继续执行；否则线程等待直到收到可以离开安全区域的信号。
+###### OopMap
+HotSpot实现细节：
+
+1. GC Roots 枚举： STW (Stop The World)
+
+ 	2. OopMap: 可作为GC Roots的节点主要在全局性的引用（如常量或类静态变量）与执行上下（如栈帧中的本地变量表）中。类加载完成后，对象的类型信息里记录自己的OopMap，记录了在该类型的对象内什么偏移量上是什么类型的数据。
+     - 每个被JIT编译过的方法也会在特定的位置上（安全点，safe point）记录下OopMap，记录执行到该方法的某条指令时，栈上和寄存器里哪些位置是引用（因此HotSpot中GC只能在safe point处进入）。
+     - 而仍然在解释器中执行的方法则可以通过解释器里的功能自动生成OopMap给GC用。
+     - Java线程中的JNI方法，它们既不是由JVM里的解释器执行的，也不是由JVM的JIT编译器生成的，所以会缺少OopMap信息。HotSpot采用`句柄`的方式来维持准确性。
+
+###### 安全点 （safe point）
+
+用户程序执行时必须执行到安全点才能暂停进行垃圾回收。 安全点的位置主要在方法调用、循环跳转、异常跳转等。
+
+HotSpot为了避免安全点过多带来过重的负担，对循环有一项优化措施：使用`int`类型或范围更小的数据类型作为索引值的循环默认不会被放置安全点。这种循环被称为可数循环（Counted Loop）。使用long或范围更大的数据类型作为索引的循环被称为不可数循环（Uncounted loop），会被放置安全点。
+
+ -XX:+UseCountedLoopSafepoints 强制在可数循环中也放置安全点（JDK 8 中有bug，有导致虚拟机崩溃的风险），实际处理可将可数循环转换成不可数循环（int → long）。
+
+###### 如何在垃圾回收时让所有线程（不包括执行JNI调用的线程）都跑到最近的安全点，停顿下来？
+
+1. 抢先式中断：preemptive suspension， 当垃圾收集发生时，系统首先把所有用户线程全部中断，如果发现有用户线程中断的地方不在安全点上，恢复这条线程执行，让它一会再重新中断，直到跑到安全点上（几乎没有虚拟机采用抢先式中断）。
+
+2. 主动式中断：voluntary suspension，当垃圾回收需要中断线程时，设置一个标志位，各个线程执行时不停地主动轮询这个标志，一旦发现中断标志为真时就自己在最近的安全点上主动中断挂起。
+
+###### 安全区域（safe region）
+
+对于没有分配处理器时间片的线程，线程无法响应中断请求（执行到安全点挂起）=> 引入安全区域
+
+确保在某一段代码片段中，引用关系不会发生变化 => 区域中任意地方开始垃圾收集都是安全的。
+
+当用户线程执行到安全区域里的代码，标识自己进入了安全区域，这段时间发起垃圾收集不必管这些线程。当线程要离开安全区域时，要检查虚拟机是否已经完成根节点枚举（或者垃圾收集过程中其他需要暂停用户线程的阶段）。如果完成了，线程继续执行；否则线程等待直到收到可以离开安全区域的信号。
+
+###### 记忆集 （Remember Set）
+
+记录从非收集区域指向收集区域的指针集合的抽象数据结构。
+
+###### 卡表（Card Table）
+
+记忆集的一种实现。 每个记录精确到一块内存区域，记录该区域内是否有对象含有跨代指针。HotSpot中卡表只是一个字节数组，每个元素标识内存区域中一块特定大小的内存块（卡页，Card Page）。只要卡页内有一个（或多个）对象的字段存在跨代指针，就进行标记变脏。垃圾收集时，卡表中变脏的元素对应的内存块区域中的对象需要加入GC Roots中。
+
+###### 写屏障（Writer Barrier）
+
+虚拟机层面对引用类型字段赋值这个动作的AOP切面，赋值前的部分叫作**写前屏障**（Pre-Writer Barrier）,赋值后的叫作**写后屏障**（Post-Writer Barrier）。HotSpot里通过写屏障维护卡表的状态（更新卡表可能存在`伪共享`问题）。
+
+### 并发的可达性分析
+
+##### 三色标记
+
+CMS和G1都使用了三色标记法。**能标记的都是可用的，未标记的都是垃圾。**
+
+**并发标记开始后产生的新对象，当成黑色，本轮GC不清理。**
+
+- 白色：对象尚未被垃圾收集器访问过。
+- 黑色：对象已经被垃圾收集器访问过，且对象的所有引用都已经扫描过。
+- 灰色：对象已经被垃圾收集器访问过，但对象上至少存在一个引用还没有被扫描过。
+
+##### 浮动垃圾
+
+例如：并发标记时黑色对象指向灰色对象的引用被置为`null`，灰色对象会继续存活，等到下次垃圾收集才能回收。
+
+##### 对象漏标
+
+当且仅当同时满足以下两个条件时，会产生对象消失问题（黑色对象被误标为白色）：
+
+1. 插入了一条或多条从黑色对象到白色对象的引用。
+2. 删除了全部从灰色对象到该白色对象的直接或间接引用。
+
+解决方法：破坏其中任一条件
+
+1. 增量更新：Incremental Update, 破坏第一个条件。当黑色对象插入新的白色对象的引用关系时，就将这个新插入的引用记录，等并发扫描结束后，再以这些记录过的引用关系中的黑色对象为根，重新标记一次（重新标记需要 stop the world）。
+2. 原始快照：Snapshot at The Beginning （SATB），破坏第二个条件。当灰色对象要删除指向白色对象的引用关系时，将这个要删除的引用记录，等并发扫描结束后，再以这些记录过的引用关系中的灰色对象为根，重新标记一次（重新标记需要 stop the world）。
+
+应用：
+
+- CMS：写屏障 + 增量更新 （存在ABA问题）
+
+- G1：写屏障 + SATB
+
+- ZGC：读屏障（Load Barrier），ZGC使用了**染色指针**。
+
+  ![在这里插入图片描述](E:\GitRepository\test\image\20200524230057427.png)
+
+# 垃圾收集器
+
+### 收集器分类
+
+- Young Generation: Serial, ParNew, Parallel Scavenge 
+- Old generation: CMS, Serial Old, Parallel Old
+- 不分代：G1
+
+### Serial 
+
+新生代收集器，单线程工作，进行垃圾回收时必须暂停其他工作线程。采用标记-复制算法。
+
+### Serial Old
+
+Serial的老年代版本，单线程收集器。采用标记-整理算法。
+
+### ParNew
+
+新生代收集器，Serial收集器的多线程并行版本，目前只有Serial、ParNew能与CMS收集器配合工作 
+
+虚拟机参数 `-XX:+UseParNewGC`
+
+### Parallel Scavenge
+
+新生代收集器，并行收集的多线程收集器。采用标记-复制算法。
+
+关注点与其他收集器不同，Parallel Scavenge的关注点在吞吐量（Throughput）
+
+            吞吐量 = （运行用户代码时间）/ （运行用户代码时间 + 运行垃圾收集时间）
+
+虚拟机参数 -XX:MaxGCPauseMillis, -XX:GCTimeRatio, -XX:+UseAdaptiveSizePolicy  
+
+### Parallel Old
+
+Parallel Scavenge收集器的老年代版本，支持多线程并发收集。采用标记-整理算法。
+
+### CMS (Concurrent Mark Sweep)
+
+老年代垃圾收集器。首次实现了垃圾收集线程和用户线程同时工作（三色标记）。
+
+虚拟机参数 -XX:+UseConcMarkSweepGC
+
+CMS以获取最短回收停顿时间为目标。采用标记-清除算法。
+
+执行步骤：
+
+1. 初始标记：initial mark,   stop the world （只是标记GC Roots能直接关联到的对象）；
+2. 并发标记：concurrent mark （三色标记）；
+3. 重新标记：remark, stop the world （修正并发标记，三色标记的增量更新）；
+4. 并发清除：concurrent sweep （清除垃圾，存活对象不需要移动）。
+
+CMS无法处理浮动垃圾（Floating Garbage，并发标记和并发清除阶段，用户线程还在运行，会伴随着新的垃圾对象产生，这一部分垃圾需要在下一次垃圾收集时再清理）。
+
+垃圾收集阶段用户线程还需要运行，需要预留足够内存空间提供给用户线程使用，不能等到老年代几乎完全填满再收集，JDK 5默认老年代使用68%空间就会激活，通过 -XX:CMSInitiatingOccupancyFraction 参数可设置。
+
+要是CMS运行期间预留的内存无法满足程序分配新对象的需要，就会出现一次“并发失败”（Concurrent Mode Failure），虚拟机将冻结用户线程的执行，临时启用Serial Old收集器来重新进行老年代的垃圾收集，这样停顿时间就很长了。
+
+CMS基于标记-清除算法，会有大量的空间碎片产生。 -XX:+UseCMSCompactAtFullCollection(默认开启，JDK 9开始废弃)，用于在CMS收集器不得不进行Full GC时开启内存碎片的合并整理过程（内存整理需要移动存活对象，（在Shenandoah和ZGC出现前）无法并发）。-XX:CMSFullGCsBeforeCompaction（JDK 9开始废弃），要求CMS收集器在执行若干次不整理空间的FullGC后，下次进入Full GC前会先进行碎片整理（默认值是0，表示每次进入Full GC时都进行碎片整理）。
+
+### G1: Garbage First
+
+G1收集器不分代，收集器面向局部收集，基于Region的堆内存布局。G1是面向服务端应用的垃圾收集器。G1内存占用高。
+
+整体来看基于标记-整理算法，从局部（两个Region）来看基于标记-复制算法。
+
+JDK 7 update 4 之后可以商用，JDK 8 update 40 之后完全实现。JDK 9开始G1成为服务器端模式下默认的垃圾收集器，CMS成为不推荐使用的收集器。
+
+G1可以面向堆内存任何部分组成回收集（Collection Set, CSet）进行回收，衡量标准是那块内存中存放的垃圾数量最多，回收收益最大，这就是G1收集器的Mixed GC模式。
+
+G1把连续的Java堆划分成多个大小相等的独立区域（Region），每个Region都可以根据需要扮演新生代的Eden、Survivor，或老年代。 Region是单次垃圾回收的最小单元，每次收集的内存空间都是Region大小的整数倍。
+
+![img](E:\GitRepository\test\image\v2-6a55f30808086b1b6fce2a367dfb0bf6_720w.jpg)
+
+有一类特殊的Region：**Humongous**区域，专门用来存储大对象（大小超过一个Region容量一半的对象。超过整个Region容量的超大对象，会被存放在N个连续的Humongous Region中，G1大多数行为都把Humongous Region作为老年代的一部分看待），-XX:G1HeapRegionSize 设置每个Region大小，取值范围 1MB~32MB,应为 2^n。
+
+G1仍然保留新生代、老年代的概念，但新生代和老年代不再固定，都是一系列区域（不需要连续）的动态集合。
+
+G1跟踪各个Region里垃圾堆积的价值大小（回收所获得的空间大小以及回收所需时间的经验值），在后台维护一个优先级列表，每次根据用户设定允许的收集停顿时间（-XX:MaxGCPauseMills，默认200ms），优先处理回收价值收益最大的那些Region（需要建立可靠的停顿预测模型）。
+
+跨Region引用：卡记忆集，每个Region都维护自己的记忆集（哈希表），所以G1较耗内存。
+
+并发标记：三色标记，使用原始快照解决漏标问题。G1为每个Region设计了两个TAMS（top at mark start）指针，回收过程中新创建的对象地址要在这两个指针位置以上（默认存活对象，不纳入回收范围）。
+
+G1的目标：在延迟可控的情况下获得尽可能高的吞吐量。
+
+G1执行步骤：
+
+1. 初始标记: initial marking，标记GC直接关联到的对象，修改TAMS指针，需要 Stop the world
+2. 并发标记: concurrent marking
+3. 最终标记: final marking， 需要stop the world
+4. 筛选回收: live data counting and evacuation，需要stop the world，多线程并行完成。选择Region构成回收集，把回收集中存活对象复制到空的Region中，清理掉回收集里Region的全部空间。
+
+### Shenandoah
+
+<a href="https://wiki.openjdk.java.net/display/shenandoah/Main">
+
+并行整理：
+	方式一： 在被移动对象原有的内存上设置保护陷阱（Memory Protection Trap）， 一旦用户程序访问到属于旧对象的内存空间就会自陷，进入预设好的异常处理器中，由其中的代码逻辑把访问转发到复制后的新对象上。（如果没有操作系统层面的直接支持，导致用户态频繁切换到核心态，代价大）。
+	方式二： 转发指针（Forwarding Pointer）实现对象移动与用户程序并发的一种解决方案。在原有对象布局结构的最前面统一增加一个新的引用字段，在正常不处于并发移动的情况下，指向对象自己，否则指向新对象。
+
+转发指针更新时存在多线程竞争问题：
+	用户线程和收集器线程并发读：无论读旧对象还是新对象，结果一致。
+    用户线程和收集器线程并发写：需要保证写操作只能发生在新复制的对象上，而不是写入旧对象的内存中。
+
+并发写的步骤：
+
+1. 收集器复制新的对象副本
+
+2. 用户线程更新对象的某个字段
+
+3. 收集器线程更新转发指针的引用值为新副本地址
+
+需要保证步骤3在步骤2之前执行或2先于1、3执行  => 保证收集器和用户线程对转发指针的访问只有其中一个能成功，避免两者交替进行（CAS）。
+
+转发指针存在执行效率问题：对象访问，读写屏障。        
+
+### ZGC Z Garbage Collector
+
+JDK 11 新加入的具有实验性质低延迟垃圾收集器。
+
+ZGC收集器是一款基于Region内存布局的，（暂时）不设分代的，使用读屏障、染色指针和内存多重映射等技术来实现的可并发的标记-整理算法，以低延迟为首要目标。
+
+ZGC基于Region的堆内存布局，但ZGC的Region具有动态性（动态创建、销毁，动态的区域容量大小）。
+
+x64硬件，ZGC的Region大小：
+
+- 小型Region: small region，2MB，用于放置小于256KB的小对象。
+
+- 中型Region: medium region。32MB，用于放置大于等于256KB且小于4MB的对象。
+
+- 大型Region: large region，容量不固定，可动态变化，必须为2MB的整数倍，放置大于等于4MB的大对象。每个大小Region只会存放一个大对象，实际容量最小可低至4MB。
+
+##### 染色指针（colored pointer）
+
+直接将少量额外的信息存储在指针上的技术。
+
+64位Linux只支持47位的进程虚拟地址空间和46位（64TB）的物理地址空间，ZGC的染色指针对于可用的46位指针宽度，将高4位提取出来存储4个标志信息。 => ZGC能管理的内存不超过4TB，不支持32位平台，不支持压缩指针（-XX:+UseCompressedOops）。
+
+通过这4个标志位，虚拟机可以直接从指针中看到其引用对象的三色标记状态、是否进入了重分配集（被移动过）、是否只能通过finalize()方法才能被访问到。      
+
+![在这里插入图片描述](E:\GitRepository\test\image\20200524230057427.png)
 
 
-    记忆集：记录从非收集区域指向收集区域的指针集合的抽象数据结构。
-    
-    卡表：记忆集的一种实现。            
-    
-    写屏障：Writer Barrier, 虚拟机层面对引用类型字段赋值这个动作的AOP切面，赋值前的部分叫作写前屏障（Pre-Writer Barrier）,赋值后的叫作邂逅屏障（Post-Writer Barrier）
 
-  并发的可达性分析：
-    三色标记（并发开始后的新对象，当成黑色，本轮GC不清理）：
-      白色：对象尚未被垃圾收集器访问过
-      黑色：对象已经被垃圾收集器访问过，且对象的所有引用都已经扫描过
-      灰色：对象已经被垃圾收集器访问过，但对象上至少存在一个引用还没有被扫描过
+##### 虚拟地址
 
+Virtual address space. In computing, a virtual address space (VAS) or address space is the set of ranges of virtual addresses that an operating system makes available to a process. 
 
-    当且仅当同时满足以下两个条件时，会产生对象消失问题（黑色对象被误标为白色）：
-      1)插入了一条或多条从黑色对象到白色对象的引用
-      2)删除了全部从灰色对象到该白色对象的直接或间接引用
-    
-      https://blog.csdn.net/qq_21383435/article/details/106311542
-    
-    解决方法，破坏其中任一条件：
-      增量更新：Incremental Update, 破坏第一个条件。当黑色对象插入新的白色对象的引用关系是，就将这个新插入的引用记录，等并发扫描结束后，再将这些记录过的引用关系中的黑色对象为根，重新标记一次(stop the world)。
-      原始快照：Snapshot at The Beginning, 破坏第二个条件。当灰色对象要删除指向白色对象的引用关系时，将这个要删除的引用记录，等并发扫描结束后，再将这些记录过的引用关系中的灰色对象为根，重新标记一次(stop the world)。
+##### 物理地址
 
-垃圾收集器：
+Physical address. In computing, a physical address (also real address, or binary address), is a memory address that is represented in the form of a binary number on the address bus circuitry in order to enable the data bus to access a particular storage cell of main memory, or a register of memory mapped I/O device.
 
-   young generation: Serial, ParNew, Parallel Scavenge
+##### 内存管理单元
 
-   old generation: CMS, Serial Old, Parallel Old
+Memory management unit. A memory management unit (MMU), sometimes called paged memory management unit (PMMU), is a computer hardware unit having all memory references passed through itself, primarily performing the translation of virtual memory addresses to physical addresses.
 
-   G1
+##### 页表
 
+Page table. 虚拟地址和物理地址的映射关系以“页”为单位。
 
-  Serial: 新生代收集器，单线程工作的收集器，进行垃圾回收时必须暂停其他工作线程，采用标记-复制算法
-  Serial Old: Serial的老年代版本，单线程收集器，采用标记-整理算法
+##### 内存映射
 
-  ParNew: 新生代收集器，Serial收集器的多线程并行版本，目前只有 Serial、ParNew能与CMS收集器配合工作 -XX:+UseParNewGC
+In computing, mmap(2) is a POSIX-compliant Unix system call that maps files or devices into memory.
 
-  Parallel Scavenge: 新生代收集器，采用标记-复制算法，并行收集的多线程收集器。
-            关注点与其他收集器不同，Parallel Scavenge的关注点在吞吐量(Throughput)
+ZGC使用多重映射将多个不同的虚拟内存地址映射到同一个物理内存上。
 
-            吞吐量 = （运行用户代码时间）/ (运行用户代码时间 + 运行垃圾收集时间)
-    
-         -XX:MaxGCPauseMillis, -XX:GCTimeRatio, -XX:+UseAdaptiveSizePolicy
+ZGC的4个执行阶段，4个阶段都是可以并发执行的：
 
-  Parallel Old: Parallel Scavenge收集器的老年代版本，支持多线程并发收集，采用标记-整理算法。
+1. 并发标记：concurrent mark, 类似G1的初始标记、并发标记、最终标记过程，更新染色指针的Marked 0、Marked 1标志位（初始标记、最终标记会有短暂停顿）。
+2. 并发预备重分配：concurrent prepare for relocate，根据特定的查询条件统计本次垃圾收集过程中要清理哪些Region,将这些Region组成重分配集（Relocation Set）(ZGC的每次回收都会扫描所有的Region, 重分配集只是决定了里面的存活对象会被重新复制到其他Region中，里面的Region会被释放)。
+3. 并发重分配：把重分配集中的存活对象复制到新的Region上，并为重分配集中的每个Region维护一个转发表(Forward Table), 记录从旧对象到新对象的转向关系。可通过染色指针得知一个对象是否处于重分配集中，再根据转发表将访问转发到新复制的对象上，并同时修正更新该引用的值使其指向新对象（指针的自愈能力,self healing => 某个region的所有对象复制完成，就可以用于新对象的分配，只要保留转发表，指针会自愈）
+4. 并发重映射：concurrent remap, 修正整个堆中指向重分配集中旧对象的所有引用，由于有转发表且指针可自愈，这一步不是迫切执行，ZGC将并发重映射的工作合并到了下一次垃圾回收的并发标记中完成，修正之后，原来的转发表信息就可以释放掉了。
 
-  CMS(Concurrent Mark Sweep): 老年代垃圾收集器。首次实现了垃圾收集线程和用户线程同时工作（三色标记）。 -XX:+UseConcMarkSweepGC
-          以获取最短回收停顿时间为目标的收集器。采用标记-清除算法。
+  垃圾回收与堆内存大小无关。
 
-          执行步骤：
-            1) 初始标记：initial mark,   stop the world (只是标记GC Roots能直接关联到的对象)
-            2) 并发标记：concurrent mark （三色标记）
-            3) 重新标记：remark,   stop the world （修正并发标记，三色标记的增量更新）
-            4) 并发清除：concurrent sweep （清除垃圾，存活对象不需要移动）
-    
-          无法处理浮动垃圾(Floating Garbage，并发标记和并发清除阶段，用户线程还在运行，会伴随着新的垃圾对象产生，这一部分垃圾需要在下一次垃圾收集时再清理)
-          垃圾收集阶段用户线程还需要运行，需要预留足够内存空间提供给用户线程使用，不能等到老年代几乎完全填满再收集，jdk 5默认老年代使用68%空间就会激活 -XX:CMSInitiatingOccupancyFraction 参数可设置。
-            要是CMS运行期间预留的内存无法满足程序分配新对象的需要，就会出现一次“并发失败”(Concurrent Mode Failure),虚拟机将冻结用户线程的执行，临时启用Serial Old收集器来重新进行老年代的垃圾收集，这样停顿时间就很长了。
-          CMS基于标记-清除算法，会有大量的空间碎片产生。 -XX:+UseCMSCompactAtFullCollection(默认开启，jdk 9开始废弃)，用于在CMS收集器不得不进行Full GC时开启内存碎片的合并整理过程（内存整理需要移动存活对象，（在Shenandoah和ZGC出现前）无法并发）
-            -XX:CMSFullGCsBeforeCompaction(jdk 9开始废弃),要求CMS收集器在执行若干次不整理空间的FullGC后，下次进入Full GC前会先进行碎片整理（默认值是0，表示每次进入Full GC时都进行碎片整理）
+​     
 
-  G1: Garbage First, 不分代，收集器面向局部收集，基于Region的堆内存布局。面向服务端应用的垃圾收集器。
-      整体来看基于标记-整理算法，从局部（两个Region）来看基于标记-复制算法。
-      G1内存占用高。
-      jdk 7 update 4 之后可以商用，jdk 8 update 40 之后完全实现
-      jdk 9开始G1成为服务器端模式下默认的垃圾收集器，CMS成为不推荐使用的收集器。
+### 衡量垃圾收集器的三项最重要指标
 
-      G1可以面向堆内存任何部分组成回收集(Collection Set, CSet)进行回收，衡量标准是那块内存中存放的垃圾数量最多，回收收益最大，这就是G1收集器的Mixed GC模式。
-      
-      G1把连续的java堆划分成多个大小相等的独立区域(Region)，每个Region都可以根据需要扮演新生代的Eden、Survivor，或老年代。 Region是单次垃圾回收的最小单元，每次收集的内存空间都是Region大小的整数倍。
-      有一类特殊的Region：Humongous区域，专门用来存储大对象（大小超过一个Region容量一半的对象，超过整个Region容量的超大对象，会被存放在N个连续的Humongous Region中，G1大多数行为都把Humongous Region作为老年代的一部分看待）, -XX:G1HeapRegionSize 设置每个Region大小，取值范围 1MB~32MB,应为 2^n
-      G1仍然保留新生代、老年代的概念，但新生代和老年代不再固定，都是一系列区域（不需要连续）的动态集合
-      G1跟踪各个Region里垃圾堆积的价值大小（回收所获得的空间大小以及回收所需时间的经验值），在后台维护一个优先级列表，每次根据用户设定允许的收集停顿时间（-XX:MaxGCPauseMills,默认200ms），优先处理回收价值收益最大的那些Region。
-    
-      跨Region引用：卡记忆集，每个Region都维护自己的记忆集（哈希表），G1较耗内存
-      并发标记：三色标记，使用原始快照解决漏标问题。G1为每个Region设计了两个TAMS(top at mark start)指针，回收过程中新创建的对象地址要在这两个指针位置以上（默认存活对象，不纳入回收范围）。
-
-
-      建立可靠的停顿预测模型：
-    
-      G1执行步骤：
-        初始标记: initial marking, 标记GC直接关联到的对象，修改TAMS指针，需要 Stop the world
-        并发标记: concurrent marking
-        最终标记: final marking, 需要stop the world
-        筛选回收: live data counting and evacuation, 需要stop the world, 多线程并行完成。选择Region构成回收集，把回收集中存活对象复制到空的Region中，清理掉回收集里Region的全部空间。
-    
-      G1的目标：在延迟可控的情况下获得尽可能高的吞吐量。
-
-  Shenandoah: https://wiki.openjdk.java.net/display/shenandoah/Main
-      并行整理：
-       方式一： 在被移动对象原有的内存上设置保护陷阱(Memory Protection Trap), 一旦用户程序访问到属于旧对象的内存空间就会自陷，进入预设好的异常处理器中，由其中的代码逻辑把访问转发到复制后的新对象上。（如果没有操作系统层面的直接支持，导致用户态频繁切换到核心态，代价大）
-       方式二： 转发指针(Forwarding Pointer)实现对象移动与用户程序并发的一种解决方案。在原有对象布局结构的最前面统一增加一个新的引用字段，在正常不处于并发移动的情况下，指向对象自己，否则指向新对象。
-               转发指针更新时存在多线程竞争问题：
-                 用户线程和收集器线程并发读：无论读旧对象还是新对象，结果一致
-                 用户线程和收集器线程并发写：需要保证写操作只能发生在新复制的对象上，而不是写入旧对象的内存中。
-                          并发写的步骤：
-                            1) 收集器复制新的对象副本
-                            2) 用户线程更新对象的某个字段
-                            3) 收集器线程更新转发指针的引用值为新副本地址
-                          需要保证步骤3)在步骤2)之前执行或2)先于1)、3)执行 
-                          => 保证收集器和用户线程对转发指针的访问只有其中一个能成功，避免两者交替进行。(CAS)
-               转发指针存在执行效率问题：对象访问，读写屏障
-
-  ZGC: Z Garbage Collector, jdk 11 新加入的具有实验性质低延迟垃圾收集器。
-      ZGC收集器是一款基于Region内存布局的，(暂时)不设分代的，使用读屏障、染色指针和内存多重映射等技术来实现的可并发的标记-整理算法，以低延迟为首要目标。
-      ZGC基于Region的堆内存布局，但ZGC的Region具有动态性（动态创建、销毁，动态的区域容量大小）
-         x64硬件，ZGC的Region大小：
-            小型Region: small region, 2MB,用于放置小于256KB的小对象
-            中型Region: medium region, 32MB, 用于放置大于等于256KB且小于4MB的对象
-            大型Region: large region, 容量不固定，可动态变化，必须为2MB的整数倍，放置大于等于4MB的大对象。每个大小Region只会存放一个大对象，实际容量最小可低至4MB。
-      染色指针：colored pointer, 直接将少量额外的信息存储在指针上的技术。
-
-         64为linux只支持47位的进程虚拟地址空间和46位(64TB)的物理地址空间，ZGC的染色指针对于可用的46位指针宽度，将高4位提取出来存储4个标志信息。 => ZGC能管理的内存不超过4TB，不支持32位平台，不支持压缩指针(-XX:+UseCompressedOops)
-         通过这4个标志位，虚拟机可以直接从指针中看到其引用对象的三色标记状态、是否进入了重分配集（被移动过）、是否只能通过finalize()方法才能被访问到。      
-         
-         虚拟地址： virtual address space. In computing, a virtual address space (VAS) or address space is the set of ranges of virtual addresses that an operating system makes available to a process.
-         物理地址： Physical address.In computing, a physical address (also real address, or binary address), is a memory address that is represented in the form of a binary number on the address bus circuitry in order to enable the data bus to access a particular storage cell of main memory, or a register of memory mapped I/O device.
-         内存管理单元：memory management unit. A memory management unit (MMU), sometimes called paged memory management unit (PMMU), is a computer hardware unit having all memory references passed through itself, primarily performing the translation of virtual memory addresses to physical addresses.
-         页表：page table, 虚拟地址和物理地址的映射关系以“页”为单位。
-         内存映射：In computing, mmap(2) is a POSIX-compliant Unix system call that maps files or devices into memory.
-
-
-         ZGC使用多重映射将多个不同的虚拟内存地址映射到同一个物理内存上
-    
-      ZGC的4个执行阶段，4个阶段都是可以并发执行的：
-         1) 并发标记：concurrent mark, 类似G1的初始标记、并发标记、最终标记过程，更新染色指针的Marked 0、Marked 1标志位（初始标记、最终标记会有短暂停顿）
-         2) 并发预备重分配：concurrent prepare for relocate, 根据特定的查询条件统计本次垃圾收集过程中要清理哪些Region,将这些Region组成重分配集(Relocation Set) (ZGC的每次回收都会扫描所有的Region, 重分配集只是决定了里面的存活对象会被重新复制到其他Region中，里面的Region会被释放)
-         3) 并发重分配：把重分配集中的存活对象复制到新的Region上，并为重分配集中的每个Region维护一个转发表(Forward Table), 记录从旧对象到新对象的转向关系。可通过染色指针得知一个对象是否处于重分配集中，再根据转发表将访问转发到新复制的对象上，并同时修正更新该引用的值使其指向新对象（指针的自愈能力,self healing => 某个region的所有对象复制完成，就可以用于新对象的分配，只要保留转发表，指针会自愈）
-         4) 并发重映射：concurrent remap, 修正整个堆中指向重分配集中旧对象的所有引用，由于有转发表且指针可自愈，这一步不是迫切执行，ZGC将并发重映射的工作合并到了下一次垃圾回收的并发标记中完成，修正之后，原来的转发表信息就可以释放掉了。
-      
-      垃圾回收与堆内存大小无关。
-
-
-  衡量垃圾收集器的三项最重要指标：
-     内存占用: footprint
-     吞吐量: throughput
-     延迟: latency
+- 内存占用：footprint
+- 吞吐量：throughput
+- 延迟：latency
 
   查看GC基本信息： 
      jdk 9 之前： -XX:+PrintGC
@@ -855,6 +965,20 @@ oop: ordinary object pointer
         通过IEEE 754向最接近数舍入得到一个可以使用float类型表示的数字。如果转换结果的绝对值太小，无法使用float表示，将返回float类型的正负0；如果转换结果的绝对值太大，无法使用float表示，将返回float类型的正负无穷大。double类型的NaN值按规定转换为float类型的NaN。
 
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1531,4 +1655,7 @@ Java内存模型与线程
 \[1\]:深入理解Java虚拟机-第三版
 \[2\]:[java.lang.Class 对象存储](https://blog.csdn.net/Xu_JL1997/article/details/89433916) 
 \[3\]:[对象访问](https://blog.csdn.net/dadale/article/details/87874846)
+\[4\]:[记忆集、卡表、写屏障](https://blog.csdn.net/qq_32165517/article/details/106526464)
+\[5\]:[三色标记法和读写屏障](https://blog.csdn.net/qq_21383435/article/details/106311542)
+\[6\]:[保守式GC、半保守式GC、准确式GC](https://www.iteye.com/blog/rednaxelafx-1044951)
 
