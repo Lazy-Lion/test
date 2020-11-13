@@ -469,30 +469,36 @@ ZGC的4个执行阶段，4个阶段都是可以并发执行的：
 ### 衡量垃圾收集器的三项最重要指标
 
 - 内存占用：footprint
+
 - 吞吐量：throughput
+
 - 延迟：latency
 
-  查看GC基本信息： 
-     jdk 9 之前： -XX:+PrintGC
-     jdk 9 后： -Xlog:gc
-  查看GC详细信息： 
-     jdk 9 之前：-XX:+PrintGCDetails
-     jdk 9 后： -Xlog:gc*
-  查看GC前后的堆、方法区可用容量变化：
-     jdk 9 之前：-XX:+PrintHeapAtGC
-     jdk 9 后： -Xlog:gc+heap=debug
-  查看GC过程中用户线程并发时间以及停顿的时间
-     jdk 9 之前：-XX:+PrintGCApplicationConcurrentTime, -XX:+PrintGCApplicationStoppedTime
-     jdk 9 后：-Xlog:safepoint
-  查看收集器Ergonomics机制（自动设置堆空间各分代区域大小、收集目标等内容，从Parallel 收集器开始支持）自动调节的相关信息
-     jdk 9 之前：-XX:+PrintAdaptiveSizePolicy
-     jdk 9 后：-Xlog:gc+ergo*=trace
-  查看熬过收集后剩余对象的年龄分布信息：
-     jdk 9 之前： -XX:+PrintTenuringDistribution
-     jdk 9 后： -XLog: gc+age=trace
+  
+
+### GC 相关参数
+
+1. 查看GC基本信息： 
+        jdk 9 之前： -XX:+PrintGC
+        jdk 9 后： -Xlog:gc
+2. 查看GC详细信息： 
+        jdk 9 之前：-XX:+PrintGCDetails
+        jdk 9 后： -Xlog:gc* 
+3. 查看GC前后的堆、方法区可用容量变化：
+        jdk 9 之前：-XX:+PrintHeapAtGC
+        jdk 9 后： -Xlog:gc+heap=debug
+4. 查看GC过程中用户线程并发时间以及停顿的时间
+        jdk 9 之前：-XX:+PrintGCApplicationConcurrentTime, -XX:+PrintGCApplicationStoppedTime
+        jdk 9 后：-Xlog:safepoint
+5. 查看收集器Ergonomics机制（自动设置堆空间各分代区域大小、收集目标等内容，从Parallel 收集器开始支持）自动调节的相关信息
+        jdk 9 之前：-XX:+PrintAdaptiveSizePolicy
+        jdk 9 后：-Xlog:gc+ergo*=trace
+6. 查看熬过收集后剩余对象的年龄分布信息：
+        jdk 9 之前： -XX:+PrintTenuringDistribution
+        jdk 9 后： -XLog: gc+age=trace
 
 
-虚拟机参数：
+
 | 参数                           | 描述                                                         |
 | ------------------------------ | ------------------------------------------------------------ |
 | UseSerialGC                    | 虚拟机运行在Client模式下的默认值，打开后使用Serial + Serial Old |
@@ -522,19 +528,19 @@ ZGC的4个执行阶段，4个阶段都是可以并发执行的：
 | UseZGC                         | 使用ZGC，配合-XX:+UnlockExperimentalVMOptions使用            |
 | UseNUMA                        | 启用 NUMA内存分配支持                                        |
 
-  NUMA: non-uniform memory access, 非一致性内存访问
-     https://zhuanlan.zhihu.com/p/33621500
-     https://zhuanlan.zhihu.com/p/30585038
-
-  查看jdk使用的垃圾收集器
+查看jdk使用的垃圾收集器
     例： (version: 1.8.0_181, 默认垃圾收集器)
 
-       命令：java -XX:+PrintCommandLineFlags -version
-       输出：-XX:+UserParallelGC
-       => 默认使用 Parallel Scavenge + Parallel Old 
-       （参照 http://hg.openjdk.java.net/jdk8u/jdk8u/hotspot/file/24cae3e4cbaa/src/share/vm/runtime/arguments.cpp
-         1401 行方法，使用-XX:+UserParallelGC默认开启 -XX:+UseParallelOldGC，除非显示关闭 Parallel Old）
+    命令：java -XX:+PrintCommandLineFlags -version
+    输出：-XX:+UserParallelGC
+       
+    => 默认使用 Parallel Scavenge + Parallel Old （参照 < a href="http://hg.openjdk.java.net/jdk8u/jdk8u/hotspot/file/24cae3e4cbaa/src/share/vm/runtime/arguments.cpp">1401 行方法，使用-XX:+UserParallelGC默认开启-XX:+UseParallelOldGC，除非显式关闭 Parallel Old）
 
+# 非一致性内存访问
+
+NUMA: non-uniform memory access, 非一致性内存访问。
+     https://zhuanlan.zhihu.com/p/33621500
+     https://zhuanlan.zhihu.com/p/30585038
 
 对象内存分配：
    从概念上应该都是在堆上分配（实际上也有可能经过即时编译后被拆散为标量类型并间接在栈上分配）。
@@ -965,6 +971,8 @@ oop: ordinary object pointer
         通过IEEE 754向最接近数舍入得到一个可以使用float类型表示的数字。如果转换结果的绝对值太小，无法使用float表示，将返回float类型的正负0；如果转换结果的绝对值太大，无法使用float表示，将返回float类型的正负无穷大。double类型的NaN值按规定转换为float类型的NaN。
 
   
+
+
 
 
 
