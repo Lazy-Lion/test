@@ -1237,7 +1237,7 @@ goto, goto_w, jsr, jsr_w, ret
 - lreturn, freturn, dreturn, areturn
 - return：供声明为`void`的方法，实例初始化方法，类和接口的类初始化方法使用
 
- ### 异常处理指令：
+ ### 异常处理指令
 
 Java程序中显式抛出异常的操作都由`athrow`指令来实现，除了用throw显式抛出异常的情况之外，《Java虚拟机规范》还规定了许多运行时异常会在其他Java虚拟机指令检测到异常状况时自动抛出。
 Java虚拟机中处理异常（catch）不是由字节码指令来实现的，而是采用异常表完成。
@@ -1249,6 +1249,74 @@ Java虚拟机支持**方法级的同步**和**方法内部一段指令序列的�
 方法级的同步是隐式的，无须通过字节码指令控制，它实现在方法调用和返回的操作上。虚拟机 可以从方法常量池的方法表结构中的`ACC_SYNCHRONIZED`访问标志得知一个方法是否被声明为同步方法。当方法调用时，调用指令将会检查方法的`ACC_SYNCHRONIZED`方法标志是否被设置，如果设置，执行线程就要求先成功持有管程，然后才能执行方法，当方法完成（正常完成或非正常完成）时释放管程。 方法执行期间，执行线程持有了管程，其他任何线程都无法再获取到同一个管程。如果一个同步方法执行期间抛出了异常，并且在方法内部无法处理此异常，那这个同步方法所持有的管程将在异常抛到同步方法边界之外时自动释放。
 
 对于*方法内部一段指令序列的同步*Java虚拟机提供`monitorenter`，`monitorexit`两条指令来支持 `synchronized`关键字的语义。
+
+### 指令相关示例
+
+```java
+/**
+ * 自动装箱、拆箱
+*/
+public class Test {
+    public static void main(String[] args) {
+        Integer a = 1; // 调用 Integer.valueOf()
+        Integer b = 2;
+        Integer c = 3;
+        Integer d = 3;
+        Integer e = 321;
+        Integer f = 321;
+        Long g = 3L;  // 调用 Long.valueOf()
+
+        System.out.println(c == d); // true, Integer缓存
+        System.out.println(e == f); // false，Integer默认只缓存[-128, 127]
+        /**
+         * c == (a + b) 核心字节码
+         * invokevirtual #4 <java/lang/Integer.intValue>
+         * aload_1
+         * invokevirtual #4 <java/lang/Integer.intValue>
+         * aload_2
+         * invokevirtual #4 <java/lang/Integer.intValue>
+         * iadd
+         * if_icmpne 38
+         */
+        System.out.println(c == (a + b)); // true
+        /**
+         * c.equals(a + b) 核心字节码
+         * invokevirtual #4 <java/lang/Integer.intValue>
+         * aload_2
+         * invokevirtual #4 <java/lang/Integer.intValue>
+         * iadd
+         * invokestatic #2 <java/lang/Integer.valueOf>
+         * invokevirtual #5 <java/lang/Integer.equals>
+         */
+        System.out.println(c.equals(a + b)); // true
+        
+        /**
+         * g == (a + b) 核心字节码
+         * aload 4
+         * invokevirtual #7 <java/lang/Long.longValue>
+         * aload_1
+         * invokevirtual #8 <java/lang/Integer.intValue>
+         * aload_2
+         * invokevirtual #8 <java/lang/Integer.intValue>
+         * iadd
+         * i2l
+         */
+        System.out.println(g == (a + b)); // true
+        /**
+         * g.equals(a + b) 核心字节码
+         * invokevirtual #7 <java/lang/Integer.intValue>
+         * aload_2
+         * invokevirtual #7 <java/lang/Integer.intValue>
+         * iadd
+         * invokestatic #2 <java/lang/Integer.valueOf>
+         * invokevirtual #8 <java/lang/Long.equals>
+         */
+        System.out.println(g.equals(a + b)); // false, Long.equals()只要被比较对象不是Long，就返回false
+    }
+}
+```
+
+
 
 # 虚拟机类加载机制
 
@@ -1448,10 +1516,10 @@ Direct Reference，可以直接指向目标的指针、相对偏移量或是一�
 public class Test {
     static {
         a = 1;
-        // b = a; // illegal forward reference
+        // b = a; // illegal forward reference。使用 static final 修饰 a 依然报这个错误
     }
     
-    public static int a;
+    public static int a;  
     public static int b;
     
     public static void main(String[] args) {
@@ -1482,139 +1550,223 @@ public interface Test {
 
 Java虚拟机保证一个类的`<clinit>()`方法在多线程环境中被正确地加锁同步，如果多个线程同时初始化一个类，只会有其中一个线程去执行这个类的`<clinit>()`方法，其他线程都需要阻塞等待，直到活动线程执行完毕`<clinit>()`方法（执行`<clinit>()`方法的线程退出`<clinit>()`方法后，其他线程唤醒后不会再次进入`<clinit>()`方法，同一个类加载器下，一个类型只会被初始化一次）。如果一个类的`<clinit>()`方法中有耗时很长的操作，那就可能造成多个进程阻塞。
 
-# 类加载器 （Class Loader）
+### 类加载器 （Class Loader）
 
 Java虚拟机有意把类加载阶段中的“通过一个类的全限定名来获取描述该类的二进制字节流”这个动作放到Java虚拟机外部实现，以便让应用程序自己决定如何去获取所需的类。实现这个动作的代码被称为“类加载器”。
 
-    对于任意一个类，都必须由加载它的类加载器和这个类本身共同确立其在java虚拟机中的唯一性（Class对象的equals()、isAssignableFrom()、isInstance()方法，instanceof关键字等），每一个类加载器，都拥有一个独立的类名称空间。
-      
-    双亲委派模型：
-      站在java虚拟机的角度来看，只存在两种不同的类加载器：
-    
-        启动类加载器(Bootstrap ClassLoader): 使用c++实现，是虚拟机自身的一部分。负责加载存放在 <JAVA_HOME>\lib目录或被-Xbootclasspath参数所指定的路径中存放的，而且是java虚拟机能够识别的(按照文件名识别，如rt.jar、tools.jar，名字不符合的类库即使放在lib目录也不会被加载)类库加载到虚拟机内存中。
-          启动类加载器无法被java程序直接引用，用户在编写自定义类加载器时，如果需要把加载请求委派给引导类加载器去处理，直接使用null代替即可。
-    
-        其他类加载器：使用java实现，独立存在于虚拟机外部，全都继承自抽象类java.lang.ClassLoader
-          扩展类加载器(Extension Class Loader): 在类sun.misc.Launcher$ExtClassLoader中以java代码的形式实现。负责加载<JAVA_HOME>\lib\ext目录中，或被java.ext.dirs系统变量指定的路径中所有的类库。
-          应用程序类加载器(Application Class Loader)：由sun.misc.Launcher$AppClassLoader实现。由于应用程序类加载器是ClassLoader类中getSystemClassLoader()方法的返回值，所以有些场合也称它为“系统类加载器”。负责加载用户类路径(classpath)上所有的类库。如果应用程序中没有自定义过自己的类加载，一般情况下这个就是程序中默认的类加载器。
-    
-                                      启动类加载器
-                                          ↑
-                                      扩展类加载器
-                                          ↑
-                                    应用程序类加载器        
-                                   ↗             ↖
-                          自定义类加载器        自定义类加载器    
-    
-      各种类加载器之间的层次关系被称为类加载器的“双亲委派模型”(Parent Delegation Model)。除了顶层的启动类加载器外，其余的类加载器都应有自己的父类加载器。不过这里类加载器之间的父子关系一般不是以继承(Inheritance)的关系来实现，而是通常使用组合(Composition)关系来复用父加载器的代码。
-      双亲委派模型的工作过程：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到最顶层的启动类加载器中，只有当父类加载器反馈自己无法完成这个加载请求(它的搜索范围没有找到所需的类)时，子加载器才会尝试自己去完成加载。
-    
-      使用双亲委派模型来组织类加载器之间的关系，一个显而易见的好处就是java中的类随着它的类加载器一起具备了一种带有优先级的层次关系。如类java.lang.Object，存放在rt.jar之中，无论哪个类加载器要加载这个类，最终都是委派给处于模型最顶端的启动类加载器进行加载，因此Object类在程序的各种类加载环境中都能够保证是同一个类。
-      双亲委派模型的实现集中在java.lang.ClassLoader的loadClass()方法中（自定义类加载器重写ClassLoader的loadClass()方法即可破坏双亲委派机制，如果重写findClass()方法则可保证双亲委派机制）。
+对于任意一个类，都必须由加载它的类加载器和这个类本身共同确立其在Java虚拟机中的唯一性（Class对象的`equals()`、`isAssignableFrom()`、`isInstance()`方法，`instanceof`关键字等），每一个类加载器，都拥有一个独立的类名称空间。
 
-虚拟机字节码执行引擎：执行引擎是java虚拟机核心组成部分之一。“虚拟机”是一个相对“物理机”的概念，这两种机器都有代码执行能力，其区别是物理机的执行引擎是直接建立在处理器、缓存、指令集和操作系统层面上的，而虚拟机的执行引擎则是由软件自行实现的，因此可以不受物理条件制约地定制指令集与执行引擎的结构体系，能够执行那些不被硬件直接支持的指令集格式。
-  执行引擎在执行字节码的时候，通常会有解释执行（通过解释器执行）和编译执行（通过即时编译器产生本地代码执行）两种选择，也可能两者兼备，还可能会有同时包含几个不同级别的即时编译器一起工作的执行引擎。
+##### 双亲委派模型
 
-  运行时栈帧结构： java虚拟机以方法作为最基本的执行单元，“栈帧”(stack frame)是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。
-    栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址和一些额外的附加信息。每一个方法从调用开始至执行结束的过程，都对应着一个栈帧在虚拟机栈里从入栈到出栈的过程。
-    编译java代码时，栈帧中需要多大的局部变量表、操作数栈的深度就一金被计算出来并写入了方法表的Code属性中。一个栈帧需要分配多少内存，并不会受程序运行时变量数据影响。执行引擎所运行的所有字节码指令都只针对当前栈帧进行操作。
+站在java虚拟机的角度来看，只存在两种不同的类加载器：
 
-      局部变量表(Local Variables Table): 是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。方法的Code属性的max_locals记录了该方法所需分配的局部变量表的最大容量（以变量槽(Variable Slot)为最小单位，long、double占用两个槽位，reference与虚拟机32位还是64位有关（32位虚拟机占用1个槽位，64位虚拟机且没有启用指针压缩优化则占用2个槽位），其他类型占用1个槽位）。
-        如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，方法中通过"this"关键字来访问这个隐含的参数。
-        局部变量表的变量槽可以复用，可能会引起的垃圾回收行为差异。（《深入理解java虚拟机》 8.2.1论述了相关内容）
-        局部变量不像类变量有“准备阶段”，类变量即使在初始化阶段没有赋值也具有一个默认的初始值，但局部变量如果定义了但没有赋初始值，那么它是完全不能使用的。
+1. 启动类加载器（Bootstrap ClassLoader）： 使用`c++`实现，是虚拟机自身的一部分。负责加载存放在 `<JAVA_HOME>\lib`目录或被`-Xbootclasspath`参数所指定的路径中存放的，而且是Java虚拟机能够识别的（按照文件名识别，如`rt.jar`、`tools.jar`，名字不符合的类库即使放在lib目录也不会被加载）类库加载到虚拟机内存中。
+
+   启动类加载器无法被Java程序直接引用，用户在编写自定义类加载器时，如果需要把加载请求委派给启动类加载器去处理，直接使用`null`代替即可。
+
+2. 其他类加载器：使用Java实现，独立存在于虚拟机外部，全都继承自抽象类`java.lang.ClassLoader`。
+
+   - 扩展类加载器（Extension Class Loader）： 在类`sun.misc.Launcher$ExtClassLoader`中以Java代码的形式实现。负责加载`<JAVA_HOME>\lib\ext`目录中，或被`java.ext.dirs`系统变量指定的路径中所有的类库。
+- 应用程序类加载器（Application Class Loader）：由`sun.misc.Launcher$AppClassLoader`实现。由于应用程序类加载器是`ClassLoader`类中`getSystemClassLoader()`方法的返回值，所以有些场合也称它为“系统类加载器”。负责加载用户类路径（classpath）上所有的类库。如果应用程序中没有自定义过自己的类加载，一般情况下这个就是程序中默认的类加载器。
+   
+   ![image-20201117135754333](image/image-20201117135754333.png)
+
+各种类加载器之间的层次关系被称为类加载器的**“双亲委派模型”**（Parent Delegation Model）。除了顶层的启动类加载器外，其余的类加载器都应有自己的父类加载器。不过这里类加载器之间的父子关系一般不是以继承（Inheritance）的关系来实现，而通常是使用组合（Composition）关系来复用父加载器的代码。
+
+双亲委派模型的工作过程：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到最顶层的启动类加载器中，只有当父类加载器反馈自己无法完成这个加载请求（它的搜索范围没有找到所需的类）时，子类加载器才会尝试自己去完成加载。
+
+使用双亲委派模型来组织类加载器之间的关系，一个显而易见的好处就是Java中的类随着它的类加载器一起具备了一种带有优先级的层次关系。如类`java.lang.Object`，存放在`rt.jar`之中，无论哪个类加载器要加载这个类，最终都是委派给处于模型最顶端的启动类加载器进行加载，因此`Object`类在程序的各种类加载环境中都能够保证是同一个类。
+
+双亲委派模型的实现集中在`java.lang.ClassLoader`的`loadClass()`方法中（自定义类加载器重写`ClassLoader`的`loadClass()`方法即可破坏双亲委派机制，如果重写`findClass()`方法则可保证双亲委派机制）。
+
+# 虚拟机字节码执行引擎
+
+执行引擎是java虚拟机核心组成部分之一。“虚拟机”是一个相对“物理机”的概念，这两种机器都有代码执行能力，其区别是物理机的执行引擎是直接建立在处理器、缓存、指令集和操作系统层面上的，而虚拟机的执行引擎则是由软件自行实现的，因此可以不受物理条件制约地定制指令集与执行引擎的结构体系，能够执行那些不被硬件直接支持的指令集格式。
+
+执行引擎在执行字节码的时候，通常会有解释执行（通过解释器执行）和编译执行（通过即时编译器产生本地代码执行）两种选择，也可能两者兼备，还可能会有同时包含几个不同级别的即时编译器一起工作的执行引擎。
+
+### 运行时栈帧结构
+
+Java虚拟机以方法作为最基本的执行单元，“栈帧”（stack frame）是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。
+
+栈帧存储了方法的**局部变量表**、**操作数栈**、**动态连接**、**方法返回地址**和一些额外的附加信息。每一个方法从调用开始至执行结束的过程，都对应着一个栈帧在虚拟机栈里从入栈到出栈的过程。
+
+编译Java代码时，栈帧中需要多大的局部变量表、操作数栈的深度就已经被计算出来并写入了方法表的`Code`属性中。一个栈帧需要分配多少内存，并不会受程序运行时变量数据影响。执行引擎所运行的所有字节码指令都只针对当前栈帧进行操作。
+
+##### 局部变量表（Local Variables Table）
+
+局部变量表是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。方法的`Code`属性的`max_locals`记录了该方法所需分配的局部变量表的最大容量（以变量槽（Variable Slot）为最小单位，`long`、`double`占用两个槽位，`reference`与虚拟机是32位还是64位有关（32位虚拟机占用1个槽位，64位虚拟机且没有启用指针压缩优化则占用2个槽位），其他类型占用1个槽位）。
+
+如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，方法中通过`this`关键字来访问这个隐含的参数。
+
+局部变量表的变量槽可以复用，可能会引起的垃圾回收行为差异。（《深入理解java虚拟机 第三版》 8.2.1论述了相关内容）。
+
+```java
+/**
+* 书中给出了如下示例
+*/
+public static void main(String[] args) {
+    {
+        byte[] placeholder = new byte[64 * 1024 * 1024];
+    }
+    int a = 0;  // 添加这行代码和不添加这行代码，GC会有不同的表现。书中同时阐述了是否有必要手动设置 placeholder = null; 
+    System.gc();
+}
+```
+
+局部变量不像类变量有“准备阶段”，类变量即使在初始化阶段没有赋值也具有一个默认的初始值，但局部变量如果定义了但没有赋初始值，那么它是完全不能使用的。 
+
+##### 操作数栈（Operand Stack）
+
+操作数栈也被称为操作栈，最大深度在编译的时候写入到`Code`属性的`max_stacks`数据项中。32位数据类型所占的栈容量为1，64位数据类型所占的栈容量为2。`javac`编译器的数据流分析工作保证了在方法执行的任何时候，操作数栈的深度都不会超过`max_stacks`中设定的最大值。
+
+##### 动态连接（Dynamic Linking）
+
+每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个引用是为了支持方法调用过程中的动态连接。
+
+字节码中的方法调用指令是以常量池中指向方法的符号引用作为参数。这些符号引用一部分会在类加载阶段或第一次使用的时候就转化为直接引用（静态解析），另一部分将在每一次运行期间都转化为直接引用（动态连接）。
+
+##### 方法返回地址
+
+当一个方法开始执行后，只有两种方式退出这个方法。
+
+1. 正常调用完成（Normal Method Invocation Completion）：执行引擎遇到任意一个方法返回的字节码指令，这时候可能会有返回值传递给上层方法调用者；
+2. 异常调用完成（Abrupt Method Invocation Completion）：方法执行的过程中遇到了异常（虚拟机内部产生的异常，`athrow`字节码指令），并且这个异常没有在方法体内得到妥善处理。一个方法使用异常完成出口的方式退出，是不会给它的上层调用者提供任何返回值的。
+
+方法退出后，必须返回到最初方法被调用时的位置，程序才能继续执行，方法返回时可能需要在栈帧中保存一些信息，用来帮助恢复它的上层主调方法的执行状态。一般来说，方法正常退出时，主调方法的PC计数器的值就可以作为返回地址，栈帧中很有可能会保存这个计数器值。而方法异常退出时，返回地址是要通过异常处理器表来确定的，栈帧就一般不会保存这部分信息。
+
+方法退出的过程实际上等同于把当前栈帧出栈，因此退出时可能执行的操作有：恢复上层方法的局部变量表和操作数栈，把返回值（如果有）压入调用者栈帧的操作数栈中，调整PC计数器的值以指向方法调用指令后面的一条指令等。
+
+##### 附加信息
+
+《Java虚拟机规范》允许虚拟机实现增加一些规范里没有描述的信息到栈帧中，如与调试、性能收集相关的信息。 
+
+### 方法调用
+
+方法调用不等同于方法中的代码被执行，方法调用阶段唯一的任务就是调用哪一个方法，还未涉及方法内部具体运行过程。
+
+**Class文件的编译过程中不包含传统程序语言编译的连接步骤，一切方法调用在Class文件里存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址（直接引用）。**
+
+##### 解析调用
+
+在类加载的解析阶段会将其中一部分符号引用转化为直接引用，这种解析能成立的前提是：调用目标在程序代码写好、编译器进行编译的那一刻就已经确定下来。符合条件的方法主要有静态方法（与类型直接关联）和私有方法（外部不可被访问）。
+
+##### 动态分派
+
+与重写（Override）密切关联。
+
+多态性的根源在于虚方法调用指令`invokevirtual`的执行逻辑（第一步就是确定实际类型），所以多态性只对方法有效，对字段是无效的。当子类声明了与父类同名的字段时，虽然子类的内存中两个字段都会存在，但是子类的字段会遮蔽父类的同名字段。
+
+##### JVM方法调用指令
+
+###### invokeinterface
+
+invoke interface method.（会在运行时再确定一个实现该接口的对象）
+
+Let `C` be the class of objectref. The actual method to be invoked is selected by the following lookup procedure:
+
+1. If `C` contains a declaration for an instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
+2. Otherwise, if `C` has a superclass, a search for a declaration of an instance method with the same name and descriptor as the resolved method is performed, starting with the direct superclass of `C `and continuing with the direct superclass of that class, and so forth, until a match is found or no further superclasses exist. If a match is found, then it is the method to be invoked.
+3. Otherwise, if there is exactly one maximally-specific method in the superinterfaces of `C` that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
+
+A *maximally-specific superinterface method* of a class or interface `C` for a particular method name and descriptor is any method for which all of the following are true:
+
+- The method is declared in a superinterface (direct or indirect) of `C`.
+- The method is declared with the specified name and descriptor.
+- The method has neither its `ACC_PRIVATE` flag nor its `ACC_STATIC` flag set.
+- Where the method is declared in interface `I`, there exists no other maximally-specific superinterface method of `C` with the specified name and descriptor that is declared in a subinterface of `I`.
+
+###### invokestatic
+
+invoke a class (static) method. 
+
+The resolved method must not be an instance initialization method, or the class or interface initialization method.
+
+The resolved method must be `static`, and therefore cannot be `abstract`.
+
+On successful resolution of the method, the class or interface that declared the resolved method is initialized if that class or interface has not already been initialized.
+
+###### invokespecial
+
+invoke instance method, special handling for `superclass`, `private`, and `instance initialization method` invocations （invokespecial 只能调用3种方法：` <init>()`, 私有方法, `super.method()`）.
+
+If the resolved method is `protected`, and it is a member of a superclass of the current class, and the method is not declared in the same run-time package as the current class, then the class of *objectref* must be either the current class or a subclass of the current class.
+
+If all of the following are true, let `C` be the direct superclass of the current class:
+
+- The resolved method is not an instance initialization method.
+- If the symbolic reference names a class (not an interface), then that class is a superclass of the current class.
+- The `ACC_SUPER` flag is set for the `class` file.
+
+Otherwise, let `C` be the class or interface named by the symbolic reference.
+
+The actual method to be invoked is selected by the following lookup procedure:
+
+1. If `C` contains a declaration for an instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
+2. Otherwise, if `C` is a class and has a superclass, a search for a declaration of an instance method with the same name and descriptor as the resolved method is performed, starting with the direct superclass of `C` and continuing with the direct superclass of that class, and so forth, until a match is found or no further superclasses exist. If a match is found, then it is the method to be invoked.
+3. Otherwise, if `C` is an interface and the class Object contains a declaration of a public instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
+4. Otherwise, if there is exactly one maximally-specific method in the superinterfaces of `C` that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
+
+###### invokevirtual
+
+invoke instance method; dispatch based on class.
+
+If the resolved method is `protected`, and it is a member of a superclass of the current class, and the method is not declared in the same run-time package as the current class, then the class of *objectref* must be either the current class or a subclass of the current class.
+
+Let `C` be the class of *objectref*. The actual method to be invoked is selected by the following lookup procedure:
+
+1. If `C` contains a declaration for an instance method `m` that overrides the resolved method, then `m `is the method to be invoked.
+2. Otherwise, if `C` has a superclass, a search for a declaration of an instance method that overrides the resolved method is performed, starting with the direct superclass of `C` and continuing with the direct superclass of that class, and so forth, until an overriding method is found or no further superclasses exist. If an overriding method is found, it is the method to be invoked.
+3. Otherwise, if there is exactly one maximally-specific method in the superinterfaces of `C` that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
+
+The difference between the `invokespecial` instruction and the `invokevirtual` instruction is that `invokevirtual` invokes a method based on the class of the object. The `invokespecial` instruction is used to invoke instance initialization methods as well as private methods and methods of a superclass of the current class. 
+
+In other words, `invokespecial` is used to call methods without concern for dynamic binding, in order to invoke the particular class’ version of a method. `invokevirtual`, `invokespecial`, `invokestatic`, `invokeinterface` 的第一个参数都是被调用方法的符号引用 ( `CONSTANT_Methodref_info` 或 `CONSTANT_InterfaceMethodref_info`)。
+
+###### invokedynamic
+
+invoke dynamic method.
+
+先在运行时动态解析出调用点限定符所引用的方法，然后再执行该方法。前面4个调用指令，分派逻辑都固化在Java虚拟机内部，而`inovkedynamic`指令的分配逻辑是由用户设定的**引导方法**来决定的。
+
+> 使用git bash输出内部类遇到的问题：`javap Class$InnerClass` 命令在git bash中始终输出Class的字节码。解决方法： `javap Class\$InnerClass`， git bash 中`$`是特殊字符，需要转义。
+
+##### 非虚方法（non-virtual method）vs 虚方法（virtual method）
+
+被`invokestatic`（静态方法）和`invokespecial`（私有方法、实例构造器、父类方法（`super.method()`））指令调用的方法，再加上被`final`修饰的方法（`invokevirtual`指令调用），在类加载的时候就可以把符号引用解析为该方法的直接引用。
+
+虚方法： 除了上述5类方法的其他方法。
+
+##### 分派（Dispatch）调用
+
+解析调用一定是个静态的过程，在编译期间就完全确定，在类加载的解析阶段就会把涉及的符号引用全部转变为明确的直接引用。分派调用可能是静态的也可能是动态的，按照分派依据的宗量（方法的接收者与方法的参数统称为方法的宗量）数可分为单分派和多分派。
+
+分派可分为静态单分派、静态多分派、动态单分派、动态多分派。
+
+###### 静态类型（Static Type）
+
+或者叫外观类型（Apparent Type）
+
+###### 实际类型（Actual Type）
+
+或者叫运行时类型（Runtime Type）
+
+```java
+Human man = new Man(); // Human - 静态类型； Man - 实际类型
+```
+
+字面量没有显示的静态类型，它的静态类型只能通过语言、语法的规则去理解和推断。
+
+编译器在重载时通过参数的静态类型而不是实际类型作为判定依据，由于静态类型在编译期可知，所以在编译阶段，javac编译期就根据参数的静态类型决定了会使用哪个重载版本，并把方法的符号引用写到`invokevirtual`指令的参数中。
+
+###### 静态分派
+
+依赖静态类型来决定方法执行版本的分派动作。典型应用有方法重载。静态分派发生在编译阶段。
 
 
-      操作数栈(Operand Stack)也被称为操作栈，最大深度在编译的时候写入到Code属性的max_stacks数据项中。32位数据类型所占的栈容量为1,64位数据类型所占的栈容量为2。javac编译器的数据流分析工作保证了在方法执行的任何时候，操作数栈的深度都不会超过max_stacks中设定的最大值。
 
 
-      动态连接(Dynamic Linking)：每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个引用是为了支持方法调用过程中的动态连接。字节码中的方法调用指令就是以常量池中指向方法的符号引用作为参数。这些符号引用一部分会在类加载阶段或第一次使用的时候就转化为直接引用（静态解析），另一部分将在每一次运行期间都转化为直接引用（动态连接）。
-
-
-      方法返回地址：当一个方法开始执行后，只有两种方式退出这个方法。
-        1. 正常调用完成(Normal Method Invocation Completion): 执行引擎遇到任意一个方法返回的字节码指令，这时候可能会有返回值传递给上层方法调用者
-        2. 异常调用完成(Abrupt Method Invocation Completion): 方法执行的过程中遇到了异常(虚拟机内部产生的异常，athrow字节码指令)，并且这个异常没有在方法体内得到妥善处理。一个方法使用异常完成出口的方式退出，是不会给它的上层调用者提供任何返回值的。
-    
-        方法退出后，必须返回到最初方法被调用时的位置，程序才能继续执行，方法返回时可能需要在栈帧中保存一些信息，用来帮助恢复它的上层主调方法的执行状态。一般来说，方法正常退出时，主调方法的PC计数器的值就可以作为返回地址，栈帧中很有可能会保存这个计数器值。而方法异常退出时，返回地址是要通过异常处理器表来确定的，栈帧就一般不会保存这部分信息。
-    
-        方法退出的过程实际上等同于把当前栈帧出栈，因此退出时可能执行的操作有：
-          恢复上层方法的局部变量表和操作数栈，把返回值(如果有)压入调用者栈帧的操作数栈中，调整PC计数器的值以指向方法调用指令后面的一条指令等。
-
-
-       附加信息：
-    
-         《Java虚拟机规范》允许虚拟机实现增加一些规范里没有描述的信息到栈帧中，如与调试、性能收集相关的信息。  
-
-
-  方法调用：方法调用不等同于方法中的代码被执行，方法调用阶段唯一的任务就是调用哪一个方法，还未涉及方法内部具体运行过程。
-
-    Class文件的编译过程中不包含传统程序语言编译的连接步骤，一切方法调用在Class文件里存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址(直接引用)。
-    
-    解析调用： 在类加载的解析阶段会将其中一部分符号引用转化为直接引用，这种解析能成立的前提是：调用目标在程序代码写好、编译器进行编译的那一刻就已经确定下来。符合条件的方法主要有静态方法（与类型直接关联）和私有方法（外部不可被访问）。
-
-
-      <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html">
-      invokeinterface: invoke interface method (会在运行时再确定一个实现该接口的对象)
-        Let C be the class of objectref. The actual method to be invoked is selected by the following lookup procedure:
-    
-          1.If C contains a declaration for an instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
-    
-          2.Otherwise, if C has a superclass, a search for a declaration of an instance method with the same name and descriptor as the resolved method is performed, starting with the direct superclass of C and continuing with the direct superclass of that class, and so forth, until a match is found or no further superclasses exist. If a match is found, then it is the method to be invoked.
-    
-          3.Otherwise, if there is exactly one maximally-specific method in the superinterfaces of C that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
-       
-      invokestatic: invoke a class (static) method
-    
-      invokespecial: invoke instance method; special handling for superclass, private, and instance initialization method invocations （invokespecial 只能调用3种方法: <init>(), 私有方法, super.method()）
-          1.If C contains a declaration for an instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
-    
-          2.Otherwise, if C is a class and has a superclass, a search for a declaration of an instance method with the same name and descriptor as the resolved method is performed, starting with the direct superclass of C and continuing with the direct superclass of that class, and so forth, until a match is found or no further superclasses exist. If a match is found, then it is the method to be invoked.
-    
-          3.Otherwise, if C is an interface and the class Object contains a declaration of a public instance method with the same name and descriptor as the resolved method, then it is the method to be invoked.
-    
-          4.Otherwise, if there is exactly one maximally-specific method in the superinterfaces of C that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
-       
-      invokevirtual: invoke instance method; dispatch based on class 
-    
-          1.If C contains a declaration for an instance method m that overrides the resolved method, then m is the method to be invoked.
-    
-          2.Otherwise, if C has a superclass, a search for a declaration of an instance method that overrides the resolved method is performed, starting with the direct superclass of C and continuing with the direct superclass of that class, and so forth, until an overriding method is found or no further superclasses exist. If an overriding method is found, it is the method to be invoked.
-    
-          3.Otherwise, if there is exactly one maximally-specific method in the superinterfaces of C that matches the resolved method's name and descriptor and is not abstract, then it is the method to be invoked.
-
-
-      The difference between the invokespecial instruction and the invokevirtual instruction is that invokevirtual invokes a method based on the class of the object. The invokespecial instruction is used to invoke instance initialization methods as well as private methods and methods of a superclass of the current class.
-      In other words, invokespecial is used to call methods without concern for dynamic binding, in order to invoke the particular class’ version of a method.
-    
-      invokevirtual, invokespecial, invokestatic, invokeinterface 的第一个参数都是被调用方法的符号引用 ( CONSTANT_Methodref_info 或 CONSTANT_InterfaceMethodref_info)。
-    
-      invokedynamic: invoke dynamic method，先在运行时动态解析出调用点限定符所引用的方法，然后再执行该方法。前面4个调用指令，分派逻辑都固化在java虚拟机内部，而inovkedynamic指令的分配逻辑是由用户设定的引导方法来决定的。
-
-
-
-      <<<<使用git输出内部类遇到的问题： javap Class$InnerClass 命令在git bash中始终输出Class的字节码。解决方法： javap Class\$InnerClass， git bash 中$是特殊字符，需要转义>>>>
-
-
-      非虚方法(non-virtual method)： 被invokestatic(静态方法)和invokespecial(私有方法、实例构造器、父类方法(super.method()))指令调用的方法,再加上被final修饰的方法(invokevirtual指令调用)，在类加载的时候就可以把符号引用解析为该方法的直接引用。
-      虚方法： 除了上述5类方法的其他方法
-    
-    分派(Dispatch)调用: 解析调用一定是个静态的过程，在编译期间就完全确定，在类加载的解析阶段就会把涉及的符号引用全部转变为明确的直接引用。分派调用可能是静态的也可能是动态的，按照分派依据的宗量(方法的接收者与方法的参数统称为方法的宗量)数可分为单分派和多分派。
-      静态单分派、静态多分派、动态单分派、动态多分派
-    
-      静态类型(Static Type)：或者叫外观类型(Apparent Type)
-      实际类型(Actual Type)：或者叫运行时类型(Runtime Type)
-    
-      例： Human man = new Man();
-      静态类型 Human, 实际类型 Man
-    
-      字面量没有显示的静态类型，它的静态类型只能通过语言、语法的规则去理解和推断。
-
-
-      编译器在重载时通过参数的静态类型而不是实际类型作为判定依据，由于静态类型在编译期可知，所以在编译阶段，javac编译期就根据参数的静态类型决定了会使用哪个重载版本，并把方法的符号引用写到invokevirtual指令的参数中。
-    
-      静态分派： 依赖静态类型来决定方法执行版本的分派动作。典型应用有方法重载。静态分派发生在编译阶段。
-    
-         重载确定一个更合适的版本：
+     ：
            查找顺序：自动转型(原始类型) → 装箱 → 自动转型(引用类型) → 变长参数
     
            byte → short ↘
@@ -1623,9 +1775,8 @@ Java虚拟机有意把类加载阶段中的“通过一个类的全限定名来�
 
 
 ​      
-​      动态分派：与重写(Override)密切关联
 ​    
-​          多态性的根源在于虚方法调用指令invokevirtual的执行逻辑（第一步就是确定实际类型），所以多态性只对方法有效，对字段是无效的。当子类声明了与父类同名的字段时，虽然子类的内存中两个字段都会存在，但是子类的字段会遮蔽父类的同名字段。
+​          
 
 
       如今的java语言(java 12)是一门静态多分派、动态单分派的语言。
@@ -1961,4 +2112,5 @@ Java内存模型与线程
 \[5\]:[三色标记法和读写屏障](https://blog.csdn.net/qq_21383435/article/details/106311542)
 \[6\]:[保守式GC、半保守式GC、准确式GC](https://www.iteye.com/blog/rednaxelafx-1044951)
 \[7\]:[压缩指针](https://www.baeldung.com/jvm-compressed-oops)
+\[8\]:[JVM文档](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html)
 
