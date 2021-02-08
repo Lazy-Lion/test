@@ -1,17 +1,17 @@
-# 运行时数据区域
+# 1 运行时数据区域
 
 ![JVM运行时数据区](image/166786b5cf6d7f95)
 
 - 线程共享数据区：方法区（Method Area）， 堆（Heap）
 - 线程隔离数据区：虚拟机栈（VM stack），本地方法栈（Native Method Stack）， 程序计数器（Program Counter Register）
 
-### 程序计数器
+### 1.1 程序计数器
 
 当前线程所指向字节码的行号指示器。执行java方法时，计数器记录正在执行的字节码指令地址；执行本地方法时，计数器值为空(undefined)。 
 
 **程序计数器是唯一一个没有规定任何*OutOfMemoryError*情况的区域。**
 
-### 虚拟机栈
+### 1.2 虚拟机栈
 
 java方法执行的线程内存模型：每个方法执行时，虚拟机都会同步创建一个栈帧（Stack Frame，栈帧包含存储局部变量表、操作数栈、动态连接、方法出口等)。方法从被调用到执行完毕，对应栈帧在虚拟机栈中从入栈到出栈的过程。
 
@@ -93,7 +93,7 @@ Java对象包括三部分，对象头（Header）， 实例数据（Instance Dat
 
 Mark Word存储对象自身的运行时数据，如哈希码、GC分代年龄（4bit）、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等。
 
-##### 类型指针（Klass Pointer，（不启用指针压缩时8字节））
+##### 类型指针（Klass Pointer，（不启用类指针压缩时8字节））
 
 类型指针是指向该对象类型元数据的指针。
 
@@ -212,7 +212,7 @@ java堆分为新生代 young generation，老年代 old generation。
 
 ##### 保守式GC，半保守GC，准确式GC
 
-<a href="https://www.iteye.com/blog/rednaxelafx-1044951">
+*https://www.iteye.com/blog/rednaxelafx-1044951*
 
 解决问题： JVM栈上如何判断一个数据是引用类型？
 
@@ -395,7 +395,7 @@ G1执行步骤：
 
 ### Shenandoah
 
-<a href="https://wiki.openjdk.java.net/display/shenandoah/Main">
+*https://wiki.openjdk.java.net/display/shenandoah/Main*
 
 并行整理：
 	方式一： 在被移动对象原有的内存上设置保护陷阱（Memory Protection Trap）， 一旦用户程序访问到属于旧对象的内存空间就会自陷，进入预设好的异常处理器中，由其中的代码逻辑把访问转发到复制后的新对象上。（如果没有操作系统层面的直接支持，导致用户态频繁切换到核心态，代价大）。
@@ -1052,6 +1052,23 @@ Java虚拟机的指令由一个字节长度的、代表着某种特定操作含�
 | d | double |
 | a | reference |
 
+### 基于栈的指令集
+
+- 优点：可移植，代码相对更加紧凑，编译器实现更加简单；
+- 缺点：理论上执行速度相对来说稍慢（完成相同功能所需指令数量一般比寄存器架构多；栈实现在内存中，频繁访问内存。）所有主流物理机的指令集都是寄存器架构。
+
+```
+iconst_1
+iadd
+istore_1
+```
+基于寄存器的指令集
+
+```
+move eax, 1
+add eax, 1 
+```
+
 ### 加载和存储指令
 
 用于将数据在栈帧中的局部变量表和操作数栈之间来回传输。
@@ -1568,7 +1585,7 @@ Java虚拟机有意把类加载阶段中的“通过一个类的全限定名来�
 
    - 扩展类加载器（Extension Class Loader）： 在类`sun.misc.Launcher$ExtClassLoader`中以Java代码的形式实现。负责加载`<JAVA_HOME>\lib\ext`目录中，或被`java.ext.dirs`系统变量指定的路径中所有的类库。
 - 应用程序类加载器（Application Class Loader）：由`sun.misc.Launcher$AppClassLoader`实现。由于应用程序类加载器是`ClassLoader`类中`getSystemClassLoader()`方法的返回值，所以有些场合也称它为“系统类加载器”。负责加载用户类路径（classpath）上所有的类库。如果应用程序中没有自定义过自己的类加载，一般情况下这个就是程序中默认的类加载器。
-   
+  
    ![image-20201117135754333](image/image-20201117135754333.png)
 
 各种类加载器之间的层次关系被称为类加载器的**“双亲委派模型”**（Parent Delegation Model）。除了顶层的启动类加载器外，其余的类加载器都应有自己的父类加载器。不过这里类加载器之间的父子关系一般不是以继承（Inheritance）的关系来实现，而通常是使用组合（Composition）关系来复用父加载器的代码。
@@ -1763,85 +1780,94 @@ Human man = new Man(); // Human - 静态类型； Man - 实际类型
 
 依赖静态类型来决定方法执行版本的分派动作。典型应用有方法重载。静态分派发生在编译阶段。
 
+如今的java语言（Java 12）是一门静态多分派、动态单分派的语言。
+
+**重载**：静态分派，编译时就可以确定静态类型和具体的方法 => 符号引用；需要依据接收者静态类型和方法参数类型选择 => 多分派
+
+```java
+方法重载的查找顺序：自动转型（原始类型） → 装箱 → 自动转型（引用类型） → 变长参数
+
+原始类型的自动转型：
+byte → short ↘
+                 int → long → float → double 
+       char  ↗
+```
+
+###### 动态分派
+
+虚方法表（Virtual Method Table，vtable，与此对应的在`invokeinterface`执行时也会用到接口方法表 Interface Method Table，itable），使用虚方法表索引来替代元数据查找以提高性能。
+
+虚方法表存放着各个方法的实际入口地址。如果某个方法在子类中没有被重写，那子类的虚方法表中的地址入口和父类相同方法的地址入口一致，都指向父类的实现入口。如果子类中重写了这个方法，子类虚方法表中的地址会被替换为指向子类实现版本的入口地址。具有相同签名的方法，在父类和子类的虚方法表中都具有一样的索引序号，这样当类型变换时，仅需要变更查找的虚方法表，就可以从不同的虚方法表中按索引转换出所需的入口地址。虚方法表一般在类加载的连接阶段进行初始化，准备了类的变量初始值后，虚拟机会把该类的虚方法表一同初始化完毕。
+
+**重写**：动态分派，`invokevirtual`，根据接收者实际类型选择 => 单分派
+
+```java
+Human man = new Man();
+Human woman = new Woman();
+
+man.sayHello();
+woman.sayHello();
+
+// 两次调用 `invokevirtual`的符号引用参数完全相同，都是`Human.sayHello:()V`, 这是由静态分派时确定的；实际调用结果不同，是动态分派的结果（`invokevirtual`）。
+```
 
 
 
-     ：
-           查找顺序：自动转型(原始类型) → 装箱 → 自动转型(引用类型) → 变长参数
-    
-           byte → short ↘
-                           int → long → float → double 
-                  char  ↗
+##### 动态类型语言支持
 
+`invokedynamic`指令。
 
-​      
-​    
-​          
+`invokevirtual`，`invokespecial`，`invokestatic`，`invokeinterface`的第一个参数都是被调用方法的符号引用（`CONSTANT_Methodref_info`，`CONSTANT_InterfaceMethodref_info`）。
 
+`java.lang.invoke`包：在之前单纯依靠符号引用来确定目标方法的这条路之外，提供一种新的动态确定目标方法的机制（方法句柄，`Method Handle`）。 => `MethodHandle`类
 
-      如今的java语言(java 12)是一门静态多分派、动态单分派的语言。
-      重载：静态分派，编译时就可以确定静态类型和具体的方法 => 符号引用；需要依据接收者静态类型和方法参数类型选择 => 多分派
-      重写：动态分派，invokevirtual,根据接收者实际类型选择 => 单分派
-    
-      例： 
-        Human man = new Man();
-        Human woman = new Woman();
-    
-        man.sayHello();
-        woman.sayHello();
-    
-        两次调用invokevirtual 的符号引用参数完全相同，都是 Human.sayHello:()V, 这是由静态分派时确定的；实际调用结果不同，是动态分派的结果(invokevirtual)。
-    
-      动态分派的实现：
-        虚方法表(Virtual Method Table, vtable, 与此对应的在invokeinterface执行时也会用到接口方法表 Interface Method Table, itable),使用虚方法表索引来替代元数据查找以提高性能。
-        
-        虚方法表存放着各个方法的实际入口地址。如果某个方法在子类中没有被重写，那子类的虚方法表中的地址入口和父类相同方法的地址入口一致，都指向父类的实现入口。如果子类中重写了这个方法，子类虚方法表中的地址会被替换为指向子类实现版本的入口地址。具有相同签名的方法，在父类和子类的虚方法表中都具有一样的索引序号，这样当类型变换时，仅需要变更查找的虚方法表，就可以从不同的虚方法表中按索引转换出所需的入口地址。虚方法表一般在类加载的连接阶段进行初始化，准备了类的变量初始值后，虚拟机会把该类的虚方法表一同初始化完毕。
-    
-    动态类型语言支持：invokedynamic指令
-    
-      invokevirtual, invokespecial, invokestatic, invokeinterface的第一个参数都是被调用方法的符号引用(CONSTANT_Methodref_info, CONSTANT_InterfaceMethodref_info)
-    
-      java.lang.invoke包：在之前单纯依靠符号引用来确定目标方法的这条路之外，提供一种新的动态确定目标方法的机制(方法句柄，Method Handle)。 => MethodHandle类
-    
-      每一处含有invokedynamic指令的位置都被称为“动态调用点(Dynamically Computed Call Site)”，这条指令的第一个参数不再是代表方法符号引用的CONSTANT_Methodref_info常量，而是变为jdk 7 新加入的CONSTANT_InvokeDynamic_info常量，从这个常量可以得到3项信息：引导方法(Bootstrap Method，该方法存放在新增的Bootstrap Methods属性中)、方法类型(Method Type)和名称。引导方法有固定的参数，返回值是java.lang.invoke.CallSite对象（代表真正要执行的目标方法调用）
+每一处含有`invokedynamic`指令的位置都被称为“动态调用点（Dynamically Computed Call Site）”，这条指令的第一个参数不再是代表方法符号引用的`CONSTANT_Methodref_info`常量，而是变为JDK 7 新加入的`CONSTANT_InvokeDynamic_info`常量，从这个常量可以得到3项信息：引导方法（Bootstrap Method，该方法存放在新增的Bootstrap Methods属性中）、方法类型（Method Type）和名称。引导方法有固定的参数，返回值是`java.lang.invoke.CallSit`e对象（代表真正要执行的目标方法调用）。
 
+   
 
-​    
-​    基于栈的指令集： 优点：可移植，代码相对更加紧凑，编译器实现更加简单；缺点：理论上执行速度相对来说稍慢（完成相同功能所需指令数量一般比寄存器架构多；栈实现在内存中，频繁访问内存。）所有主流物理机的指令集都是寄存器架构
-​        iconst_1
-​        iadd
-​        istore_1
-​    
-​    基于寄存器的指令集：
-​        move eax, 1
-​        add eax, 1 
-​    
-​    字节码与java动态代理
+### 字节码与Java动态代理
 
+# 前端编译与优化
 
-前端编译与优化：
+### Java的“编译期”
 
-   java的“编译期”：
-     1. 编译器的前端(如javac)：把*.java文件转变成*.class文件的过程；
-     2. java虚拟机的即时编译器(JIT编译器，Just In Time Compiler，如hotspot的C1、C2编译器)：运行期把字节码转变成本地机器码的过程
-     3. 静态的提前编译器(AOT编译器，Ahead of Time Compiler，如Jaotc)：直接把程序编译成与目标机器指令集相关的二进制代码的过程
+        1. 编译器的前端（如`javac`）：把`.java`文件转变成`.class`文件的过程；
+        2. Java虚拟机的即时编译器（JIT编译器，Just In Time Compiler，如HotSpot的C1、C2编译器）：运行期把字节码转变成本地机器码的过程；
+        3. 静态的提前编译器（AOT编译器，Ahead of Time Compiler，如Jaotc）：直接把程序编译成与目标机器指令集相关的二进制代码的过程。
 
-   java中即时编译器在运行期的优化过程，支撑了程序执行效率的不断提升；而前端编译器在编译期的优化过程，则是支撑着程序员的编码效率的提高。
+**Java中即时编译器在运行期的优化过程，支撑了程序执行效率的不断提升；而前端编译器在编译期的优化过程，则是支撑着程序员的编码效率的提高。**
 
-   javac编译器：
+### Java中一些常见的语法糖
 
-   泛型： 泛型类、泛型接口、泛型方法，“类型擦除式泛型”(Type Erasure Generics，java中泛型的擦除仅仅是对方法的Code属性中的字节码进行擦除，实际上元数据中还是保留了泛型信息(如Signature属性，通过反射可以取得参数化类型))
-     无法对泛型进行实例判断 instanceof
-     无法使用泛型创建对象
-     无妨使用泛型创建数组
+##### 泛型
 
-   语法糖：泛型，自动拆箱、装箱(如Integer.valueOf(), Integer.intValue())，循环遍历(Iterable)，变长参数(数组参数)
+泛型类、泛型接口、泛型方法。
 
+Java的泛型是“类型擦除式”泛型（Type Erasure Generics，Java中泛型的擦除仅仅是对方法的`Code`属性中的字节码进行擦除，实际上元数据中还是保留了泛型信息（如`Signature`属性，通过反射可以取得参数化类型））。
 
-后端编译与优化： 把Class文件转换成与本地基础设施(硬件指令集、操作系统)相关的二进制机器码。
-   提前编译器、即时编译器
+###### 类型擦除的一些影响
 
-  即时编译器：java程序最初通过解释器进行解释执行，当虚拟机发现某个方法或代码块的运行特别频繁，就会把这些代码认定为“热点代码”(Hot Spot Code)，为了提高热点代码的执行效率，在运行时，虚拟机将会把这些代码编译成本地机器码，并以各种手段尽可能地进行代码优化。
+1. 无法对泛型进行实例判断`instanceof`
+2. 无法使用泛型创建对象
+3. 无法使用泛型创建数组
+
+##### 自动拆箱、装箱
+
+如`Integer.valueOf()`，`Integer.intValue()`
+
+##### 循环遍历（Iterable）
+
+##### 变长参数（数组参数）
+
+# 后端编译与优化
+
+把`Class`文件转换成与本地基础设施（硬件指令集、操作系统）相关的二进制机器码。
+
+提前编译器、即时编译器 
+
+### 即时编译器
+
+Java程序最初通过解释器进行解释执行，当虚拟机发现某个方法或代码块的运行特别频繁，就会把这些代码认定为“热点代码”(Hot Spot Code)，为了提高热点代码的执行效率，在运行时，虚拟机将会把这些代码编译成本地机器码，并以各种手段尽可能地进行代码优化。
 
     解释器(Interperter)和编译器(Compiler)：当程序需要迅速启动和执行的时候，解释器可以首先发挥作用，省去编译的时间，立即运行。当程序启动后，随着时间的推移，编译器逐渐发挥作用，把越来越多的代码编译成本地代码，这样可以减少解释器的中间损耗，获得更高的执行效率。当程序运行环境中内存资源限制较大，可以使用解释执行节约内存，反之可以使用编译执行来提升效率。解释器还可以作为编译器激进优化时后备的“逃生门”，让编译器根据概率选择一些不能保证所有情况都正确，但大多数时候能提升运行速度的优化手段，当激进优化的假设不成立(如加载了新类，类型继承结构出现变化，出现“罕见陷阱”)时可以通过逆优化(Deoptimization)退回到解释执行状态继续执行。
 
@@ -2048,10 +2074,10 @@ Java内存模型与线程
 
   Java语言中各种操作共享的数据分为5类：
     1. 不可变：不可变(Immutable)的对象一定是线程安全的。java中的不可变类型，如基本数据类型，java.lang.String、java.lang.Number的部分子类(Integer,Long,Double,BigInteger,BigDecimal等不可变；AtomicInteger,AtomicLong等可变)
-    2. 绝对线程安全：符合上述线程安全定义。
-    3. 相对线程安全：通常意义所讲的线程安全，保证对这个对象单次的操作是线程安全的。
-    4. 线程兼容
-    5. 线程对立：不管调用端是否采用同步措施，都无法在多线程环境中并发使用代码。
+        2. 绝对线程安全：符合上述线程安全定义。
+        3. 相对线程安全：通常意义所讲的线程安全，保证对这个对象单次的操作是线程安全的。
+        4. 线程兼容
+        5. 线程对立：不管调用端是否采用同步措施，都无法在多线程环境中并发使用代码。
 
   线程安全的实现：
 
@@ -2103,6 +2129,103 @@ Java内存模型与线程
 
    偏向锁 → 轻量级锁 → 重量级锁
 
+# 调优
+
+常用`JVM`参数：使用命令 `java -XX:+PrintFlagsFinal` 可查看相关参数默认值。
+
+| 参数                   | 含义                                                         |
+| ---------------------- | ------------------------------------------------------------ |
+| `-Xms`                 | 初始堆内存大小                                     |
+| `-Xmx`                 | 最大堆内存大小。64位Server JVM，默认是物理内存的1/4，且最大不超过32G。 |
+|`-XX:MinHeapFreeRatio`||
+|`-XX:MaxHeapFreeRatio`||
+| `-Xss`                 | 栈大小                                                       |
+| `-XX:NewRatio`         | default 2. if `-XX:NewRatio=3`, then young generation : tenured generation = 1 : 3 |
+|`-XX:MaxNewSize`|年轻代的最大内存大小|
+|`-XX:NewSize`|年轻代的初始内存大小|
+|`-XX:SurvivorRatio`|default 8. if `-XX:SurvivorRatio=8`, then eden : from survivor : to survivor = 8 : 1 : 1|
+|||
+| `-XX:MetaspaceSize`    | 分配`class metaspace`的空间超出设置的值时会触发`full gc`，以后每次扩容都会触发`full gc`。默认大约 20M。 **该参数不是设置`Metaspace`大小的。** |
+| `-XX:MaxMetaspaceSize` | 最大 `Metaspace`内存大小。默认没有限制，依赖于系统可用内存大小。 |
+| `-XX:MaxMetaspaceFreeRatio` |  |
+| `-XX:MinMetaspaceFreeRatio` |  |
+| `-XX:+PrintGCDetails` |                                                              |
+| `-XX:+PrintTenuringDistribution` | 打印年轻代对象的年龄，以及提升到老年代的年龄阈值 |
+| `-XX:+UseSerialGC` | 启用串行（Serial）垃圾收集器，一般用于单核机器或内存小于`100MB`的应用 |
+| `-XX:+UseParallelGC` | 启用并行（Parallel）垃圾收集器（also known as the **throughput collector**）。并行收集有利于提高吞吐量。 |
+| `-XX:+UseParallelOldGC` | `full gc`时启用并行垃圾收集器，`-XX:+UseParallelGC`时默认启用。 |
+| `-XX:ParallelGCThreads` | 设置用于年轻代和老年代并行垃圾收集的线程数。 |
+| `-XX:MaxGCPauseMillis` | 设置最大`GC`暂停时间的目标值，单位`ms`。 |
+| `-XX:GCTimeRatio` | 设置吞吐量目标值。if `-XX:GCTimeRatio=n, then gc time : total time = 1 : (n + 1)` |
+| `-XX:+UseGCOverheadLimit` |  |
+| `-XX:+UseConcMarkSweepGC` | 启用`CMS`，JDK 8的并发（Concurrent）收集器主要有两个：`CMS` 和`G1`。并发收集有利于减少响应时间。 |
+| `-XX:CMSInitiatingOccupancyFraction` | default -1. 设置开始一次`CMS`收集时老年代的占用率（0-100）。负数表示使用`-XX:CMSTriggerRatio`和`MinHeapFreeRatio`共同决定开始`CMS`收集的时机。 |
+| `-XX:CMSTriggerRatio` |  |
+| `-XX:+UseG1GC` | 启用`G1`，JDK 8的并发（Concurrent）收集器主要有两个：`CMS` 和`G1`。并发收集有利于减少响应时间。 |
+| `-XX:InitiatingHeapOccupancyPercent` | default 45. 设置触发一次并发GC收集时堆内存的占用率（0-100）。 |
+| `-XX:MaxGCPauseMillis` | default 200. 设置最大`GC`暂停时间目标值，单位`ms`。 |
+| `-XX:GCPauseIntervalMillis` |  |
+| `-XX:G1HeapRegionSize` | 设置`G1 region`的大小，取值[1MB, 32MB]，且是2的整数次幂。目的是为了划分出大约2048个region。 |
+| `-XX:G1NewSizePercent` | *实验性参数*， `-XX:+UnlockExperimentalVMOptions`可解锁实验性参数。 |
+| `-XX:G1MaxNewSizePercent` | *实验性参数* |
+| `-XX:ParallelGCThreads` | 设置`STW`时的工作线程数。 |
+| `-XX:ConcGCThreads` | 设置并发标记的线程数。一般设置为`ParallelGCThreads`线程数的1/4。 |
+| `-XX:G1MixedGCLiveThresholdPercent` | *实验性参数* |
+| `-XX:G1HeapWastePercent` | default 5. 设置堆内存浪费的比率。当可回收的比率小于该值，`Java HotSpot VM`不会启动`mixed garbage collection cycle`. |
+| `-XX:G1MixedGCCountTarget` | default 8. 设置标记周期完成后用于收集`old region`的`mixed gc`个数。 |
+| `-XX:G1OldCSetRegionThresholdPercent` | default 10. 设置`mixed gc`时`old region`数量占比上限。 |
+| `-XX:G1ReservePercent` | default 10. 设置预留内存占比以降低`G1`收集器晋升失败的可能性（`to-space`内存溢出）。 |
+| `-XX:+DisableExplicitGC` | 启用时虚拟机忽略`System.gc()`方法（该方法会触发`full gc`）的调用，默认不启用。 |
+| `-XX:SoftRefLRUPolicyMSPerMB` | default 1000. 每MB空闲内存允许`SoftReference`存活的时间，单位`ms`。 |
+| `-XX:+TraceClassLoading` | 启动类加载追踪。默认不启动。 |
+| `-XX:+TraceClassUnloading` | 启动类卸载追踪。默认不启动。 |
+| `-XX:-UseCompressedOops` | 禁用普通对象指针压缩。默认启用（使用32位表示指针）。 |
+| `-XX:-UseCompressedClassPointers` | 禁用类指针（对象头中保存）压缩。`UseCompressedOops`启用时也会默认启用。 |
+| `-XX:ObjectAlignmentInBytes` | 设置`java`对象内存对齐字节数，默认8字节。取值范围[8,256]且为2的整数次幂。 |
+| `-XX:CompressedClassSpaceSize` | 设置`metaspace`中`kclass metaspace`的大小，默认`1g`。只有开启指针压缩才有这块内存。 |
+
+*JVM 参数列表：https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html*
+
+
+
+java 参数配置：
+
+```sh
+-Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+-Xms10880m   
+-Xmx10880m  
+-Xss1024k   
+-XX:NewRatio=3 
+-XX:MetaspaceSize=128m  
+-XX:MaxMetaspaceSize=384m
+-XX:+UseConcMarkSweepGC
+-XX:+CMSParallelRemarkEnabled
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:CMSInitiatingOccupancyFraction=70
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/log/jvm/oom.hprof
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+-Xloggc:/log/jvm/gcdetail.log
+-XX:+UseGCLogFileRotation
+-XX:NumberOfGCLogFiles=5
+-XX:GCLogFileSize=10M
+-XX:+PrintTenuringDistribution
+
+-javaagent:/apm-agent/skywalking-agent.jar
+-javaagent:/opt/exporter/jmx_prometheus_javaagent-0.3.2-SNAPSHOT.jar=9203:/opt/exporter/tomcat_jmx_exporter.yml
+-Djdk.tls.ephemeralDHKeySize=2048
+-Djava.protocol.handler.pkgs=org.apache.catalina.webresources
+-Dorg.apache.catalina.security.SecurityListener.UMASK=0027
+-Dignore.endorsed.dirs=
+-Dcatalina.base=/usr/local/tomcat
+-Dcatalina.home=/usr/local/tomcat
+-Djava.io.tmpdir=/usr/local/tomcat/temp
+```
+
+
+
 # Reference
 
 \[1\]:深入理解Java虚拟机-第三版
@@ -2113,4 +2236,6 @@ Java内存模型与线程
 \[6\]:[保守式GC、半保守式GC、准确式GC](https://www.iteye.com/blog/rednaxelafx-1044951)
 \[7\]:[压缩指针](https://www.baeldung.com/jvm-compressed-oops)
 \[8\]:[JVM文档](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html)
+\[9\]:[GC文档](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
+\[10\]:[JVM参数文档](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/index.html)
 

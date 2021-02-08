@@ -70,3 +70,18 @@ protected void finalize() throws Throwable { }//实例被垃圾回收器回收�
 ### 泛型
 
 协变、逆变
+
+Maven使用JDK 1.8
+
+```xml
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+```
+
