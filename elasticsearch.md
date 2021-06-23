@@ -1028,7 +1028,7 @@ POST /<target>/_doc/
 //             create - 只有当doc id 不存在时才会index, 否则操作失败。index - doc id 不存在新增，存在时更新（先删后增，会导致以前的部分字段丢失）
 //    routing: 指向主分配的路由
 //    require_alias： 有效值：true、false. 默认 false. 
-//             true - 提供的target必须是索引别名        
+//             true - 提供的target必须是索引别名 
 PUT /customer/_doc/1  // 索引名（如果索引不存在会自动创建）/ type（7.10默认type名是_doc）/ 文档唯一id
 {
   "name": "John Doe"
